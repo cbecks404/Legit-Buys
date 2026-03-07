@@ -561,6 +561,31 @@ function AdminQueue({ pending, onApprove, onReject, approved, onEditApproved, on
   );
 }
 
+// Rate Limiter 
+const SUBMISSION_KEY = "lb_submissions";
+const RATE_LIMIT = 3;
+const RATE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function getRecentSubmissions() {
+  try {
+    const raw = localStorage.getItem(SUBMISSION_KEY);
+    const timestamps = raw ? JSON.parse(raw) : [];
+    const cutoff = Date.now() - RATE_WINDOW_MS;
+    return timestamps.filter(t => t > cutoff);
+  } catch { return []; }
+}
+
+function recordSubmission() {
+  try {
+    const recent = getRecentSubmissions();
+    localStorage.setItem(SUBMISSION_KEY, JSON.stringify([...recent, Date.now()]));
+  } catch {}
+}
+
+function canSubmit() {
+  return getRecentSubmissions().length < RATE_LIMIT;
+}
+
 // ── Main app ──────────────────────────────────────────
 export default function App() {
   const [reviews, setReviews] = useState([]);
@@ -568,10 +593,20 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [cat, setCat] = useState("all");
   const [activeDiet, setActiveDiet] = useState([]);
+  const [activeScore, setActiveScore] = useState(null);
+  const [rateLimited, setRateLimited] = useState(!canSubmit());
   const [modal, setModal] = useState(null);
   const [adminOk, setAdminOk] = useState(false);
+  const [adminUser, setAdminUser] = useState(null);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminError, setAdminError] = useState("");
+  const [adminLoading, setAdminLoading] = useState(false);
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setAdminUser(session.user);
+      });
     async function loadData() {
       const { data: liveReviews } = await supabase
         .from('reviews').select('*').order('upvotes', { ascending: false });
@@ -589,6 +624,7 @@ export default function App() {
   const filtered = [...reviews]
     .filter(r => cat === "all" || r.category === cat)
     .filter(r => activeDiet.length === 0 || activeDiet.every(d => (r.diet_tags ?? []).includes(d)))
+    .filter(r => activeScore === null || r.rating === activeScore)
     .sort((a,b) => b.upvotes - a.upvotes);
 
   const upvote = async (id) => {
@@ -609,13 +645,13 @@ export default function App() {
       link:        f.link,
       map_query:   f.mapQuery,
       diet_tags:   f.dietTags,
-      verified:    false,
+      verified: !!(await supabase.auth.getSession()).data.session,
       upvotes:     0,
       date:        new Date().toISOString().slice(0, 10),
     };
     const { data, error } = await supabase.from('pending_reviews').insert([newReview]).select();
     if (error) { console.error('Submit error:', error); }
-    else { setPending(p => [...p, data[0]]); }
+    else { setPending(p => [...p, data[0]]); recordSubmission(); setRateLimited(!canSubmit()); } 
   };
 
   const approve = async (id) => {
@@ -644,10 +680,27 @@ export default function App() {
   const updatePending = (id, fields) => setPending(p => p.map(r => r.id===id ? {...r,...fields} : r));
 
   const openAdmin = () => {
-    if (adminOk) { setModal("admin"); return; }
-    const pin = window.prompt("Admin PIN:");
-    if (pin==="1234") { setAdminOk(true); setModal("admin"); }
-    else if (pin!==null) window.alert("Wrong PIN.");
+  if (adminUser) { setModal("admin"); return; }
+  setModal("adminLogin");
+  };
+
+  const handleAdminLogin = async () => {
+    setAdminLoading(true);
+    setAdminError("");
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: adminEmail,
+      password: adminPassword,
+    });
+    setAdminLoading(false);
+    if (error) { setAdminError("Incorrect email or password."); return; }
+    setAdminUser(data.user);
+    setModal("admin");
+  };
+
+  const handleAdminLogout = async () => {
+    await supabase.auth.signOut();
+    setAdminUser(null);
+    setModal(null);
   };
 
   return (
@@ -678,13 +731,31 @@ export default function App() {
           </h1>
           <p style={{ margin:"0 0 24px", color:"#383838", fontSize:13.5, lineHeight:1.6 }}>Real picks from real colleagues. No ads, no fluff.</p>
 
-          <div style={{ display:"flex", gap:28, padding:"16px 0", borderTop:"1px solid #141414", borderBottom:"1px solid #141414", marginBottom:20 }}>
-            {[["Reviews",reviews.length],["Reviewers",new Set(reviews.map(r=>r.submitter)).size],["Pending",pending.length]].map(([l,v])=>(
-              <div key={l}>
-                <div style={{ fontFamily:"'DM Mono',monospace", fontSize:24, color:"#C8FF47", fontWeight:600 }}>{v}</div>
-                <div style={{ fontFamily:"'DM Mono',monospace", fontSize:9, color:"#2e2e2e", letterSpacing:".14em", textTransform:"uppercase", marginTop:3 }}>{l}</div>
-              </div>
-            ))}
+          <div style={{ padding:"14px 0", borderTop:"1px solid #141414", borderBottom:"1px solid #141414", marginBottom:20 }}>
+            <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#333", letterSpacing:".14em", textTransform:"uppercase", marginBottom:10 }}>Filter by score</div>
+            <div style={{ display:"flex", gap:8 }}>
+              {SCORE_META.map(m => {
+                const color = SCORE_COLORS[m.value];
+                const isActive = activeScore === m.value;
+                return (
+                  <button key={m.value} onClick={()=>setActiveScore(isActive ? null : m.value)} style={{
+                    flex:1, padding:"10px 4px", borderRadius:10, border:"none", lineHeight:1.5,
+                    outline:`1.5px solid ${isActive ? color : "#1e1e1e"}`,
+                    background: isActive ? `${color}18` : "#111",
+                    color: isActive ? color : "#333",
+                    fontFamily:"'DM Mono',monospace", fontSize:10, cursor:"pointer",
+                    transition:"all .15s", fontWeight: isActive ? 700 : 400,
+                  }}>
+                    {m.value}<br/>{m.short}
+                  </button>
+                );
+              })}
+            </div>
+            {activeScore !== null && (
+              <button onClick={()=>setActiveScore(null)} style={{ background:"none", border:"none", color:"#444", fontSize:11, fontFamily:"'DM Mono',monospace", cursor:"pointer", padding:"8px 0 0", letterSpacing:".06em" }}>
+                ✕ clear
+              </button>
+            )}
           </div>
 
           <div style={{ display:"flex", gap:7, overflowX:"auto", scrollbarWidth:"none", paddingBottom:8 }}>
@@ -695,13 +766,23 @@ export default function App() {
             {DIET_TAGS.map(tag=><DietPill key={tag.id} tag={tag} active={activeDiet.includes(tag.id)} onClick={()=>toggleDietFilter(tag.id)} />)}
           </div>
 
-          {activeDiet.length > 0 && (
-            <div style={{ marginTop:8 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8, minHeight:24 }}>
+            {activeDiet.length > 0 ? (
               <button onClick={()=>setActiveDiet([])} style={{ background:"none", border:"none", color:"#444", fontSize:11, fontFamily:"'DM Mono',monospace", cursor:"pointer", padding:0, letterSpacing:".06em" }}>
                 ✕ clear filters
               </button>
-            </div>
-          )}
+            ) : <span />}
+            <a
+              href="/scoring-guide.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#333", letterSpacing:".08em", textDecoration:"none", borderBottom:"1px solid #2a2a2a", paddingBottom:1, transition:"color .15s" }}
+              onMouseEnter={e=>e.target.style.color="#C8FF47"}
+              onMouseLeave={e=>e.target.style.color="#333"}
+            >
+              Review &amp; scoring guide &#8599;
+            </a>
+          </div>
         </div>
 
         <div style={{ padding:"18px 12px", display:"flex", flexDirection:"column", gap:10 }}>
@@ -712,15 +793,90 @@ export default function App() {
       </div>
 
       <div style={{ position:"fixed", bottom:28, left:"50%", transform:"translateX(-50%)", zIndex:100 }}>
-        <button onClick={()=>setModal("submit")} style={{ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:99, padding:"14px 32px", fontFamily:"'DM Mono',monospace", fontSize:13, fontWeight:700, cursor:"pointer", letterSpacing:".05em", whiteSpace:"nowrap", boxShadow:"0 0 50px #C8FF4755" }}>
-          + Submit a Legit Buy
+        <button
+          onClick={() => {
+            if (rateLimited) {
+              setModal("rateLimited");
+            } else {
+              setModal("submit");
+            }
+          }}
+          style={{
+            background: rateLimited ? "transparent" : "#C8FF47",
+            color: rateLimited ? "#333" : "#0a0a0a",
+            border: rateLimited ? "1px solid #222" : "none",
+            borderRadius:99, padding:"10px 20px",
+            fontFamily:"'DM Mono',monospace", fontSize:12, fontWeight:700,
+            cursor:"pointer", transition:"all .2s",
+          }}>
+          {rateLimited ? "🔒 Submit" : "+ Submit a Legit Buy"}
         </button>
       </div>
 
       {modal==="submit" && <Sheet title="Submit a Legit Buy" onClose={()=>setModal(null)}><SubmitFlow onSubmit={submit} onClose={()=>setModal(null)} /></Sheet>}
+
+      {modal==="adminLogin" && (
+        <Sheet title="Admin login" onClose={()=>setModal(null)}>
+          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+            <div>
+              <label style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#444", letterSpacing:".14em", textTransform:"uppercase", display:"block", marginBottom:7, fontWeight:600 }}>Email</label>
+              <input
+                type="email"
+                value={adminEmail}
+                onChange={e=>setAdminEmail(e.target.value)}
+                placeholder="your@email.com"
+                style={{ width:"100%", background:"#161616", border:"1px solid #222", borderRadius:10, padding:"12px 14px", color:"#f0ede8", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#444", letterSpacing:".14em", textTransform:"uppercase", display:"block", marginBottom:7, fontWeight:600 }}>Password</label>
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={e=>setAdminPassword(e.target.value)}
+                placeholder="••••••••"
+                onKeyDown={e=>e.key==="Enter" && handleAdminLogin()}
+                style={{ width:"100%", background:"#161616", border:"1px solid #222", borderRadius:10, padding:"12px 14px", color:"#f0ede8", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" }}
+              />
+            </div>
+            {adminError && <div style={{ fontSize:12, color:"#E05A5A", fontFamily:"'DM Mono',monospace" }}>{adminError}</div>}
+            <button
+              onClick={handleAdminLogin}
+              disabled={adminLoading}
+              style={{ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:99, padding:"13px 0", width:"100%", fontFamily:"'DM Mono',monospace", fontSize:13, fontWeight:700, cursor:adminLoading?"not-allowed":"pointer", opacity:adminLoading?0.5:1, marginTop:4 }}>
+              {adminLoading ? "Logging in…" : "Log in →"}
+            </button>
+          </div>
+        </Sheet>
+      )}
+
+      {modal==="rateLimited" && (
+        <Sheet title="Submission limit reached" onClose={()=>setModal(null)}>
+          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+            <div style={{ background:"#141414", border:"1px solid #1c1c1c", borderRadius:10, padding:"14px 16px", fontSize:13, color:"#555", fontFamily:"'DM Mono',monospace", lineHeight:1.7 }}>
+              You've submitted {RATE_LIMIT} reviews in the last 24 hours — that's the daily limit to keep things quality over quantity.
+            </div>
+            <div style={{ fontSize:13, color:"#444", fontFamily:"'Libre Baskerville',Georgia,serif", lineHeight:1.7 }}>
+              Come back tomorrow to add more. In the meantime, upvote the reviews you agree with.
+            </div>
+            <button onClick={()=>setModal(null)} style={{ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:99, padding:"13px 0", width:"100%", fontFamily:"'DM Mono',monospace", fontSize:13, fontWeight:700, cursor:"pointer" }}>
+              Got it
+            </button>
+          </div>
+        </Sheet>
+      )}
+
       {modal==="admin" && (
         <Sheet title={`Admin${pending.length?` · ${pending.length} pending`:""}`} onClose={()=>setModal(null)}>
           <AdminQueue pending={pending} onApprove={approve} onReject={reject} approved={reviews} onEditApproved={editApproved} onUpdatePending={updatePending} />
+          <div style={{ marginTop:24, paddingTop:16, borderTop:"1px solid #1a1a1a" }}>
+            <div style={{ fontSize:11, color:"#333", fontFamily:"'DM Mono',monospace", marginBottom:10 }}>
+              Logged in as {adminUser?.email}
+            </div>
+            <button onClick={handleAdminLogout} style={{ background:"transparent", color:"#E05A5A", border:"1px solid #E05A5A33", borderRadius:99, padding:"9px 20px", fontFamily:"'DM Mono',monospace", fontSize:12, cursor:"pointer" }}>
+              Log out
+            </button>
+          </div>
         </Sheet>
       )}
     </>
