@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legit Buys — Reviewer Scoring Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --border: #2a2a2a;
+    --text: #f0ece4;
+    --muted: #7a7570;
+    --accent: #f5c842;
+    --accent2: #ff6b35;
+
+    --lb0: #1e1e1e;
+    --lb1: #1a2a1a;
+    --lb2: #1f2e10;
+    --lb3: #2b3a08;
+
+    --lb0-glow: #3a3a3a;
+    --lb1-glow: #3a6b3a;
+    --lb2-glow: #6b9c2a;
+    --lb3-glow: #a8d020;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    padding: 48px 32px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 56px;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .logo-lockup { flex: 1; min-width: 220px; }
+
+  .logo-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  h1 span { color: var(--accent); }
+
+  .header-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 260px;
+    margin-top: 12px;
+  }
+
+  .version-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 12px;
+    align-self: flex-start;
+    white-space: nowrap;
+  }
+
+  /* SCORE DEFINITIONS */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .scores-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 48px;
+  }
+
+  .score-def {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .score-def::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .score-def.s0::before { background: var(--lb0-glow); }
+  .score-def.s1::before { background: var(--lb1-glow); }
+  .score-def.s2::before { background: var(--lb2-glow); }
+  .score-def.s3::before { background: var(--lb3-glow); }
+
+  .score-def:hover { border-color: #444; }
+
+  .score-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .s0 .score-num { color: var(--lb0-glow); }
+  .s1 .score-num { color: var(--lb1-glow); }
+  .s2 .score-num { color: var(--lb2-glow); }
+  .s3 .score-num { color: var(--lb3-glow); }
+
+  .score-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .score-desc {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* MATRIX */
+  .matrix-wrap {
+    margin-bottom: 48px;
+  }
+
+  .matrix-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .matrix-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: 120px repeat(3, 1fr);
+    grid-template-rows: auto repeat(5, 1fr);
+    gap: 4px;
+  }
+
+  .matrix-corner { /* empty top-left */ }
+
+  .col-header {
+    text-align: center;
+    padding: 10px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .col-header .price-icon {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .row-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px 8px 0;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.3;
+    border-right: 1px solid var(--border);
+    gap: 8px;
+  }
+
+  .row-stars { font-size: 14px; }
+
+  .cell {
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    text-align: center;
+    position: relative;
+    min-height: 80px;
+    cursor: default;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .cell:hover {
+    transform: scale(1.03);
+    z-index: 2;
+    border-color: rgba(255,255,255,0.08);
+  }
+
+  .cell-lb {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .cell-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  /* Score colour levels */
+  .lvl-dead { background: #111; border: 1px dashed #222 !important; }
+  .lvl-dead .cell-lb { color: #333; }
+  .lvl-dead .cell-label { color: #2e2e2e; }
+
+  .lvl-0 { background: #181818; }
+  .lvl-0 .cell-lb { color: #555; }
+  .lvl-0 .cell-label { color: #444; }
+
+  .lvl-1 { background: #192019; }
+  .lvl-1 .cell-lb { color: var(--lb1-glow); }
+  .lvl-1 .cell-label { color: #548054; }
+
+  .lvl-2 { background: #1e2b0e; }
+  .lvl-2 .cell-lb { color: #8bbf30; }
+  .lvl-2 .cell-label { color: #6a9426; }
+
+  .lvl-3 { background: #253408; }
+  .lvl-3 .cell-lb { color: var(--lb3-glow); }
+  .lvl-3 .cell-label { color: #8ab820; }
+
+  .lvl-hot { background: #2b1a08; }
+  .lvl-hot .cell-lb { color: var(--accent2); }
+  .lvl-hot .cell-label { color: #c05220; }
+
+  /* pill for "out of your way" */
+  .must-tag {
+    position: absolute;
+    top: 6px; right: 6px;
+    background: var(--accent);
+    color: #000;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 2px 5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  /* PRICE KEY */
+  .price-key {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+
+  .price-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .price-symbol {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    width: 28px;
+  }
+
+  /* RULES */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+
+  .rule-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    margin-bottom: 6px;
+    letter-spacing: 0.1em;
+  }
+
+  .rule-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .rule-body {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--accent);
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 28px 18px; }
+    .scores-row { grid-template-columns: repeat(2, 1fr); }
+    .matrix-grid { grid-template-columns: 90px repeat(3, 1fr); }
+    .cell { min-height: 64px; }
+    .cell-lb { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-lockup">
+    <div class="logo-tag">Legit Buys — Internal Doc</div>
+    <h1>Scorer's<br><span>Field Guide</span></h1>
+    <p class="header-desc">A quick reference for verified reviewers. Use this to calibrate your LB score before submitting.</p>
+  </div>
+  <div class="version-badge">v1.0 · LB SCORE SYSTEM</div>
+</div>
+
+<!-- SCORE DEFINITIONS -->
+<div class="section-label">The LB Scale</div>
+<div class="scores-row">
+  <div class="score-def s0">
+    <div class="score-num">0</div>
+    <div class="score-name">Pass</div>
+    <div class="score-desc">Not bad, but not worth a detour. Only if it lands in front of you.</div>
+  </div>
+  <div class="score-def s1">
+    <div class="score-num">1</div>
+    <div class="score-name">Legit</div>
+    <div class="score-desc">Solid. Worth grabbing if you're nearby or in the mood.</div>
+  </div>
+  <div class="score-def s2">
+    <div class="score-num">2</div>
+    <div class="score-name">Big Legit</div>
+    <div class="score-desc">Genuinely great. You'd make a small detour for this one.</div>
+  </div>
+  <div class="score-def s3">
+    <div class="score-num">3</div>
+    <div class="score-name">Certified LB</div>
+    <div class="score-desc">Go out of your way. Drop everything. This needs to be in your life.</div>
+  </div>
+</div>
+
+<!-- SCORING MATRIX -->
+<div class="matrix-wrap">
+  <div class="section-label">Scoring Matrix</div>
+  <div class="matrix-title">Experience × Price</div>
+  <div class="matrix-sub">Find where your experience row meets the product's price column. The cell shows the likely LB score and a gut-check label.</div>
+
+  <div class="matrix-grid">
+    <!-- Top row: headers -->
+    <div class="matrix-corner"></div>
+    <div class="col-header"><span class="price-icon">·</span>Cheap</div>
+    <div class="col-header"><span class="price-icon">··</span>Fair</div>
+    <div class="col-header"><span class="price-icon">···</span>Pricey</div>
+
+    <!-- Row: Disappointing -->
+    <div class="row-header">
+      <span>😑</span>
+      <span>Disappointing</span>
+    </div>
+    <div class="cell lvl-dead">
+      <div class="cell-lb">—</div>
+      <div class="cell-label">Not a LB</div>
+    </div>
+    <div class="cell lvl-dead">
+      <div class="cell-lb">—</div>
+      <div class="cell-label">Not a LB</div>
+    </div>
+    <div class="cell lvl-dead">
+      <div class="cell-lb">—</div>
+      <div class="cell-label">Not a LB</div>
+    </div>
+
+    <!-- Row: Fine -->
+    <div class="row-header">
+      <span>🤙</span>
+      <span>Fine / Decent</span>
+    </div>
+    <div class="cell lvl-0">
+      <div class="cell-lb">0</div>
+      <div class="cell-label">It's aight</div>
+    </div>
+    <div class="cell lvl-0">
+      <div class="cell-lb">0</div>
+      <div class="cell-label">Take it or leave it</div>
+    </div>
+    <div class="cell lvl-0">
+      <div class="cell-lb">0</div>
+      <div class="cell-label">Not at that price</div>
+    </div>
+
+    <!-- Row: Good -->
+    <div class="row-header">
+      <span>👌</span>
+      <span>Good</span>
+    </div>
+    <div class="cell lvl-2">
+      <div class="cell-lb">2</div>
+      <div class="cell-label">Cracking deal</div>
+    </div>
+    <div class="cell lvl-1">
+      <div class="cell-lb">1</div>
+      <div class="cell-label">Worth it</div>
+    </div>
+    <div class="cell lvl-1">
+      <div class="cell-lb">1</div>
+      <div class="cell-label">Treat yourself</div>
+    </div>
+
+    <!-- Row: Excellent -->
+    <div class="row-header">
+      <span>🔥</span>
+      <span>Excellent</span>
+    </div>
+    <div class="cell lvl-3">
+      <div class="cell-lb">3</div>
+      <div class="cell-label">Certified LB</div>
+      <div class="must-tag">Must</div>
+    </div>
+    <div class="cell lvl-2">
+      <div class="cell-lb">2</div>
+      <div class="cell-label">Go get it</div>
+    </div>
+    <div class="cell lvl-2">
+      <div class="cell-lb">2</div>
+      <div class="cell-label">Big legit</div>
+    </div>
+
+    <!-- Row: Life-changing -->
+    <div class="row-header">
+      <span>🤯</span>
+      <span>Life-changing</span>
+    </div>
+    <div class="cell lvl-3">
+      <div class="cell-lb">3</div>
+      <div class="cell-label">Instant classic</div>
+      <div class="must-tag">Must</div>
+    </div>
+    <div class="cell lvl-3">
+      <div class="cell-lb">3</div>
+      <div class="cell-label">Certified LB</div>
+      <div class="must-tag">Must</div>
+    </div>
+    <div class="cell lvl-hot">
+      <div class="cell-lb">3*</div>
+      <div class="cell-label">Pricey but worth every penny</div>
+      <div class="must-tag">Legend</div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICE KEY -->
+<div class="section-label">Price Key</div>
+<div class="price-key">
+  <div class="price-item">
+    <div class="price-symbol">·</div>
+    <div><strong style="color:var(--text)">Cheap</strong> — Budget-friendly, easy impulse buy</div>
+  </div>
+  <div class="price-item">
+    <div class="price-symbol">··</div>
+    <div><strong style="color:var(--text)">Fair</strong> — Reasonable for what it is</div>
+  </div>
+  <div class="price-item">
+    <div class="price-symbol">···</div>
+    <div><strong style="color:var(--text)">Pricey</strong> — A conscious spend, sets higher expectations</div>
+  </div>
+</div>
+
+<!-- RULES -->
+<div class="section-label">Reviewer Rules</div>
+<div class="rules-grid">
+  <div class="rule-card">
+    <div class="rule-num">RULE 01</div>
+    <div class="rule-title">Price shapes the bar</div>
+    <div class="rule-body">A cheap snack that's "good" hits harder than a pricey one. The matrix accounts for this — use it.</div>
+  </div>
+  <div class="rule-card">
+    <div class="rule-num">RULE 02</div>
+    <div class="rule-title">Be honest, not generous</div>
+    <div class="rule-body">A 3 should genuinely make you want to text someone. If you're unsure, it's probably a 2.</div>
+  </div>
+  <div class="rule-card">
+    <div class="rule-num">RULE 03</div>
+    <div class="rule-title">Context matters</div>
+    <div class="rule-body">Rate it for what it's supposed to be — a convenience store snack vs a deli counter have different benchmarks.</div>
+  </div>
+  <div class="rule-card">
+    <div class="rule-num">RULE 04</div>
+    <div class="rule-title">Not everything qualifies</div>
+    <div class="rule-body">Disappointing products don't get a score — they're not a Legit Buy at any price. Fine/decent at cheap or fair price also doesn't make the cut. Only submit what genuinely earns a score.</div>
+  </div>
+  <div class="rule-card">
+    <div class="rule-num">RULE 05</div>
+    <div class="rule-title">3* is rare</div>
+    <div class="rule-body">A pricey product scoring 3 has to be genuinely extraordinary — the kind of thing people will thank you for.</div>
+  </div>
+  <div class="rule-card">
+    <div class="rule-num">RULE 06</div>
+    <div class="rule-title">One experience, one score</div>
+    <div class="rule-body">Score it fresh, on the day. Don't revisit to inflate. If it gets better over time, submit a follow-up.</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-logo">LEGIT BUYS</div>
+  <div class="footer-note">FOR VERIFIED REVIEWERS ONLY · INTERNAL USE</div>
+</div>
+
+</body>
+</html>
