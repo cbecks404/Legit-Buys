@@ -211,84 +211,93 @@ function Card({ r, onUp }) {
       }} />
 
       {/* Holographic shimmer overlay */}
+      {/* Holographic glow — sits behind content via z-index */}
       {isHolo && (
         <div style={{
-          position: "absolute", inset: 0, pointerEvents: "none",
-          background: "linear-gradient(45deg,transparent 30%,rgba(255,255,255,0.04) 50%,transparent 70%)",
-          animation: "shimmer 3s ease infinite",
+          position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+          background: "linear-gradient(135deg,rgba(200,255,71,0.06),rgba(96,195,245,0.06),rgba(244,169,66,0.06),rgba(192,132,252,0.06))",
+          animation: "shimmer 8s ease infinite",
         }} />
       )}
 
-      {/* Holographic rainbow border */}
+      {/* Rainbow border */}
       {isHolo && (
         <div style={{
-          position: "absolute", inset: 0, borderRadius: 14, pointerEvents: "none",
+          position: "absolute", inset: 0, borderRadius: 14, pointerEvents: "none", zIndex: 0,
           border: "1px solid transparent",
-          background: "linear-gradient(#0f3460,#0f3460) padding-box, linear-gradient(135deg,#C8FF47,#60C3F5,#F4A942,#C084FC) border-box",
+          background: "linear-gradient(#111,#111) padding-box, linear-gradient(135deg,#C8FF47,#60C3F5,#F4A942,#C084FC) border-box",
         }} />
       )}
 
-      {/* Title row */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8 }}>
-        <div>
-          <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:accent, letterSpacing:".18em", textTransform:"uppercase", fontWeight:600, marginBottom:4 }}>
-            {CAT_META[r.category]?.emoji} {r.category}
+      {/* All content wrapped to sit above holo overlays */}
+      <div style={{ position:"relative", zIndex:1, display:"flex", flexDirection:"column", gap:10 }}>
+
+        {/* Title row */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}>
+          <div>
+            <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:accent, letterSpacing:".18em", textTransform:"uppercase", fontWeight:600, marginBottom:4 }}>
+              {CAT_META[r.category]?.emoji} {r.category}
+            </div>
+            <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:16, color:"#f0ede8", lineHeight:1.25, fontWeight:700 }}>{r.product}</div>
           </div>
-          <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:16, color:"#f0ede8", lineHeight:1.25, fontWeight:700 }}>{r.product}</div>
+          <ScoreSelector value={r.rating} />
         </div>
-        <ScoreSelector value={r.rating} />
+
+        {/* Review text */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
+        <p style={{ margin:0, fontSize:13.5, color:"#777", lineHeight:1.65, fontStyle:"italic", fontFamily:"'Libre Baskerville',Georgia,serif" }}>"{r.review}"</p>
+
+        {/* Diet tags */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
+        {dietTags.length > 0 && (
+          <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+            {dietTags.map(tag => {
+              const meta = DIET_TAGS.find(d => d.id === tag);
+              return meta ? (
+                <span key={tag} style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#555", background:"#161616", border:"1px solid #222", padding:"2px 8px", borderRadius:99 }}>
+                  {meta.label}
+                </span>
+              ) : null;
+            })}
+          </div>
+        )}
+
+        {/* Links */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
+        {hasLinks && (
+          <div style={{ display:"flex", gap:6, flexWrap:"wrap", paddingTop:2 }}>
+            <LinkButton link={r.link} where={r.where} />
+            <MapButton mapQuery={mapQuery} />
+          </div>
+        )}
+
+        {/* Footer */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:2, paddingTop: hasLinks?8:0, borderTop: hasLinks?"1px solid #181818":"none" }}>
+          <div>
+            <div style={{ fontSize:11, color:"#3a3a3a", fontFamily:"'DM Mono',monospace" }}>
+              {r.verified && <span style={{ color:"#C8FF47", marginRight:5 }}>✓</span>}
+              {r.submitter} · {r.where}
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:3 }}>
+              <span style={{ fontSize:12, color:accent, fontFamily:"'DM Mono',monospace", fontWeight:600 }}>£{r.price}</span>
+              {sym && <span style={{ fontSize:11, color:"#444", fontFamily:"'DM Mono',monospace", background:"#1a1a1a", border:"1px solid #222", padding:"1px 7px", borderRadius:99 }}>{sym}</span>}
+            </div>
+          </div>
+          <button
+            onClick={() => { if (!upped) { setUpped(true); onUp(r.id); }}}
+            style={{
+              background: upped ? `${accent}18` : "transparent",
+              border: `1px solid ${upped ? accent : "#242424"}`,
+              color: upped ? accent : "#444",
+              borderRadius:99, padding:"5px 13px", fontSize:12,
+              fontFamily:"'DM Mono',monospace", cursor: upped?"default":"pointer", transition:"all .2s",
+            }}>
+            ↑ {r.upvotes + (upped ? 1 : 0)}
+          </button>
+        </div>
       </div>
-
-      {/* Review text */}
-      <p style={{ margin:0, fontSize:13.5, color:"#777", lineHeight:1.65, fontStyle:"italic", fontFamily:"'Libre Baskerville',Georgia,serif" }}>"{r.review}"</p>
-
-      {/* Diet tags */}
-      {dietTags.length > 0 && (
-        <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
-          {dietTags.map(tag => {
-            const meta = DIET_TAGS.find(d => d.id === tag);
-            return meta ? (
-              <span key={tag} style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#555", background:"#161616", border:"1px solid #222", padding:"2px 8px", borderRadius:99 }}>
-                {meta.label}
-              </span>
-            ) : null;
-          })}
-        </div>
-      )}
-
-      {/* Links */}
-      {hasLinks && (
-        <div style={{ display:"flex", gap:6, flexWrap:"wrap", paddingTop:2 }}>
-          <LinkButton link={r.link} where={r.where} />
-          <MapButton mapQuery={mapQuery} />
-        </div>
-      )}
-
-      {/* Footer */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:2, paddingTop: hasLinks?8:0, borderTop: hasLinks?"1px solid #181818":"none" }}>
-        <div>
-          <div style={{ fontSize:11, color:"#3a3a3a", fontFamily:"'DM Mono',monospace" }}>
-            {r.verified && <span style={{ color:"#C8FF47", marginRight:5 }}>✓</span>}
-            {r.submitter} · {r.where}
-          </div>
-          <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:3 }}>
-            <span style={{ fontSize:12, color:accent, fontFamily:"'DM Mono',monospace", fontWeight:600 }}>£{r.price}</span>
-            {sym && <span style={{ fontSize:11, color:"#444", fontFamily:"'DM Mono',monospace", background:"#1a1a1a", border:"1px solid #222", padding:"1px 7px", borderRadius:99 }}>{sym}</span>}
-          </div>
-        </div>
-        <button
-          onClick={() => { if (!upped) { setUpped(true); onUp(r.id); }}}
-          style={{
-            background: upped ? `${accent}18` : "transparent",
-            border: `1px solid ${upped ? accent : "#242424"}`,
-            color: upped ? accent : "#444",
-            borderRadius:99, padding:"5px 13px", fontSize:12,
-            fontFamily:"'DM Mono',monospace", cursor: upped?"default":"pointer", transition:"all .2s",
-          }}>
-          ↑ {r.upvotes + (upped ? 1 : 0)}
-        </button>
-      </div>
-    </div>
+    </div>  
   );
 }
 
