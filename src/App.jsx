@@ -32,7 +32,7 @@ const SCORE_META = [
   { value: 3, label: "Certified Legit Buy", short: "Certified" },
 ];
 
-const SCORE_COLORS = ["#BBB", "#60C3F5", "#F4A942", "#C8FF47"];
+const SCORE_COLORS = ["#808080", "#60C3F5", "#F4A942", "#C8FF47"];
 const SCORE_HINTS  = [
   "No recommendation",
   "Worth picking up",
@@ -191,7 +191,7 @@ function Card({ r, onUp, saved, onSave }) {
           : "#111",
         backgroundSize: isHolo ? "300% 300%" : "auto",
         animation: isHolo ? "holo 6s ease infinite" : "none",
-        border: "1px solid #1c1c1c",
+        border: isHolo ? "1px solid transparent" : `1px solid ${accent}55`,
         borderRadius: 14, padding: "18px 18px 14px",
         display: "flex", flexDirection: "column", gap: 10,
         position: "relative", overflow: "hidden",
@@ -199,17 +199,6 @@ function Card({ r, onUp, saved, onSave }) {
         transition: "transform .15s",
       }}
     >
-      {/* Top accent / rainbow bar */}
-      <div style={{
-        position: "absolute", top: 0, left: 0, right: 0, height: 3,
-        background: isHolo
-          ? "linear-gradient(90deg,#C8FF47,#60C3F5,#F4A942,#F07070,#C084FC,#C8FF47)"
-          : accent,
-        backgroundSize: "200%",
-        animation: isHolo ? "shimmer-bar 3s linear infinite" : "none",
-        borderRadius: "14px 14px 0 0",
-      }} />
-
       {/* Holographic shimmer overlay */}
       {/* Holographic glow — sits behind content via z-index */}
       {isHolo && (
@@ -238,14 +227,14 @@ function Card({ r, onUp, saved, onSave }) {
             <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:accent, letterSpacing:".18em", textTransform:"uppercase", fontWeight:600, marginBottom:4 }}>
               {CAT_META[r.category]?.emoji} {r.category}
             </div>
-            <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:16, color:"#f0ede8", lineHeight:1.25, fontWeight:700 }}>{r.product}</div>
+            <div style={{ fontFamily:"'LBCardHeader', serif", fontSize:16, color:"#f0ede8", lineHeight:1.25 }}>{r.product}</div>
           </div>
           <ScoreSelector value={r.rating} />
         </div>
 
         {/* Review text */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
-        <p style={{ margin:0, fontSize:13.5, color:"#aaa", lineHeight:1.65, fontStyle:"italic", fontFamily:"'Libre Baskerville',Georgia,serif" }}>"{r.review}"</p>
+        <p style={{ margin:0, fontSize:13.5, color:"#aaa", lineHeight:1.65, fontFamily:"'LBReview', serif" }}>{r.review}</p>
 
         {/* Diet tags */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
@@ -274,7 +263,7 @@ function Card({ r, onUp, saved, onSave }) {
         {/* Footer */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:2, paddingTop: hasLinks?8:0, borderTop: hasLinks?"1px solid #181818":"none", position:"relative", zIndex:1 }}>
           <div>
-            <div style={{ fontSize:11, color:"#aaa", fontFamily:"'DM Mono',monospace" }}>
+            <div style={{ fontSize:11, color:"#aaa", fontFamily:"'LBBody', sans-serif" }}>
               {r.verified && <span style={{ color:"#C8FF47", marginRight:5 }}>✓</span>}
               {r.submitter} · {r.where}
             </div>
@@ -565,7 +554,7 @@ function AdminQueue({ pending, onApprove, onReject, approved, onEditApproved, on
             <div style={{ marginTop:12, display:"flex", flexDirection:"column", gap:10 }}>
               <div><label style={lbl}>Website or Instagram link</label><input style={inp} placeholder="https://..." value={editFields.link} onChange={e=>setEditFields(p=>({...p,link:e.target.value}))} /></div>
               <div><label style={lbl}>Address or postcode</label><input style={inp} placeholder="e.g. Leon London Bridge SE1" value={editFields.mapQuery} onChange={e=>setEditFields(p=>({...p,mapQuery:e.target.value}))} /></div>
-              <button onClick={()=>{ onEditApproved(r.id, editFields); setEditingId(null); }} style={{ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:8, padding:"10px 0", fontFamily:"'DM Mono',monospace", fontSize:12, fontWeight:700, cursor:"pointer" }}>Save changes ✓</button>
+              <button onClick={()=>{ onEditApproved(r.id, editFields); setEditingId(null); }} style={{ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:8, padding:"10px 0", fontFamily:"'LBBody', sans-serif", fontSize:12, fontWeight:700, cursor:"pointer", transition:"all .2s", }}>Save changes ✓</button>
             </div>
           )}
         </div>
@@ -756,7 +745,7 @@ export default function App() {
           <h1 style={{ margin:"0 0 6px", fontFamily:"'LBTitle', sans-serif", fontSize:"clamp(48px, 11vw, 120px)", lineHeight:1, color:"#f0ede8", fontWeight:400, letterSpacing:".04em", textTransform:"uppercase" }}>
             LEGIT BUYS
           </h1>
-          <p style={{ margin:"0 0 24px", color:"#aaa", fontSize:13.5, lineHeight:1.6, fontFamily:"'Libre Baskerville',Georgia,serif", letterSpacing:".18em", textTransform:"uppercase" }}>Real picks from real foodies</p>
+          <p style={{ margin:"0 0 24px", color:"#aaa", fontSize:13.5, lineHeight:1.6, fontFamily:"'LBBody', sans-serif", letterSpacing:".18em", textTransform:"uppercase" }}>Real picks from real foodies</p>
 
           <div style={{ padding:"14px 0", borderTop:"1px solid #141414", borderBottom:"1px solid #141414", marginBottom:20 }}>
             <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#CCC", letterSpacing:".14em", textTransform:"uppercase", marginBottom:10 }}>Filter by score</div>
@@ -767,9 +756,9 @@ export default function App() {
                 return (
                   <button key={m.value} onClick={()=>setActiveScore(isActive ? null : m.value)} style={{
                     flex:1, padding:"10px 4px", borderRadius:10, border:"none", lineHeight:1.5,
-                    outline:`1.5px solid ${isActive ? color : "#1e1e1e"}`,
-                    background: isActive ? `${color}18` : "#111",
-                    color: isActive ? color : "#666",
+                    outline:`1.5px solid ${isActive ? color : `${color}44`}`,
+                    background: isActive ? `${color}18` : `${color}08`,
+                    color: isActive ? color : `${color}99`,
                     fontFamily:"'DM Mono',monospace", fontSize:10, cursor:"pointer",
                     transition:"all .15s", fontWeight: isActive ? 700 : 400,
                   }}>
@@ -816,7 +805,7 @@ export default function App() {
               href="/scoring-guide.html"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#CCC", letterSpacing:".08em", textDecoration:"none", borderBottom:"1px solid #555", paddingBottom:1, transition:"color .15s" }}
+              style={{ fontSize:10, fontFamily:"'LBBody', sans-serif", color:"#666", letterSpacing:".08em", textDecoration:"none", borderBottom:"1px solid #555", paddingBottom:1, transition:"color .15s" }}
               onMouseEnter={e=>e.target.style.color="#C8FF47"}
               onMouseLeave={e=>e.target.style.color="#666"}
             >

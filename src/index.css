@@ -11,3 +11,24 @@
   font-weight: normal;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'LBCardHeader';
+  src: url('/fonts/Cardheader-Bold.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'LBReview';
+  src: url('/fonts/Reviewtext.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'LBBody';
+  src: url('/fonts/Bodytext.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
