@@ -32,7 +32,7 @@ const SCORE_META = [
   { value: 3, label: "Certified Legit Buy", short: "Certified" },
 ];
 
-const SCORE_COLORS = ["#555", "#60C3F5", "#F4A942", "#C8FF47"];
+const SCORE_COLORS = ["#BBB", "#60C3F5", "#F4A942", "#C8FF47"];
 const SCORE_HINTS  = [
   "No recommendation",
   "Worth picking up",
@@ -80,7 +80,7 @@ function ScoreSelector({ value = null, interactive = false, onChange }) {
                 flex: 1, padding: "10px 4px", borderRadius: 10, border: "none",
                 background: isActive ? `${color}22` : "#161616",
                 outline: `1.5px solid ${isActive ? color : "#1e1e1e"}`,
-                color: isActive ? color : "#444",
+                color: isActive ? color : "#AAA",
                 fontFamily: "'DM Mono',monospace", fontSize: 10, cursor: "pointer",
                 transition: "all .15s", lineHeight: 1.5, fontWeight: isActive ? 700 : 400,
               }}>
@@ -104,7 +104,7 @@ function Pill({ cat, active, onClick }) {
   return (
     <button onClick={onClick} style={{
       background: active ? m.color : "transparent",
-      color: active ? "#0a0a0a" : "#4a4a4a",
+      color: active ? "#0a0a0a" : "#BBB",
       border: `1.5px solid ${active ? m.color : "#232323"}`,
       borderRadius: 99, padding: "5px 14px", fontSize: 12,
       fontFamily: "'DM Mono',monospace", cursor: "pointer",
@@ -120,8 +120,8 @@ function DietPill({ tag, active, onClick }) {
   return (
     <button onClick={onClick} style={{
       background: active ? "#ffffff14" : "transparent",
-      color: active ? "#f0ede8" : "#3a3a3a",
-      border: `1.5px solid ${active ? "#555" : "#1e1e1e"}`,
+      color: active ? "#f0ede8" : "#AAA",
+      border: `1.5px solid ${active ? "#BBB" : "#1e1e1e"}`,
       borderRadius: 99, padding: "4px 12px", fontSize: 11,
       fontFamily: "'DM Mono',monospace", cursor: "pointer",
       whiteSpace: "nowrap", transition: "all .15s", fontWeight: active ? 600 : 400,
@@ -165,7 +165,7 @@ function LinkButton({ link, where }) {
 }
 
 // ── Review card ───────────────────────────────────────
-function Card({ r, onUp }) {
+function Card({ r, onUp, saved, onSave }) {
   console.log('Card rendering:', r);
   const [upped, setUpped] = useState(false);
   const accent    = CAT_META[r.category]?.color ?? "#C8FF47";
@@ -245,7 +245,7 @@ function Card({ r, onUp }) {
 
         {/* Review text */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
-        <p style={{ margin:0, fontSize:13.5, color:"#777", lineHeight:1.65, fontStyle:"italic", fontFamily:"'Libre Baskerville',Georgia,serif" }}>"{r.review}"</p>
+        <p style={{ margin:0, fontSize:13.5, color:"#aaa", lineHeight:1.65, fontStyle:"italic", fontFamily:"'Libre Baskerville',Georgia,serif" }}>"{r.review}"</p>
 
         {/* Diet tags */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
@@ -254,7 +254,7 @@ function Card({ r, onUp }) {
             {dietTags.map(tag => {
               const meta = DIET_TAGS.find(d => d.id === tag);
               return meta ? (
-                <span key={tag} style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#555", background:"#161616", border:"1px solid #222", padding:"2px 8px", borderRadius:99 }}>
+                <span key={tag} style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#ccc", background:"#161616", border:"1px solid #666", padding:"2px 8px", borderRadius:99 }}>
                   {meta.label}
                 </span>
               ) : null;
@@ -272,34 +272,47 @@ function Card({ r, onUp }) {
         )}
 
         {/* Footer */}
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:2, paddingTop: hasLinks?8:0, borderTop: hasLinks?"1px solid #181818":"none" }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:2, paddingTop: hasLinks?8:0, borderTop: hasLinks?"1px solid #181818":"none", position:"relative", zIndex:1 }}>
           <div>
-            <div style={{ fontSize:11, color:"#3a3a3a", fontFamily:"'DM Mono',monospace" }}>
+            <div style={{ fontSize:11, color:"#aaa", fontFamily:"'DM Mono',monospace" }}>
               {r.verified && <span style={{ color:"#C8FF47", marginRight:5 }}>✓</span>}
               {r.submitter} · {r.where}
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:3 }}>
               <span style={{ fontSize:12, color:accent, fontFamily:"'DM Mono',monospace", fontWeight:600 }}>£{r.price}</span>
-              {sym && <span style={{ fontSize:11, color:"#444", fontFamily:"'DM Mono',monospace", background:"#1a1a1a", border:"1px solid #222", padding:"1px 7px", borderRadius:99 }}>{sym}</span>}
+              {sym && <span style={{ fontSize:11, color:"#bbb", fontFamily:"'DM Mono',monospace", background:"#1a1a1a", border:"1px solid #666", padding:"1px 7px", borderRadius:99 }}>{sym}</span>}
             </div>
           </div>
-          <button
-            onClick={() => { if (!upped) { setUpped(true); onUp(r.id); }}}
-            style={{
-              background: upped ? `${accent}18` : "transparent",
-              border: `1px solid ${upped ? accent : "#242424"}`,
-              color: upped ? accent : "#444",
-              borderRadius:99, padding:"5px 13px", fontSize:12,
-              fontFamily:"'DM Mono',monospace", cursor: upped?"default":"pointer", transition:"all .2s",
-            }}>
-            ↑ {r.upvotes + (upped ? 1 : 0)}
-          </button>
+          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+            <button
+              onClick={() => onSave(r.id)}
+              style={{
+                background: saved ? "#ffffff14" : "transparent",
+                border: `1px solid ${saved ? "#f0ede8" : "#242424"}`,
+                color: saved ? "#f0ede8" : "#AAA",
+                borderRadius:99, padding:"5px 11px", fontSize:12,
+                fontFamily:"'DM Mono',monospace", cursor:"pointer", transition:"all .2s",
+              }}>
+              {saved ? "★" : "☆"}
+            </button>
+            <button
+              onClick={() => { if (!upped) { setUpped(true); onUp(r.id); }}}
+              style={{
+                background: upped ? `${accent}18` : "transparent",
+                border: `1px solid ${upped ? accent : "#242424"}`,
+                color: upped ? accent : "#AAA",
+                borderRadius:99, padding:"5px 13px", fontSize:12,
+                fontFamily:"'DM Mono',monospace", cursor: upped?"default":"pointer", transition:"all .2s",
+              }}>
+              ↑ {r.upvotes + (upped ? 1 : 0)}
+            </button>
+          </div>
         </div>
       </div>
-    </div>  
+    </div>
   );
 }
+
 
 // ── Bottom sheet ──────────────────────────────────────
 function Sheet({ title, onClose, children }) {
@@ -314,7 +327,7 @@ function Sheet({ title, onClose, children }) {
       }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
           <span style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:19, color:"#f0ede8", fontWeight:700 }}>{title}</span>
-          <button onClick={onClose} style={{ background:"none", border:"none", color:"#383838", fontSize:22, cursor:"pointer", lineHeight:1, padding:"2px 6px" }}>✕</button>
+          <button onClick={onClose} style={{ background:"none", border:"none", color:"#AAA", fontSize:22, cursor:"pointer", lineHeight:1, padding:"2px 6px" }}>✕</button>
         </div>
         {children}
       </div>
@@ -336,17 +349,17 @@ function SubmitFlow({ onSubmit, onClose }) {
     dietTags: p.dietTags.includes(id) ? p.dietTags.filter(t=>t!==id) : [...p.dietTags, id],
   }));
 
-  const inp = { width:"100%", background:"#161616", border:"1px solid #222", borderRadius:10, padding:"12px 14px", color:"#f0ede8", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" };
-  const lbl = { fontSize:9, fontFamily:"'DM Mono',monospace", color:"#444", letterSpacing:".14em", textTransform:"uppercase", display:"block", marginBottom:7, fontWeight:600 };
-  const hint = { fontSize:11, color:"#333", fontFamily:"'DM Mono',monospace", marginTop:5, lineHeight:1.5 };
+  const inp = { width:"100%", background:"#161616", border:"1px solid #666", borderRadius:10, padding:"12px 14px", color:"#f0ede8", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" };
+  const lbl = { fontSize:9, fontFamily:"'DM Mono',monospace", color:"#bbb", letterSpacing:".14em", textTransform:"uppercase", display:"block", marginBottom:7, fontWeight:600 };
+  const hint = { fontSize:11, color:"#CCC", fontFamily:"'DM Mono',monospace", marginTop:5, lineHeight:1.5 };
   const nextBtn = (disabled) => ({ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:99, padding:"13px 0", width:"100%", fontFamily:"'DM Mono',monospace", fontSize:13, fontWeight:700, cursor:disabled?"not-allowed":"pointer", letterSpacing:".04em", marginTop:6, opacity:disabled?0.35:1 });
-  const backBtn = { background:"transparent", color:"#3a3a3a", border:"1px solid #1e1e1e", borderRadius:99, padding:"11px 0", width:"100%", fontFamily:"'DM Mono',monospace", fontSize:12, cursor:"pointer", marginTop:8 };
+  const backBtn = { background:"transparent", color:"#aaa", border:"1px solid #2e2e2e", borderRadius:99, padding:"11px 0", width:"100%", fontFamily:"'DM Mono',monospace", fontSize:12, cursor:"pointer", marginTop:8 };
   const handlePrice = (val) => set("price", val.replace(/[^0-9.]/g,"").replace(/(\..*)\./g,"$1"));
 
   const steps = [
     // Step 0 – The buy
     <div key={0} style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#555", fontSize:13, marginBottom:4 }}>Step 1 of 4 — The buy</div>
+      <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#ccc", fontSize:13, marginBottom:4 }}>Step 1 of 4 — The buy</div>
       <div>
         <label style={lbl}>Product or place *</label>
         <input style={inp} placeholder="e.g. Pip & Nut Almond Butter Cups" value={f.product} onChange={e=>set("product",e.target.value)} />
@@ -359,7 +372,7 @@ function SubmitFlow({ onSubmit, onClose }) {
               padding:"10px 4px", borderRadius:10, border:"none", lineHeight:1.5,
               outline:`1.5px solid ${f.category===c ? m.color : "#1e1e1e"}`,
               background: f.category===c ? `${m.color}14` : "#161616",
-              color: f.category===c ? m.color : "#444",
+              color: f.category===c ? m.color : "#AAA",
               fontFamily:"'DM Mono',monospace", fontSize:11, cursor:"pointer", transition:"all .15s",
             }}>
               {m.emoji}<br/>{c}
@@ -388,7 +401,7 @@ function SubmitFlow({ onSubmit, onClose }) {
 
     // Step 1 – Score & name
     <div key={1} style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#555", fontSize:13, marginBottom:4 }}>Step 2 of 4 — Your verdict</div>
+      <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#ccc", fontSize:13, marginBottom:4 }}>Step 2 of 4 — Your verdict</div>
       <div>
         <label style={lbl}>Score *</label>
         <ScoreSelector value={f.rating} interactive onChange={v=>set("rating",v)} />
@@ -397,7 +410,7 @@ function SubmitFlow({ onSubmit, onClose }) {
         <label style={lbl}>Your honest review *</label>
         <textarea style={{ ...inp, minHeight:100, resize:"vertical" }} placeholder="What made it worth buying? Be specific." value={f.review} onChange={e=>set("review",e.target.value)} />
       </div>
-      <div style={{ background:"#141414", border:"1px solid #1c1c1c", borderRadius:10, padding:"12px 14px", fontSize:12, color:"#555", fontFamily:"'DM Mono',monospace", lineHeight:1.6 }}>
+      <div style={{ background:"#141414", border:"1px solid #1c1c1c", borderRadius:10, padding:"12px 14px", fontSize:12, color:"#ccc", fontFamily:"'DM Mono',monospace", lineHeight:1.6 }}>
         ✓ Your name shows on the review so people know it's real.
       </div>
       <div><label style={lbl}>Your name *</label><input style={inp} placeholder="First name + initial (e.g. Priya K.)" value={f.submitter} onChange={e=>set("submitter",e.target.value)} /></div>
@@ -411,17 +424,17 @@ function SubmitFlow({ onSubmit, onClose }) {
 
     // Step 2 – Dietary info
     <div key={2} style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#555", fontSize:13, marginBottom:4 }}>Step 3 of 4 — Dietary info</div>
-      <div style={{ background:"#141414", border:"1px solid #1c1c1c", borderRadius:10, padding:"12px 14px", fontSize:12, color:"#444", fontFamily:"'DM Mono',monospace", lineHeight:1.7 }}>
+      <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#ccc", fontSize:13, marginBottom:4 }}>Step 3 of 4 — Dietary info</div>
+      <div style={{ background:"#141414", border:"1px solid #1c1c1c", borderRadius:10, padding:"12px 14px", fontSize:12, color:"#bbb", fontFamily:"'DM Mono',monospace", lineHeight:1.7 }}>
         Tag any diets this suits. Optional — helps people filter for what works for them.
       </div>
       <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
         {DIET_TAGS.map(tag => (
           <button key={tag.id} onClick={()=>toggleDiet(tag.id)} style={{
             padding:"8px 14px", borderRadius:99, fontSize:12, cursor:"pointer", transition:"all .15s",
-            border:`1.5px solid ${f.dietTags.includes(tag.id) ? "#555" : "#1e1e1e"}`,
+            border:`1.5px solid ${f.dietTags.includes(tag.id) ? "#BBB" : "#1e1e1e"}`,
             background: f.dietTags.includes(tag.id) ? "#ffffff14" : "#161616",
-            color: f.dietTags.includes(tag.id) ? "#f0ede8" : "#3a3a3a",
+            color: f.dietTags.includes(tag.id) ? "#f0ede8" : "#AAA",
             fontFamily:"'DM Mono',monospace",
           }}>
             {tag.label}
@@ -434,8 +447,8 @@ function SubmitFlow({ onSubmit, onClose }) {
 
     // Step 3 – Links
     <div key={3} style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#555", fontSize:13, marginBottom:4 }}>Step 4 of 4 — Links (optional)</div>
-      <div style={{ background:"#141414", border:"1px solid #1c1c1c", borderRadius:10, padding:"12px 14px", fontSize:12, color:"#444", fontFamily:"'DM Mono',monospace", lineHeight:1.7 }}>
+      <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#ccc", fontSize:13, marginBottom:4 }}>Step 4 of 4 — Links (optional)</div>
+      <div style={{ background:"#141414", border:"1px solid #1c1c1c", borderRadius:10, padding:"12px 14px", fontSize:12, color:"#bbb", fontFamily:"'DM Mono',monospace", lineHeight:1.7 }}>
         Help readers find it instantly. Both fields are optional — an admin can fill them in later.
       </div>
       <div>
@@ -455,7 +468,7 @@ function SubmitFlow({ onSubmit, onClose }) {
     <div key={4} style={{ textAlign:"center", padding:"30px 0 10px" }}>
       <div style={{ fontSize:48, marginBottom:16 }}>✦</div>
       <div style={{ fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:22, color:"#f0ede8", marginBottom:8 }}>Nice one.</div>
-      <div style={{ fontSize:13, color:"#555", lineHeight:1.7, marginBottom:28 }}>Your review is in the queue.<br/>It'll go live once approved.</div>
+      <div style={{ fontSize:13, color:"#ccc", lineHeight:1.7, marginBottom:28 }}>Your review is in the queue.<br/>It'll go live once approved.</div>
       <button onClick={onClose} style={{ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:99, padding:"13px 32px", fontFamily:"'DM Mono',monospace", fontSize:13, fontWeight:700, cursor:"pointer" }}>Back to board</button>
     </div>,
   ];
@@ -474,18 +487,18 @@ function AdminQueue({ pending, onApprove, onReject, approved, onEditApproved, on
   const [editingId, setEditingId] = useState(null);
   const [editFields, setEditFields] = useState({ link:"", mapQuery:"" });
 
-  const inp = { width:"100%", background:"#0f0f0f", border:"1px solid #1e1e1e", borderRadius:8, padding:"10px 12px", color:"#f0ede8", fontSize:13, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" };
-  const lbl = { fontSize:9, fontFamily:"'DM Mono',monospace", color:"#444", letterSpacing:".12em", textTransform:"uppercase", display:"block", marginBottom:6, fontWeight:600 };
+  const inp = { width:"100%", background:"#0f0f0f", border:"1px solid #2e2e2e", borderRadius:8, padding:"10px 12px", color:"#f0ede8", fontSize:13, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" };
+  const lbl = { fontSize:9, fontFamily:"'DM Mono',monospace", color:"#bbb", letterSpacing:".12em", textTransform:"uppercase", display:"block", marginBottom:6, fontWeight:600 };
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
 
       {/* Pending section */}
-      <div style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#333", letterSpacing:".14em", textTransform:"uppercase", marginBottom:8 }}>
+      <div style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#CCC", letterSpacing:".14em", textTransform:"uppercase", marginBottom:8 }}>
         Pending approval {pending.length > 0 && `(${pending.length})`}
       </div>
       {pending.length === 0 && (
-        <div style={{ fontSize:13, color:"#2a2a2a", fontFamily:"'DM Mono',monospace", marginBottom:20, paddingBottom:20, borderBottom:"1px solid #141414" }}>
+        <div style={{ fontSize:13, color:"#BBB", fontFamily:"'DM Mono',monospace", marginBottom:20, paddingBottom:20, borderBottom:"1px solid #141414" }}>
           All clear ✦
         </div>
       )}
@@ -497,25 +510,25 @@ function AdminQueue({ pending, onApprove, onReject, approved, onEditApproved, on
             ? rawDiet.replace(/[{}]/g, '').split(',').map(s => s.trim())
             : [];
         return (
-          <div key={r.id} style={{ background:"#141414", border:"1px solid #1e1e1e", borderRadius:12, padding:16, marginBottom:6 }}>
+          <div key={r.id} style={{ background:"#141414", border:"1px solid #2e2e2e", borderRadius:12, padding:16, marginBottom:6 }}>
             <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
               <span style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#f0ede8", fontSize:15, fontWeight:700 }}>{r.product}</span>
               <ScoreSelector value={r.rating} />
             </div>
-            <p style={{ margin:"0 0 6px", fontSize:13, color:"#666", fontStyle:"italic", fontFamily:"'Libre Baskerville',Georgia,serif" }}>"{r.review}"</p>
-            <div style={{ fontSize:10, color:"#333", fontFamily:"'DM Mono',monospace", marginBottom:6, letterSpacing:".06em" }}>
+            <p style={{ margin:"0 0 6px", fontSize:13, color:"#CCC", fontStyle:"italic", fontFamily:"'Libre Baskerville',Georgia,serif" }}>"{r.review}"</p>
+            <div style={{ fontSize:10, color:"#CCC", fontFamily:"'DM Mono',monospace", marginBottom:6, letterSpacing:".06em" }}>
               {r.submitter} · {r.category} · {r.where} · £{r.price} {priceSymbol(r.price_range ?? r.priceRange)}
             </div>
             {dietTags.length > 0 && (
               <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginBottom:10 }}>
                 {dietTags.map(tag => {
                   const meta = DIET_TAGS.find(d=>d.id===tag);
-                  return meta ? <span key={tag} style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#555", background:"#161616", border:"1px solid #222", padding:"2px 7px", borderRadius:99 }}>{meta.label}</span> : null;
+                  return meta ? <span key={tag} style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#ccc", background:"#161616", border:"1px solid #666", padding:"2px 7px", borderRadius:99 }}>{meta.label}</span> : null;
                 })}
               </div>
             )}
             <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:12, padding:"10px 0", borderTop:"1px solid #1a1a1a" }}>
-              <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#2e2e2e", letterSpacing:".12em", textTransform:"uppercase" }}>Add links before approving</div>
+              <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#CCC", letterSpacing:".12em", textTransform:"uppercase" }}>Add links before approving</div>
               <input style={inp} placeholder="Link (website / instagram)" value={r.link || ""} onChange={e=>onUpdatePending(r.id,{link:e.target.value})} />
               <input style={inp} placeholder="Address or postcode for map" value={r.map_query ?? r.mapQuery ?? ""} onChange={e=>onUpdatePending(r.id,{map_query:e.target.value})} />
             </div>
@@ -528,24 +541,24 @@ function AdminQueue({ pending, onApprove, onReject, approved, onEditApproved, on
       })}
 
       {/* Live reviews */}
-      <div style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#333", letterSpacing:".14em", textTransform:"uppercase", margin:"16px 0 8px" }}>
+      <div style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#CCC", letterSpacing:".14em", textTransform:"uppercase", margin:"16px 0 8px" }}>
         Edit live reviews
       </div>
       {approved.map(r => (
-        <div key={r.id} style={{ background:"#141414", border:"1px solid #1e1e1e", borderRadius:12, padding:14, marginBottom:6 }}>
+        <div key={r.id} style={{ background:"#141414", border:"1px solid #2e2e2e", borderRadius:12, padding:14, marginBottom:6 }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
             <span style={{ fontFamily:"'Libre Baskerville',Georgia,serif", color:"#f0ede8", fontSize:14, fontWeight:700 }}>{r.product}</span>
             <button
               onClick={()=> editingId===r.id ? setEditingId(null) : (setEditingId(r.id), setEditFields({ link:r.link||"", mapQuery:r.map_query??r.mapQuery??""}))}
-              style={{ background:"none", border:"1px solid #222", borderRadius:6, color:"#444", fontSize:11, fontFamily:"'DM Mono',monospace", padding:"4px 10px", cursor:"pointer" }}>
+              style={{ background:"none", border:"1px solid #666", borderRadius:6, color:"#bbb", fontSize:11, fontFamily:"'DM Mono',monospace", padding:"4px 10px", cursor:"pointer" }}>
               {editingId===r.id ? "cancel" : "edit links"}
             </button>
           </div>
-          <div style={{ fontSize:10, color:"#2e2e2e", fontFamily:"'DM Mono',monospace", marginTop:4, letterSpacing:".06em" }}>{r.submitter} · {r.where}</div>
+          <div style={{ fontSize:10, color:"#CCC", fontFamily:"'DM Mono',monospace", marginTop:4, letterSpacing:".06em" }}>{r.submitter} · {r.where}</div>
           {editingId !== r.id && (
             <div style={{ marginTop:8, display:"flex", gap:6, flexWrap:"wrap" }}>
-              {r.link ? <span style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#C8FF4788", background:"#C8FF4710", padding:"3px 8px", borderRadius:99 }}>↗ {r.link.slice(0,28)}{r.link.length>28?"…":""}</span> : <span style={{ fontSize:10, color:"#2a2a2a", fontFamily:"'DM Mono',monospace" }}>no link</span>}
-              {(r.map_query||r.mapQuery) ? <span style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#6fcf6f88", background:"#6fcf6f10", padding:"3px 8px", borderRadius:99 }}>📍 {(r.map_query??r.mapQuery).slice(0,25)}…</span> : <span style={{ fontSize:10, color:"#2a2a2a", fontFamily:"'DM Mono',monospace" }}>no map</span>}
+              {r.link ? <span style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#C8FF4788", background:"#C8FF4710", padding:"3px 8px", borderRadius:99 }}>↗ {r.link.slice(0,28)}{r.link.length>28?"…":""}</span> : <span style={{ fontSize:10, color:"#BBB", fontFamily:"'DM Mono',monospace" }}>no link</span>}
+              {(r.map_query||r.mapQuery) ? <span style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#6fcf6f88", background:"#6fcf6f10", padding:"3px 8px", borderRadius:99 }}>📍 {(r.map_query??r.mapQuery).slice(0,25)}…</span> : <span style={{ fontSize:10, color:"#BBB", fontFamily:"'DM Mono',monospace" }}>no map</span>}
             </div>
           )}
           {editingId === r.id && (
@@ -592,9 +605,22 @@ export default function App() {
   const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cat, setCat] = useState("all");
+  const [showSaved, setShowSaved] = useState(false);
   const [activeDiet, setActiveDiet] = useState([]);
   const [activeScore, setActiveScore] = useState(null);
   const [rateLimited, setRateLimited] = useState(!canSubmit());
+  const [saved, setSaved] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("lb_saved") || "[]"); }
+    catch { return []; }
+  });
+
+  const toggleSave = (id) => {
+    setSaved(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+      localStorage.setItem("lb_saved", JSON.stringify(next));
+      return next;
+    });
+  };
   const [modal, setModal] = useState(null);
   const [adminOk, setAdminOk] = useState(false);
   const [adminUser, setAdminUser] = useState(null);
@@ -622,6 +648,7 @@ export default function App() {
   const toggleDietFilter = (id) => setActiveDiet(p => p.includes(id) ? p.filter(x=>x!==id) : [...p, id]);
 
   const filtered = [...reviews]
+    .filter(r => !showSaved || saved.includes(r.id))
     .filter(r => cat === "all" || r.category === cat)
     .filter(r => activeDiet.length === 0 || activeDiet.every(d => (r.diet_tags ?? []).includes(d)))
     .filter(r => activeScore === null || r.rating === activeScore)
@@ -713,8 +740,8 @@ export default function App() {
         @keyframes shimmer  {0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(200%) rotate(45deg)}}
         @keyframes shimmer-bar{0%{background-position:0% 50%}100%{background-position:200% 50%}}
         ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-thumb{background:#1e1e1e;border-radius:3px}
-        input::placeholder,textarea::placeholder{color:#2a2a2a}
-        input:focus,textarea:focus,select:focus{border-color:#2a2a2a!important;outline:none}
+        input::placeholder,textarea::placeholder{color:#555}
+        input:focus,textarea:focus,select:focus{border-color:#555!important;outline:none}
         a:hover{opacity:.75} select option{background:#161616}
       `}</style>
 
@@ -724,15 +751,15 @@ export default function App() {
 
           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
             <span style={{ color:"#C8FF47", fontSize:16 }}>✦</span>
-            <span style={{ fontFamily:"'DM Mono',monospace", fontSize:9, color:"#333", letterSpacing:".22em", textTransform:"uppercase" }}>Legit Buys</span>
+            <span style={{ fontFamily:"'DM Mono',monospace", fontSize:9, color:"#CCC", letterSpacing:".22em", textTransform:"uppercase" }}>Legit Buys</span>
           </div>
-          <h1 style={{ margin:"0 0 8px", fontFamily:"'Libre Baskerville',Georgia,serif", fontSize:36, lineHeight:1.08, color:"#f0ede8", fontWeight:700 }}>
-            Stuff worth<br/>actually buying.
+          <h1 style={{ margin:"0 0 6px", fontFamily:"'LBTitle', sans-serif", fontSize:"clamp(48px, 11vw, 120px)", lineHeight:1, color:"#f0ede8", fontWeight:400, letterSpacing:".04em", textTransform:"uppercase" }}>
+            LEGIT BUYS
           </h1>
-          <p style={{ margin:"0 0 24px", color:"#383838", fontSize:13.5, lineHeight:1.6 }}>Real picks from real colleagues. No ads, no fluff.</p>
+          <p style={{ margin:"0 0 24px", color:"#aaa", fontSize:13.5, lineHeight:1.6, fontFamily:"'Libre Baskerville',Georgia,serif", letterSpacing:".18em", textTransform:"uppercase" }}>Real picks from real foodies</p>
 
           <div style={{ padding:"14px 0", borderTop:"1px solid #141414", borderBottom:"1px solid #141414", marginBottom:20 }}>
-            <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#333", letterSpacing:".14em", textTransform:"uppercase", marginBottom:10 }}>Filter by score</div>
+            <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#CCC", letterSpacing:".14em", textTransform:"uppercase", marginBottom:10 }}>Filter by score</div>
             <div style={{ display:"flex", gap:8 }}>
               {SCORE_META.map(m => {
                 const color = SCORE_COLORS[m.value];
@@ -742,7 +769,7 @@ export default function App() {
                     flex:1, padding:"10px 4px", borderRadius:10, border:"none", lineHeight:1.5,
                     outline:`1.5px solid ${isActive ? color : "#1e1e1e"}`,
                     background: isActive ? `${color}18` : "#111",
-                    color: isActive ? color : "#333",
+                    color: isActive ? color : "#666",
                     fontFamily:"'DM Mono',monospace", fontSize:10, cursor:"pointer",
                     transition:"all .15s", fontWeight: isActive ? 700 : 400,
                   }}>
@@ -752,7 +779,7 @@ export default function App() {
               })}
             </div>
             {activeScore !== null && (
-              <button onClick={()=>setActiveScore(null)} style={{ background:"none", border:"none", color:"#444", fontSize:11, fontFamily:"'DM Mono',monospace", cursor:"pointer", padding:"8px 0 0", letterSpacing:".06em" }}>
+              <button onClick={()=>setActiveScore(null)} style={{ background:"none", border:"none", color:"#bbb", fontSize:11, fontFamily:"'DM Mono',monospace", cursor:"pointer", padding:"8px 0 0", letterSpacing:".06em" }}>
                 ✕ clear
               </button>
             )}
@@ -762,13 +789,26 @@ export default function App() {
             {Object.keys(CAT_META).map(c=><Pill key={c} cat={c} active={cat===c} onClick={()=>setCat(c)} />)}
           </div>
 
+          <button
+            onClick={() => setShowSaved(s => !s)}
+            style={{
+              marginTop:2, marginBottom:2,
+              background: showSaved ? "#ffffff14" : "transparent",
+              border: `1px solid ${showSaved ? "#f0ede8" : "#2e2e2e"}`,
+              color: showSaved ? "#f0ede8" : "#BBB",
+              borderRadius:99, padding:"7px 16px", fontSize:11,
+              fontFamily:"'DM Mono',monospace", cursor:"pointer", transition:"all .2s",
+            }}>
+            {showSaved ? "★ My saves" : "☆ My saves"}
+          </button>
+
           <div style={{ display:"flex", gap:6, overflowX:"auto", scrollbarWidth:"none", paddingBottom:4, paddingTop:8 }}>
             {DIET_TAGS.map(tag=><DietPill key={tag.id} tag={tag} active={activeDiet.includes(tag.id)} onClick={()=>toggleDietFilter(tag.id)} />)}
           </div>
 
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8, minHeight:24 }}>
             {activeDiet.length > 0 ? (
-              <button onClick={()=>setActiveDiet([])} style={{ background:"none", border:"none", color:"#444", fontSize:11, fontFamily:"'DM Mono',monospace", cursor:"pointer", padding:0, letterSpacing:".06em" }}>
+              <button onClick={()=>setActiveDiet([])} style={{ background:"none", border:"none", color:"#bbb", fontSize:11, fontFamily:"'DM Mono',monospace", cursor:"pointer", padding:0, letterSpacing:".06em" }}>
                 ✕ clear filters
               </button>
             ) : <span />}
@@ -776,9 +816,9 @@ export default function App() {
               href="/scoring-guide.html"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#333", letterSpacing:".08em", textDecoration:"none", borderBottom:"1px solid #2a2a2a", paddingBottom:1, transition:"color .15s" }}
+              style={{ fontSize:10, fontFamily:"'DM Mono',monospace", color:"#CCC", letterSpacing:".08em", textDecoration:"none", borderBottom:"1px solid #555", paddingBottom:1, transition:"color .15s" }}
               onMouseEnter={e=>e.target.style.color="#C8FF47"}
-              onMouseLeave={e=>e.target.style.color="#333"}
+              onMouseLeave={e=>e.target.style.color="#666"}
             >
               Review &amp; scoring guide &#8599;
             </a>
@@ -786,9 +826,9 @@ export default function App() {
         </div>
 
         <div style={{ padding:"18px 12px", display:"flex", flexDirection:"column", gap:10 }}>
-          {loading && <div style={{ textAlign:"center", padding:"60px 0", color:"#333", fontSize:13, fontFamily:"'DM Mono',monospace", letterSpacing:".1em" }}>loading buys...</div>}
+          {loading && <div style={{ textAlign:"center", padding:"60px 0", color:"#CCC", fontSize:13, fontFamily:"'DM Mono',monospace", letterSpacing:".1em" }}>loading buys...</div>}
           {!loading && filtered.length===0 && <div style={{ textAlign:"center", padding:"60px 0", color:"#222", fontSize:13, fontFamily:"'DM Mono',monospace" }}>No reviews match these filters.</div>}
-          {filtered.map(r=><Card key={r.id} r={r} onUp={upvote} />)}
+          {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} />)}
         </div>
       </div>
 
@@ -803,7 +843,7 @@ export default function App() {
           }}
           style={{
             background: rateLimited ? "transparent" : "#C8FF47",
-            color: rateLimited ? "#333" : "#0a0a0a",
+            color: rateLimited ? "#666" : "#0a0a0a",
             border: rateLimited ? "1px solid #222" : "none",
             borderRadius:99, padding:"10px 20px",
             fontFamily:"'DM Mono',monospace", fontSize:12, fontWeight:700,
@@ -819,24 +859,24 @@ export default function App() {
         <Sheet title="Admin login" onClose={()=>setModal(null)}>
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
             <div>
-              <label style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#444", letterSpacing:".14em", textTransform:"uppercase", display:"block", marginBottom:7, fontWeight:600 }}>Email</label>
+              <label style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#bbb", letterSpacing:".14em", textTransform:"uppercase", display:"block", marginBottom:7, fontWeight:600 }}>Email</label>
               <input
                 type="email"
                 value={adminEmail}
                 onChange={e=>setAdminEmail(e.target.value)}
                 placeholder="your@email.com"
-                style={{ width:"100%", background:"#161616", border:"1px solid #222", borderRadius:10, padding:"12px 14px", color:"#f0ede8", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" }}
+                style={{ width:"100%", background:"#161616", border:"1px solid #666", borderRadius:10, padding:"12px 14px", color:"#f0ede8", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" }}
               />
             </div>
             <div>
-              <label style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#444", letterSpacing:".14em", textTransform:"uppercase", display:"block", marginBottom:7, fontWeight:600 }}>Password</label>
+              <label style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#bbb", letterSpacing:".14em", textTransform:"uppercase", display:"block", marginBottom:7, fontWeight:600 }}>Password</label>
               <input
                 type="password"
                 value={adminPassword}
                 onChange={e=>setAdminPassword(e.target.value)}
                 placeholder="••••••••"
                 onKeyDown={e=>e.key==="Enter" && handleAdminLogin()}
-                style={{ width:"100%", background:"#161616", border:"1px solid #222", borderRadius:10, padding:"12px 14px", color:"#f0ede8", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" }}
+                style={{ width:"100%", background:"#161616", border:"1px solid #666", borderRadius:10, padding:"12px 14px", color:"#f0ede8", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"system-ui,sans-serif" }}
               />
             </div>
             {adminError && <div style={{ fontSize:12, color:"#E05A5A", fontFamily:"'DM Mono',monospace" }}>{adminError}</div>}
@@ -853,10 +893,10 @@ export default function App() {
       {modal==="rateLimited" && (
         <Sheet title="Submission limit reached" onClose={()=>setModal(null)}>
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-            <div style={{ background:"#141414", border:"1px solid #1c1c1c", borderRadius:10, padding:"14px 16px", fontSize:13, color:"#555", fontFamily:"'DM Mono',monospace", lineHeight:1.7 }}>
+            <div style={{ background:"#141414", border:"1px solid #1c1c1c", borderRadius:10, padding:"14px 16px", fontSize:13, color:"#ccc", fontFamily:"'DM Mono',monospace", lineHeight:1.7 }}>
               You've submitted {RATE_LIMIT} reviews in the last 24 hours — that's the daily limit to keep things quality over quantity.
             </div>
-            <div style={{ fontSize:13, color:"#444", fontFamily:"'Libre Baskerville',Georgia,serif", lineHeight:1.7 }}>
+            <div style={{ fontSize:13, color:"#bbb", fontFamily:"'Libre Baskerville',Georgia,serif", lineHeight:1.7 }}>
               Come back tomorrow to add more. In the meantime, upvote the reviews you agree with.
             </div>
             <button onClick={()=>setModal(null)} style={{ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:99, padding:"13px 0", width:"100%", fontFamily:"'DM Mono',monospace", fontSize:13, fontWeight:700, cursor:"pointer" }}>
@@ -870,7 +910,7 @@ export default function App() {
         <Sheet title={`Admin${pending.length?` · ${pending.length} pending`:""}`} onClose={()=>setModal(null)}>
           <AdminQueue pending={pending} onApprove={approve} onReject={reject} approved={reviews} onEditApproved={editApproved} onUpdatePending={updatePending} />
           <div style={{ marginTop:24, paddingTop:16, borderTop:"1px solid #1a1a1a" }}>
-            <div style={{ fontSize:11, color:"#333", fontFamily:"'DM Mono',monospace", marginBottom:10 }}>
+            <div style={{ fontSize:11, color:"#CCC", fontFamily:"'DM Mono',monospace", marginBottom:10 }}>
               Logged in as {adminUser?.email}
             </div>
             <button onClick={handleAdminLogout} style={{ background:"transparent", color:"#E05A5A", border:"1px solid #E05A5A33", borderRadius:99, padding:"9px 20px", fontFamily:"'DM Mono',monospace", fontSize:12, cursor:"pointer" }}>

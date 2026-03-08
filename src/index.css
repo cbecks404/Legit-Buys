@@ -1,0 +1,13 @@
+@font-face {
+  font-family: 'LBTitle';
+  src: url('/Legitbuystitlefont.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'LBSlogan';
+  src: url('/Legitbuyssolganfont.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
