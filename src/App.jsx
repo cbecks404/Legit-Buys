@@ -873,9 +873,9 @@ export default function App() {
             {DIET_TAGS.map(tag=><DietPill key={tag.id} tag={tag} active={activeDiet.includes(tag.id)} onClick={()=>toggleDietFilter(tag.id)} />)}
           </div>
 
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8, minHeight:24 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:10, minHeight:24 }}>
             {activeDiet.length > 0 ? (
-              <button onClick={()=>setActiveDiet([])} style={{ background:"none", border:"none", color:"#bbb", fontSize:11, fontFamily:"'DM Mono',monospace", cursor:"pointer", padding:0, letterSpacing:".06em" }}>
+              <button onClick={()=>setActiveDiet([])} style={{ background:"none", border:"none", color:"#888", fontSize:11, fontFamily:"'LBBody',sans-serif", cursor:"pointer", padding:0, letterSpacing:".06em" }}>
                 ✕ clear filters
               </button>
             ) : <span />}
@@ -883,11 +883,16 @@ export default function App() {
               href="/scoring-guide.html"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ fontSize:10, fontFamily:"'LBBody', sans-serif", color:"#666", letterSpacing:".08em", textDecoration:"none", borderBottom:"1px solid #555", paddingBottom:1, transition:"color .15s" }}
-              onMouseEnter={e=>e.target.style.color="#C8FF47"}
-              onMouseLeave={e=>e.target.style.color="#666"}
+              style={{
+                fontSize:11, fontFamily:"'LBBody', sans-serif", color:"#C8FF47",
+                letterSpacing:".08em", textDecoration:"none", transition:"all .15s",
+                background:"#C8FF4714", border:"1px solid #C8FF4733",
+                padding:"6px 14px", borderRadius:99,
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background="#C8FF4728"}
+              onMouseLeave={e=>e.currentTarget.style.background="#C8FF4714"}
             >
-              Review &amp; scoring guide &#8599;
+              ✦ Review &amp; scoring guide
             </a>
           </div>
         </div>
@@ -908,15 +913,21 @@ export default function App() {
               setModal("submit");
             }
           }}
+          onMouseDown={e => e.currentTarget.style.transform="scale(0.96)"}
+          onMouseUp={e => e.currentTarget.style.transform="scale(1)"}
+          onMouseLeave={e => e.currentTarget.style.transform="scale(1)"}
           style={{
-            background: rateLimited ? "transparent" : "#C8FF47",
-            color: rateLimited ? "#666" : "#0a0a0a",
-            border: rateLimited ? "1px solid #222" : "none",
-            borderRadius:99, padding:"10px 20px",
-            fontFamily:"'DM Mono',monospace", fontSize:12, fontWeight:700,
+            background: rateLimited ? "#111" : "#C8FF47",
+            color: rateLimited ? "#444" : "#0a0a0a",
+            border: rateLimited ? "1px solid #2a2a2a" : "none",
+            borderRadius:99, padding:"16px 36px",
+            fontFamily:"'LBTitle', sans-serif",
+            fontSize:"clamp(16px, 4vw, 22px)",
+            letterSpacing:".06em",
             cursor:"pointer", transition:"all .2s",
+            boxShadow: rateLimited ? "none" : "0 4px 24px #C8FF4744",
           }}>
-          {rateLimited ? "🔒 Submit" : "+ Submit a Legit Buy"}
+          {rateLimited ? "🔒 Submit" : "SUBMIT A LEGIT BUY"}
         </button>
       </div>
 
