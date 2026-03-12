@@ -102,14 +102,19 @@ function ScoreSelector({ value = null, interactive = false, onChange }) {
 function Pill({ cat, active, onClick }) {
   const m = CAT_META[cat];
   return (
-    <button onClick={onClick} style={{
-      background: active ? m.color : "transparent",
-      color: active ? "#0a0a0a" : "#BBB",
-      border: `1.5px solid ${active ? m.color : "#232323"}`,
-      borderRadius: 99, padding: "5px 14px", fontSize: 12,
-      fontFamily: "'DM Mono',monospace", cursor: "pointer",
-      fontWeight: active ? 700 : 400, whiteSpace: "nowrap", transition: "all .15s",
-    }}>
+    <button
+      onClick={onClick}
+      onMouseDown={e => e.currentTarget.style.transform="scale(0.92)"}
+      onMouseUp={e => e.currentTarget.style.transform="scale(1)"}
+      onMouseLeave={e => e.currentTarget.style.transform="scale(1)"}
+      style={{
+        background: active ? m.color : "transparent",
+        color: active ? "#0a0a0a" : "#888",
+        border: `1.5px solid ${active ? m.color : "#232323"}`,
+        borderRadius: 99, padding: "5px 14px", fontSize: 12,
+        fontFamily: "'LBBody', sans-serif", cursor: "pointer",
+        fontWeight: active ? 700 : 400, whiteSpace: "nowrap", transition: "all .15s",
+      }}>
       {m.emoji} {cat === "all" ? "All" : cat[0].toUpperCase() + cat.slice(1)}
     </button>
   );
@@ -118,7 +123,12 @@ function Pill({ cat, active, onClick }) {
 // ── Diet pill ─────────────────────────────────────────
 function DietPill({ tag, active, onClick }) {
   return (
-    <button onClick={onClick} style={{
+    <button
+      onClick={onClick}
+      onMouseDown={e => e.currentTarget.style.transform="scale(0.92)"}
+      onMouseUp={e => e.currentTarget.style.transform="scale(1)"}
+      onMouseLeave={e => e.currentTarget.style.transform="scale(1)"}
+      style={{
       background: active ? "#ffffff14" : "transparent",
       color: active ? "#f0ede8" : "#AAA",
       border: `1.5px solid ${active ? "#BBB" : "#1e1e1e"}`,
@@ -166,8 +176,8 @@ function LinkButton({ link, where }) {
 
 // ── Review card ───────────────────────────────────────
 function Card({ r, onUp, saved, onSave }) {
-  console.log('Card rendering:', r);
   const [upped, setUpped] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const accent    = CAT_META[r.category]?.color ?? "#C8FF47";
   const rawDiet = r.diet_tags ?? r.dietTags ?? [];
   const dietTags = Array.isArray(rawDiet)
@@ -227,7 +237,14 @@ function Card({ r, onUp, saved, onSave }) {
             <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:accent, letterSpacing:".18em", textTransform:"uppercase", fontWeight:600, marginBottom:4 }}>
               {CAT_META[r.category]?.emoji} {r.category}
             </div>
-            <div style={{ fontFamily:"'LBCardHeader', serif", fontSize:16, color:"#f0ede8", lineHeight:1.25 }}>{r.product}</div>
+            <div
+              onClick={() => setExpanded(e => !e)}
+              style={{ fontFamily:"'LBCardHeader', serif", fontSize:16, color:"#f0ede8", lineHeight:1.25, cursor:"pointer" }}>
+              {r.product}
+              <span style={{ fontSize:9, color:"#444", fontFamily:"'LBBody',sans-serif", marginLeft:8, letterSpacing:".08em" }}>
+                {expanded ? "▲ less" : "▼ more"}
+              </span>
+            </div>
           </div>
           <ScoreSelector value={r.rating} />
         </div>
@@ -253,10 +270,61 @@ function Card({ r, onUp, saved, onSave }) {
 
         {/* Links */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
-        {hasLinks && (
+        {hasLinks && !expanded && (
           <div style={{ display:"flex", gap:6, flexWrap:"wrap", paddingTop:2 }}>
             <LinkButton link={r.link} where={r.where} />
             <MapButton mapQuery={mapQuery} />
+          </div>
+        )}
+
+        {/* Expanded detail */}
+        {expanded && (
+          <div style={{ animation:"fadeSlideUp .2s ease", borderTop:"1px solid #1e1e1e", paddingTop:12, display:"flex", flexDirection:"column", gap:12 }}>
+            {r.map_query && (
+              <div>
+                <div style={{ fontSize:9, fontFamily:"'LBBody',sans-serif", color:"#555", letterSpacing:".14em", textTransform:"uppercase", marginBottom:8 }}>Location</div>
+                <iframe
+                  title="map"
+                  width="100%"
+                  height="160"
+                  style={{ border:"none", borderRadius:10 }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(r.map_query ?? r.where)}&output=embed`}
+                />
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.map_query ?? r.where)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize:10, fontFamily:"'LBBody',sans-serif", color:"#555", textDecoration:"none", display:"block", marginTop:4 }}>
+                  Open in Google Maps &#8599;
+                </a>
+              </div>
+            )}
+            {r.link && (
+              <div>
+                <div style={{ fontSize:9, fontFamily:"'LBBody',sans-serif", color:"#555", letterSpacing:".14em", textTransform:"uppercase", marginBottom:8 }}>Link</div>
+                <a
+                  href={r.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display:"flex", alignItems:"center", gap:10,
+                    background:"#161616", border:"1px solid #2a2a2a", borderRadius:10,
+                    padding:"10px 14px", textDecoration:"none", transition:"all .15s",
+                  }}>
+                  <div style={{ width:32, height:32, borderRadius:8, background:"#222", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>
+                    🔗
+                  </div>
+                  <div>
+                    <div style={{ fontSize:12, color:"#f0ede8", fontFamily:"'LBBody',sans-serif", marginBottom:2 }}>
+                      {(() => { try { return new URL(r.link).hostname.replace("www.",""); } catch { return r.link; } })()}
+                    </div>
+                    <div style={{ fontSize:10, color:"#555", fontFamily:"'LBBody',sans-serif" }}>{r.link.slice(0,40)}{r.link.length>40?"…":""}</div>
+                  </div>
+                </a>
+              </div>
+            )}
           </div>
         )}
 
@@ -275,23 +343,31 @@ function Card({ r, onUp, saved, onSave }) {
           <div style={{ display:"flex", gap:8, alignItems:"center" }}>
             <button
               onClick={() => onSave(r.id)}
+              onMouseDown={e => e.currentTarget.style.transform="scale(0.88)"}
+              onMouseUp={e => e.currentTarget.style.transform="scale(1)"}
+              onMouseLeave={e => e.currentTarget.style.transform="scale(1)"}
               style={{
                 background: saved ? "#ffffff14" : "transparent",
                 border: `1px solid ${saved ? "#f0ede8" : "#242424"}`,
-                color: saved ? "#f0ede8" : "#AAA",
+                color: saved ? "#f0ede8" : "#444",
                 borderRadius:99, padding:"5px 11px", fontSize:12,
-                fontFamily:"'DM Mono',monospace", cursor:"pointer", transition:"all .2s",
+                fontFamily:"'LBBody', sans-serif", cursor:"pointer", transition:"all .15s",
+                animation: saved ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
               }}>
               {saved ? "★" : "☆"}
             </button>
             <button
               onClick={() => { if (!upped) { setUpped(true); onUp(r.id); }}}
+              onMouseDown={e => { if(!upped) e.currentTarget.style.transform="scale(0.88)" }}
+              onMouseUp={e => e.currentTarget.style.transform="scale(1)"}
+              onMouseLeave={e => e.currentTarget.style.transform="scale(1)"}
               style={{
                 background: upped ? `${accent}18` : "transparent",
                 border: `1px solid ${upped ? accent : "#242424"}`,
-                color: upped ? accent : "#AAA",
+                color: upped ? accent : "#444",
                 borderRadius:99, padding:"5px 13px", fontSize:12,
-                fontFamily:"'DM Mono',monospace", cursor: upped?"default":"pointer", transition:"all .2s",
+                fontFamily:"'LBBody', sans-serif", cursor: upped?"default":"pointer", transition:"all .15s",
+                animation: upped ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
               }}>
               ↑ {r.upvotes + (upped ? 1 : 0)}
             </button>
@@ -728,6 +804,8 @@ export default function App() {
         @keyframes holo     {0%{background-position:0% 50%;filter:hue-rotate(0deg)}50%{background-position:100% 50%;filter:hue-rotate(180deg)}100%{background-position:0% 50%;filter:hue-rotate(360deg)}}
         @keyframes shimmer  {0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(200%) rotate(45deg)}}
         @keyframes shimmer-bar{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+        @keyframes popIn {0%{transform:scale(0.85);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+        @keyframes fadeSlideUp {from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
         ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-thumb{background:#1e1e1e;border-radius:3px}
         input::placeholder,textarea::placeholder{color:#555}
         input:focus,textarea:focus,select:focus{border-color:#555!important;outline:none}
