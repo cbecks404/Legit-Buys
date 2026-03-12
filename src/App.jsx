@@ -175,7 +175,7 @@ function LinkButton({ link, where }) {
 }
 
 // ── Review card ───────────────────────────────────────
-function Card({ r, onUp, saved, onSave }) {
+function Card({ r, onUp, saved, onSave, theme: T = {} }) {
   const [upped, setUpped] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const accent    = CAT_META[r.category]?.color ?? "#C8FF47";
@@ -198,7 +198,7 @@ function Card({ r, onUp, saved, onSave }) {
       style={{
         background: isHolo
           ? "linear-gradient(135deg,#1a1a2e 0%,#16213e 25%,#0f3460 50%,#1a1a2e 75%,#16213e 100%)"
-          : "#111",
+          : (T.cardBg ?? "#111"),
         backgroundSize: isHolo ? "300% 300%" : "auto",
         animation: isHolo ? "holo 6s ease infinite" : "none",
         border: isHolo ? "1px solid transparent" : `1px solid ${accent}55`,
@@ -239,7 +239,7 @@ function Card({ r, onUp, saved, onSave }) {
             </div>
             <div
               onClick={() => setExpanded(e => !e)}
-              style={{ fontFamily:"'LBCardHeader', serif", fontSize:16, color:"#f0ede8", lineHeight:1.25, cursor:"pointer" }}>
+              style={{ fontFamily:"'LBCardHeader', serif", fontSize:16, color: T.text ?? "#f0ede8", lineHeight:1.25 }}>
               {r.product}
               <span style={{ fontSize:9, color:"#444", fontFamily:"'LBBody',sans-serif", marginLeft:8, letterSpacing:".08em" }}>
                 {expanded ? "▲ less" : "▼ more"}
@@ -251,7 +251,7 @@ function Card({ r, onUp, saved, onSave }) {
 
         {/* Review text */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
-        <p style={{ margin:0, fontSize:13.5, color:"#aaa", lineHeight:1.65, fontFamily:"'LBReview', serif" }}>{r.review}</p>
+        <p style={{ margin:0, fontSize:13.5, color: T.textMid ?? "#aaa", lineHeight:1.65, fontFamily:"'LBReview', serif" }}>{r.review}</p>
 
         {/* Diet tags */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}></div>
@@ -379,13 +379,160 @@ function Card({ r, onUp, saved, onSave }) {
 }
 
 
+// ── App intro walkthrough ─────────────────────────────
+function AppIntro({ onDismiss, theme: T }) {
+  const [step, setStep] = useState(0);
+  const steps = [
+    {
+      emoji: "✦",
+      title: "Welcome to Legit Buys",
+      body: "Real food picks from real colleagues. No ads, no algorithms — just honest recommendations from people you actually know.",
+      tip: null,
+    },
+    {
+      emoji: "🏆",
+      title: "The scoring scale",
+      body: "Every review gets a score from 0 to 3. Here's what they mean:",
+      tip: [
+        { score: "0", label: "Pass", desc: "No recommendation", color: "#383838" },
+        { score: "1", label: "Legit", desc: "Worth picking up", color: "#60C3F5" },
+        { score: "2", label: "Big Legit", desc: "Genuinely great", color: "#F4A942" },
+        { score: "3", label: "Certified Legit Buy", desc: "Stop what you're doing", color: "#C8FF47" },
+      ],
+    },
+    {
+      emoji: "📝",
+      title: "How to submit",
+      body: "Tap 'Submit a Legit Buy' to add your pick. Your review goes to admin for approval before going live — keeping things quality over quantity.",
+      tip: null,
+    },
+  ];
+  const s = steps[step];
+  const isLast = step === steps.length - 1;
+
+  return (
+    <div onClick={e => e.target===e.currentTarget && onDismiss(false)}
+      style={{ position:"fixed", inset:0, background:"#000000cc", backdropFilter:"blur(10px)", display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:300 }}>
+      <div style={{
+        background: T.sheetBg ?? "#0d0d0d", borderTop:`1px solid ${T.sheetBorder ?? "#202020"}`,
+        borderRadius:"18px 18px 0 0", width:"100%", maxWidth:520,
+        padding:"26px 22px 50px", animation:"sheetUp .25s cubic-bezier(.16,1,.3,1)",
+      }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
+          <div style={{ display:"flex", gap:6 }}>
+            {steps.map((_,i) => (
+              <div key={i} style={{ width: i===step ? 20 : 6, height:6, borderRadius:99, background: i<step ? "#C8FF4788" : i===step ? "#C8FF47" : T.border ?? "#1e1e1e", transition:"all .3s" }} />
+            ))}
+          </div>
+          <button onClick={()=>onDismiss(false)} style={{ background:"none", border:"none", color:T.textDim ?? "#555", fontSize:20, cursor:"pointer" }}>✕</button>
+        </div>
+
+        <div style={{ fontSize:40, marginBottom:16, color: s.emoji === "✦" ? "#C8FF47" : "inherit" }}>{s.emoji}</div>
+        <div style={{ fontFamily:"'LBCardHeader', serif", fontSize:22, color:T.text ?? "#f0ede8", marginBottom:12, lineHeight:1.2 }}>{s.title}</div>
+        <p style={{ margin:"0 0 20px", fontSize:14, color:T.textMid ?? "#aaa", fontFamily:"'LBBody', sans-serif", lineHeight:1.7 }}>{s.body}</p>
+
+        {s.tip && (
+          <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:20 }}>
+            {s.tip.map(t => (
+              <div key={t.score} style={{ display:"flex", alignItems:"center", gap:12, background:T.surface2 ?? "#161616", border:`1px solid ${T.border ?? "#1e1e1e"}`, borderRadius:10, padding:"10px 14px" }}>
+                <span style={{ fontSize:11, fontFamily:"'DM Mono',monospace", fontWeight:700, color:t.color, background:`${t.color}18`, border:`1px solid ${t.color}44`, padding:"3px 9px", borderRadius:99, whiteSpace:"nowrap" }}>{t.label}</span>
+                <span style={{ fontSize:12, color:T.textMid ?? "#aaa", fontFamily:"'LBBody', sans-serif" }}>{t.desc}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button
+          onClick={() => isLast ? onDismiss(false) : setStep(s => s + 1)}
+          style={{ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:99, padding:"13px 0", width:"100%", fontFamily:"'LBTitle', sans-serif", fontSize:16, letterSpacing:".04em", cursor:"pointer", marginBottom:10 }}>
+          {isLast ? "LET'S GO →" : "NEXT →"}
+        </button>
+        {isLast && (
+          <button onClick={()=>onDismiss(true)} style={{ background:"none", border:"none", color:T.textDim ?? "#555", fontSize:12, fontFamily:"'LBBody', sans-serif", cursor:"pointer", width:"100%", padding:"8px 0" }}>
+            Don't show this again
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Submit guide walkthrough ──────────────────────────
+function SubmitGuide({ onDismiss, theme: T }) {
+  const [step, setStep] = useState(0);
+  const steps = [
+    {
+      emoji: "✍️",
+      title: "Writing a good review",
+      body: "Be specific — what made it worth buying? Mention the taste, value, where to get it. Reviews like 'it was nice' don't help anyone.",
+      tip: "Think: would a colleague trust this recommendation?",
+    },
+    {
+      emoji: "🏆",
+      title: "Scoring honestly",
+      body: "Only give a Certified Legit Buy (3) if you'd genuinely stop what you're doing to recommend it. Save the top score for the best.",
+      tip: "When in doubt, check the full scoring guide below.",
+      link: true,
+    },
+  ];
+  const s = steps[step];
+  const isLast = step === steps.length - 1;
+
+  return (
+    <div onClick={e => e.target===e.currentTarget && onDismiss(false)}
+      style={{ position:"fixed", inset:0, background:"#000000cc", backdropFilter:"blur(10px)", display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:300 }}>
+      <div style={{
+        background: T.sheetBg ?? "#0d0d0d", borderTop:`1px solid ${T.sheetBorder ?? "#202020"}`,
+        borderRadius:"18px 18px 0 0", width:"100%", maxWidth:520,
+        padding:"26px 22px 50px", animation:"sheetUp .25s cubic-bezier(.16,1,.3,1)",
+      }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
+          <div style={{ display:"flex", gap:6 }}>
+            {steps.map((_,i) => (
+              <div key={i} style={{ width: i===step ? 20 : 6, height:6, borderRadius:99, background: i<step ? "#C8FF4788" : i===step ? "#C8FF47" : T.border ?? "#1e1e1e", transition:"all .3s" }} />
+            ))}
+          </div>
+          <button onClick={()=>onDismiss(false)} style={{ background:"none", border:"none", color:T.textDim ?? "#555", fontSize:20, cursor:"pointer" }}>✕</button>
+        </div>
+
+        <div style={{ fontSize:40, marginBottom:16 }}>{s.emoji}</div>
+        <div style={{ fontFamily:"'LBCardHeader', serif", fontSize:22, color:T.text ?? "#f0ede8", marginBottom:12, lineHeight:1.2 }}>{s.title}</div>
+        <p style={{ margin:"0 0 16px", fontSize:14, color:T.textMid ?? "#aaa", fontFamily:"'LBBody', sans-serif", lineHeight:1.7 }}>{s.body}</p>
+
+        {s.tip && (
+          <div style={{ background:T.surface2 ?? "#161616", border:`1px solid ${T.border ?? "#1e1e1e"}`, borderRadius:10, padding:"12px 14px", marginBottom:20 }}>
+            <p style={{ margin:0, fontSize:12, color:"#C8FF47", fontFamily:"'LBBody', sans-serif", lineHeight:1.6 }}>💡 {s.tip}</p>
+            {s.link && (
+              <a href="/scoring-guide.html" target="_blank" rel="noopener noreferrer"
+                style={{ fontSize:11, color:"#C8FF47", fontFamily:"'LBBody', sans-serif", display:"block", marginTop:8, opacity:0.7 }}>
+                View full scoring guide &#8599;
+              </a>
+            )}
+          </div>
+        )}
+
+        <button
+          onClick={() => isLast ? onDismiss(false) : setStep(s => s + 1)}
+          style={{ background:"#C8FF47", color:"#0a0a0a", border:"none", borderRadius:99, padding:"13px 0", width:"100%", fontFamily:"'LBTitle', sans-serif", fontSize:16, letterSpacing:".04em", cursor:"pointer", marginBottom:10 }}>
+          {isLast ? "START REVIEWING →" : "NEXT →"}
+        </button>
+        {isLast && (
+          <button onClick={()=>onDismiss(true)} style={{ background:"none", border:"none", color:T.textDim ?? "#555", fontSize:12, fontFamily:"'LBBody', sans-serif", cursor:"pointer", width:"100%", padding:"8px 0" }}>
+            Don't show this again
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Bottom sheet ──────────────────────────────────────
-function Sheet({ title, onClose, children }) {
+function Sheet({ title, onClose, children, theme: T = {} }) {
   return (
     <div onClick={e => e.target===e.currentTarget && onClose()}
       style={{ position:"fixed", inset:0, background:"#000000cc", backdropFilter:"blur(10px)", display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:200 }}>
       <div style={{
-        background:"#0d0d0d", borderTop:"1px solid #202020",
+        background: T.sheetBg ?? "#0d0d0d", borderTop:`1px solid ${T.sheetBorder ?? "#202020"}`,
         borderRadius:"18px 18px 0 0", width:"100%", maxWidth:520,
         maxHeight:"92vh", overflowY:"auto", padding:"26px 22px 50px",
         animation:"sheetUp .25s cubic-bezier(.16,1,.3,1)",
@@ -694,6 +841,36 @@ export default function App() {
   const [adminError, setAdminError] = useState("");
   const [adminLoading, setAdminLoading] = useState(false);
   const [splash, setSplash] = useState(true);
+  const [showAppIntro, setShowAppIntro] = useState(() => {
+    try { return localStorage.getItem("lb_intro_seen") !== "true"; }
+    catch { return true; }
+  });
+  const [showSubmitGuide, setShowSubmitGuide] = useState(false);
+  const [introStep, setIntroStep] = useState(0);
+  const [submitGuideStep, setSubmitGuideStep] = useState(0);
+
+  const dismissIntro = (dontShow = false) => {
+    if (dontShow) localStorage.setItem("lb_intro_seen", "true");
+    setShowAppIntro(false);
+  };
+
+  const dismissSubmitGuide = (dontShow = false) => {
+    if (dontShow) localStorage.setItem("lb_submit_guide_seen", "true");
+    setShowSubmitGuide(false);
+    setModal("submit");
+  };
+  const [darkMode, setDarkMode] = useState(() => {
+    try { return localStorage.getItem("lb_theme") !== "light"; }
+    catch { return true; }
+  });
+
+  const toggleTheme = () => {
+    setDarkMode(d => {
+      const next = !d;
+      localStorage.setItem("lb_theme", next ? "dark" : "light");
+      return next;
+    });
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -797,12 +974,40 @@ export default function App() {
     setModal(null);
   };
 
+  const T = darkMode ? {
+    bg:        "#080808",
+    surface:   "#111",
+    surface2:  "#161616",
+    border:    "#1c1c1c",
+    border2:   "#2a2a2a",
+    text:      "#f0ede8",
+    textMid:   "#aaa",
+    textDim:   "#555",
+    pill:      "#232323",
+    cardBg:    "#111",
+    sheetBg:   "#0d0d0d",
+    sheetBorder:"#202020",
+  } : {
+    bg:        "#f5f2ee",
+    surface:   "#ffffff",
+    surface2:  "#f0ede8",
+    border:    "#d0c8be",
+    border2:   "#b8b0a6",
+    text:      "#0f0d0b",
+    textMid:   "#2e2a26",
+    textDim:   "#6b6158",
+    pill:      "#e0d8d0",
+    cardBg:    "#ffffff",
+    sheetBg:   "#faf8f5",
+    sheetBorder:"#d0c8be",
+  };
+
   return (
     <>
     {splash && (
       <div style={{
         position:"fixed", inset:0, zIndex:999,
-        background:"#080808",
+        background: T.bg,
         display:"flex", flexDirection:"column",
         alignItems:"center", justifyContent:"center",
         animation: loading ? "none" : "splashFadeOut .8s ease forwards",
@@ -816,26 +1021,26 @@ export default function App() {
             fontSize:48, color:"#C8FF47",
             animation:"pulse 2s ease infinite",
           }}>✦</div>
-          <h1 style={{
-            margin:0,
-            fontFamily:"'LBTitle', sans-serif",
-            fontSize:"clamp(42px, 12vw, 80px)",
-            color:"#f0ede8",
-            letterSpacing:".06em",
-            lineHeight:1,
-            textAlign:"center",
-          }}>
+          <h1 style={{ 
+            margin:"0 0 6px", 
+            fontFamily:"'LBTitle', sans-serif", 
+            fontSize:"clamp(48px, 11vw, 120px)", 
+            lineHeight:1, color:T.text, 
+            fontWeight:400, 
+            letterSpacing:".04em", 
+            textTransform:"uppercase" 
+            }}>
             LEGIT BUYS
           </h1>
-          <p style={{
-            margin:0,
-            fontFamily:"'LBBody', sans-serif",
-            fontSize:13,
-            color:"#555",
-            letterSpacing:".2em",
-            textTransform:"uppercase",
-            textAlign:"center",
-          }}>
+          <p style={{ 
+            margin:"0 0 24px", 
+            color:T.textMid, 
+            fontSize:13.5, 
+            lineHeight:1.6, 
+            fontFamily:"'LBBody', sans-serif", 
+            letterSpacing:".18em", 
+            textTransform:"uppercase" 
+            }}>
             Real picks from real foodies
           </p>
         </div>
@@ -857,7 +1062,7 @@ export default function App() {
     )}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,700;1,400&family=DM+Mono:wght@400;600;700&display=swap');
-        *{box-sizing:border-box;} body{margin:0;background:#080808;}
+        *{box-sizing:border-box;} body{margin:0;background:${T.bg};transition:background .3s;}
         @keyframes sheetUp  {from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
         @keyframes holo     {0%{background-position:0% 50%;filter:hue-rotate(0deg)}50%{background-position:100% 50%;filter:hue-rotate(180deg)}100%{background-position:0% 50%;filter:hue-rotate(360deg)}}
         @keyframes shimmer  {0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(200%) rotate(45deg)}}
@@ -873,9 +1078,17 @@ export default function App() {
         a:hover{opacity:.75} select option{background:#161616}
       `}</style>
 
-      <div style={{ maxWidth:520, margin:"0 auto", minHeight:"100vh", paddingBottom:120, overflowX:"hidden" }}>
-        <div style={{ padding:"40px 18px 0", position:"relative" }}>
-          <button onClick={openAdmin} title="Admin" style={{ position:"absolute", top:38, right:18, background:"none", border:"none", color:"#1e1e1e", fontSize:19, cursor:"pointer" }}>⚙</button>
+      <div style={{ maxWidth:520, margin:"0 auto", minHeight:"100vh", paddingBottom:120, overflowX:"hidden", background:T.bg, transition:"background .3s" }}>
+        <div style={{ padding:"40px 18px 0", position:"relative", background:T.bg }}>
+          <div style={{ position:"absolute", top:38, right:18, display:"flex", alignItems:"center", gap:10 }}>
+            <button
+              onClick={toggleTheme}
+              title="Toggle theme"
+              style={{ background:"none", border:"none", fontSize:16, cursor:"pointer", color:T.textDim, transition:"color .2s", padding:0 }}>
+              {darkMode ? "☀️" : "🌙"}
+            </button>
+            <button onClick={openAdmin} title="Admin" style={{ background:"none", border:"none", color:T.textDim, fontSize:19, cursor:"pointer", padding:0 }}>⚙</button>
+          </div>
 
           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
             <span style={{ color:"#C8FF47", fontSize:16 }}>✦</span>
@@ -886,7 +1099,7 @@ export default function App() {
           </h1>
           <p style={{ margin:"0 0 24px", color:"#aaa", fontSize:13.5, lineHeight:1.6, fontFamily:"'LBBody', sans-serif", letterSpacing:".18em", textTransform:"uppercase" }}>Real picks from real foodies</p>
 
-          <div style={{ padding:"14px 0", borderTop:"1px solid #141414", borderBottom:"1px solid #141414", marginBottom:20 }}>
+          <div style={{ padding:"14px 0", borderTop:`1px solid ${T.border}`, borderBottom:`1px solid ${T.border}`, marginBottom:20 }}>
             <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:"#CCC", letterSpacing:".14em", textTransform:"uppercase", marginBottom:10 }}>Filter by score</div>
             <div style={{ display:"flex", gap:8 }}>
               {SCORE_META.map(m => {
@@ -961,7 +1174,7 @@ export default function App() {
         <div style={{ padding:"18px 12px", display:"flex", flexDirection:"column", gap:10 }}>
           {loading && <div style={{ textAlign:"center", padding:"60px 0", color:"#CCC", fontSize:13, fontFamily:"'DM Mono',monospace", letterSpacing:".1em" }}>loading buys...</div>}
           {!loading && filtered.length===0 && <div style={{ textAlign:"center", padding:"60px 0", color:"#222", fontSize:13, fontFamily:"'DM Mono',monospace" }}>No reviews match these filters.</div>}
-          {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} />)}
+          {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} theme={T} />)}
         </div>
       </div>
 
@@ -971,7 +1184,13 @@ export default function App() {
             if (rateLimited) {
               setModal("rateLimited");
             } else {
-              setModal("submit");
+              const seen = localStorage.getItem("lb_submit_guide_seen") === "true";
+              if (!seen) {
+                setSubmitGuideStep(0);
+                setShowSubmitGuide(true);
+              } else {
+                setModal("submit");
+              }
             }
           }}
           onMouseDown={e => e.currentTarget.style.transform="scale(0.96)"}
@@ -991,6 +1210,9 @@ export default function App() {
           {rateLimited ? "🔒 Submit" : "SUBMIT A LEGIT BUY"}
         </button>
       </div>
+      
+      {showAppIntro && !splash && <AppIntro onDismiss={dismissIntro} theme={T} />}
+      {showSubmitGuide && <SubmitGuide onDismiss={dismissSubmitGuide} theme={T} />}
 
       {modal==="submit" && <Sheet title="Submit a Legit Buy" onClose={()=>setModal(null)}><SubmitFlow onSubmit={submit} onClose={()=>setModal(null)} /></Sheet>}
 
