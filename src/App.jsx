@@ -693,6 +693,7 @@ export default function App() {
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
   const [adminLoading, setAdminLoading] = useState(false);
+  const [splash, setSplash] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -706,6 +707,7 @@ export default function App() {
       if (liveReviews) setReviews(liveReviews);
       if (pendingReviews) setPending(pendingReviews);
       setLoading(false);
+      setTimeout(() => setSplash(false), 600);
     }
     loadData();
   }, []);
@@ -797,6 +799,62 @@ export default function App() {
 
   return (
     <>
+    {splash && (
+      <div style={{
+        position:"fixed", inset:0, zIndex:999,
+        background:"#080808",
+        display:"flex", flexDirection:"column",
+        alignItems:"center", justifyContent:"center",
+        animation: loading ? "none" : "splashFadeOut .8s ease forwards",
+        pointerEvents: loading ? "all" : "none",
+      }}>
+        <div style={{
+          display:"flex", flexDirection:"column", alignItems:"center", gap:16,
+          animation:"splashFadeIn .6s cubic-bezier(.16,1,.3,1) forwards",
+        }}>
+          <div style={{
+            fontSize:48, color:"#C8FF47",
+            animation:"pulse 2s ease infinite",
+          }}>✦</div>
+          <h1 style={{
+            margin:0,
+            fontFamily:"'LBTitle', sans-serif",
+            fontSize:"clamp(42px, 12vw, 80px)",
+            color:"#f0ede8",
+            letterSpacing:".06em",
+            lineHeight:1,
+            textAlign:"center",
+          }}>
+            LEGIT BUYS
+          </h1>
+          <p style={{
+            margin:0,
+            fontFamily:"'LBBody', sans-serif",
+            fontSize:13,
+            color:"#555",
+            letterSpacing:".2em",
+            textTransform:"uppercase",
+            textAlign:"center",
+          }}>
+            Real picks from real foodies
+          </p>
+        </div>
+        {loading && (
+          <div style={{
+            position:"absolute", bottom:60,
+            display:"flex", gap:6,
+          }}>
+            {[0,1,2].map(i => (
+              <div key={i} style={{
+                width:5, height:5, borderRadius:"50%",
+                background:"#C8FF47",
+                animation:`pulse 1.2s ease ${i * 0.2}s infinite`,
+              }} />
+            ))}
+          </div>
+        )}
+      </div>
+    )}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,700;1,400&family=DM+Mono:wght@400;600;700&display=swap');
         *{box-sizing:border-box;} body{margin:0;background:#080808;}
@@ -806,6 +864,9 @@ export default function App() {
         @keyframes shimmer-bar{0%{background-position:0% 50%}100%{background-position:200% 50%}}
         @keyframes popIn {0%{transform:scale(0.85);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
         @keyframes fadeSlideUp {from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+        @keyframes splashFadeIn {from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes splashFadeOut {from{opacity:1}to{opacity:0;pointer-events:none}}
+        @keyframes pulse {0%,100%{opacity:1}50%{opacity:0.4}}
         ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-thumb{background:#1e1e1e;border-radius:3px}
         input::placeholder,textarea::placeholder{color:#555}
         input:focus,textarea:focus,select:focus{border-color:#555!important;outline:none}
