@@ -234,8 +234,16 @@ function Card({ r, onUp, saved, onSave, theme: T = {} }) {
         {/* Title row */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, position:"relative", zIndex:1 }}>
           <div>
-            <div style={{ fontSize:9, fontFamily:"'DM Mono',monospace", color:accent, letterSpacing:".18em", textTransform:"uppercase", fontWeight:600, marginBottom:4 }}>
-              {CAT_META[r.category]?.emoji} {r.category}
+            <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginBottom:4 }}>
+              {(r.categories ?? [r.category]).map(c => (
+                <span key={c} style={{
+                  fontSize:9, fontFamily:"'DM Mono',monospace",
+                  color: CAT_META[c]?.color ?? accent,
+                  letterSpacing:".18em", textTransform:"uppercase", fontWeight:600,
+                }}>
+                  {CAT_META[c]?.emoji} {c}
+                </span>
+              ))}
             </div>
             <div
               onClick={() => setExpanded(e => !e)}
@@ -551,11 +559,20 @@ function Sheet({ title, onClose, children, theme: T = {} }) {
 function SubmitFlow({ onSubmit, onClose }) {
   const [step, setStep] = useState(0);
   const [f, setF] = useState({
-    product:"", category:"snacks", rating:null, review:"",
+    product:"", category:"snacks", categories:["snacks"], rating:null, review:"",
     submitter:"", where:"", price:"", priceRange:"fair",
     link:"", mapQuery:"", dietTags:[],
   });
   const set = (k, v) => setF(p => ({...p, [k]:v}));
+    const toggleCategory = (c) => setF(p => {
+    const already = p.categories.includes(c);
+    const next = already && p.categories.length === 1
+      ? p.categories
+      : already
+        ? p.categories.filter(x => x !== c)
+        : [...p.categories, c];
+    return { ...p, categories: next, category: next[0] };
+  });
   const toggleDiet = (id) => setF(p => ({
     ...p,
     dietTags: p.dietTags.includes(id) ? p.dietTags.filter(t=>t!==id) : [...p.dietTags, id],
@@ -578,18 +595,28 @@ function SubmitFlow({ onSubmit, onClose }) {
       </div>
       <div>
         <label style={lbl}>Category *</label>
+        <div style={{ fontSize:11, color:"#666", fontFamily:"'LBBody',sans-serif", marginBottom:6 }}>
+          Select all that apply
+        </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
-          {Object.entries(CAT_META).filter(([k])=>k!=="all").map(([c,m]) => (
-            <button key={c} onClick={()=>set("category",c)} style={{
-              padding:"10px 4px", borderRadius:10, border:"none", lineHeight:1.5,
-              outline:`1.5px solid ${f.category===c ? m.color : "#1e1e1e"}`,
-              background: f.category===c ? `${m.color}14` : "#161616",
-              color: f.category===c ? m.color : "#AAA",
-              fontFamily:"'DM Mono',monospace", fontSize:11, cursor:"pointer", transition:"all .15s",
-            }}>
-              {m.emoji}<br/>{c}
-            </button>
-          ))}
+          {Object.entries(CAT_META).filter(([k])=>k!=="all").map(([c,m]) => {
+            const isActive = f.categories.includes(c);
+            return (
+              <button key={c} onClick={()=>toggleCategory(c)} style={{
+                padding:"10px 4px", borderRadius:10, border:"none", lineHeight:1.5,
+                outline:`1.5px solid ${isActive ? m.color : "#1e1e1e"}`,
+                background: isActive ? `${m.color}14` : "#161616",
+                color: isActive ? m.color : "#444",
+                fontFamily:"'DM Mono',monospace", fontSize:11, cursor:"pointer", transition:"all .15s",
+                position:"relative",
+              }}>
+                {m.emoji}<br/>{c}
+                {isActive && f.categories.length > 1 && (
+                  <span style={{ position:"absolute", top:4, right:6, fontSize:8, color:m.color }}>✓</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
       <div><label style={lbl}>Where to get it</label><input style={inp} placeholder="Tesco, Amazon, local deli…" value={f.where} onChange={e=>set("where",e.target.value)} /></div>
@@ -893,7 +920,7 @@ export default function App() {
 
   const filtered = [...reviews]
     .filter(r => !showSaved || saved.includes(r.id))
-    .filter(r => cat === "all" || r.category === cat)
+    .filter(r => cat === "all" || (r.categories ?? [r.category]).includes(cat))
     .filter(r => activeDiet.length === 0 || activeDiet.every(d => (r.diet_tags ?? []).includes(d)))
     .filter(r => activeScore === null || r.rating === activeScore)
     .sort((a,b) => b.upvotes - a.upvotes);
@@ -907,6 +934,7 @@ export default function App() {
     const newReview = {
       product:     f.product,
       category:    f.category,
+      categories:  f.categories,
       rating:      f.rating,
       review:      f.review,
       submitter:   f.submitter,
