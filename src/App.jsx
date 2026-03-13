@@ -288,6 +288,17 @@ function Card({ r, onUp, saved, onSave, theme: T = {} }) {
         {/* Expanded detail */}
         {expanded && (
           <div style={{ animation:"fadeSlideUp .2s ease", borderTop:"1px solid #1e1e1e", paddingTop:12, display:"flex", flexDirection:"column", gap:12 }}>
+            {r.image_url && (
+              <div>
+                <div style={{ fontSize:9, fontFamily:"'LBBody',sans-serif", color:"#555", letterSpacing:".14em", textTransform:"uppercase", marginBottom:8 }}>Photo</div>
+                <img
+                  src={r.image_url}
+                  alt={r.product}
+                  style={{ width:"100%", borderRadius:10, objectFit:"cover", maxHeight:220, display:"block" }}
+                  onError={e => e.currentTarget.style.display="none"}
+                />
+              </div>
+            )}
             {r.map_query && (
               <div>
                 <div style={{ fontSize:9, fontFamily:"'LBBody',sans-serif", color:"#bbb", letterSpacing:".14em", textTransform:"uppercase", marginBottom:8 }}>Location</div>
@@ -562,7 +573,7 @@ function SubmitFlow({ onSubmit, onClose, theme: T = {} }) {
   const [f, setF] = useState({
     product:"", category:"snacks", categories:["snacks"], rating:0, review:"",
     submitter:"", where:"", price:"", priceRange:"fair",
-    link:"", mapQuery:"", dietTags:[],
+    link:"", mapQuery:"", dietTags:[], imageUrl:"",
   });
   const set = (k, v) => setF(p => ({...p, [k]:v}));
   const toggleDiet = (id) => setF(p => ({
@@ -718,6 +729,11 @@ function SubmitFlow({ onSubmit, onClose, theme: T = {} }) {
       <div>
         <label style={lbl}>Website or Instagram link</label>
         <input style={inp} placeholder="https://leon.co or https://instagram.com/..." value={f.link} onChange={e=>set("link",e.target.value)} />
+      </div>
+      <div>
+        <label style={lbl}>Photo link (optional)</label>
+        <input style={inp} placeholder="Paste an image URL from Instagram, Google etc" value={f.imageUrl} onChange={e=>set("imageUrl",e.target.value)} />
+        <div style={hint}>Must be a direct image link — right click any image online and copy image address.</div>
       </div>
       <div>
         <label style={lbl}>Address or postcode for map</label>
@@ -999,6 +1015,7 @@ export default function App() {
       price_range: f.priceRange,
       link:        f.link,
       map_query:   f.mapQuery,
+      image_url:   f.imageUrl,
       diet_tags:   f.dietTags,
       verified: !!(await supabase.auth.getSession()).data.session,
       upvotes:     0,
