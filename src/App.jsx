@@ -47,6 +47,7 @@ export default function App() {
   const [showMenu, setShowMenu]       = useState(false);
   const [showFilter, setShowFilter]   = useState(false);
   const [screen, setScreen]           = useState("home");
+  const [activeCity, setActiveCity]   = useState(null);
   const [user, setUser]                 = useState(null);
   const [userProfile, setUserProfile]   = useState(null);
   const [showUserAuth, setShowUserAuth] = useState(false);
@@ -127,7 +128,13 @@ export default function App() {
     .filter(r => cat === "all" || (r.categories ?? [r.category]).includes(cat))
     .filter(r => activeDiet.length === 0 || activeDiet.every(d => (r.diet_tags ?? []).includes(d)))
     .filter(r => activeScore === null || r.rating === activeScore)
-    .sort((a, b) => b.upvotes - a.upvotes);
+    .filter(r => !activeCity || r.city === activeCity)
+    .sort((a, b) => {
+      const aHolo = a.rating === 3 && (a.price_range === "pricey") ? 1 : 0;
+      const bHolo = b.rating === 3 && (b.price_range === "pricey") ? 1 : 0;
+      if (bHolo !== aHolo) return bHolo - aHolo;
+      return b.upvotes - a.upvotes;
+    });
 
   // ── Walkthroughs ───────────────────────────────────
   const loadUserProfile = async (u) => {
@@ -157,7 +164,7 @@ export default function App() {
       product: f.product, category: f.category, categories: f.categories,
       rating: f.rating, review: f.review, submitter: f.submitter,
       where: f.where, price: f.price, price_range: f.priceRange,
-      link: f.link, map_query: f.mapQuery, image_url: f.imageUrl,
+      link: f.link, map_query: f.mapQuery, image_url: f.imageUrl, city: f.city,
       diet_tags: f.dietTags,
       user_id: user?.id ?? null,
       submitter_email: user?.email ?? null,
@@ -280,15 +287,44 @@ export default function App() {
               }}>☰</button>
             </div>
 
-            {/* Scoring guide link */}
-            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-              <a href="/scoring-guide.html" target="_blank" rel="noopener noreferrer" style={{
-                fontSize: 11, fontFamily: "'LBBody', sans-serif", color: "#C8FF47",
-                letterSpacing: ".08em", textDecoration: "none",
-                background: "#C8FF4714", border: "1px solid #C8FF4733",
-                padding: "6px 14px", borderRadius: 99,
-              }}>✦ Review &amp; scoring guide</a>
-            </div>
+            {/* City pills */}
+            {(() => {
+              const cities = [...new Set(reviews.filter(r => r.city).map(r => r.city))].sort();
+              if (cities.length === 0) return null;
+              return (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: T.textDim ?? "#555", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 10 }}>City</div>
+                  <div style={{ display: "flex", gap: 7, overflowX: "auto", scrollbarWidth: "none", paddingBottom: 4 }}>
+                    <button
+                      onClick={() => setActiveCity(null)}
+                      style={{
+                        background: !activeCity ? "#C8FF47" : "transparent",
+                        color: !activeCity ? "#0a0a0a" : T.textMid ?? "#aaa",
+                        border: `1.5px solid ${!activeCity ? "#C8FF47" : T.border2 ?? "#2a2a2a"}`,
+                        borderRadius: 99, padding: "5px 14px", fontSize: 12,
+                        fontFamily: "'LBBody',sans-serif", cursor: "pointer",
+                        whiteSpace: "nowrap", transition: "all .15s",
+                      }}>
+                      All
+                    </button>
+                    {cities.map(city => (
+                      <button key={city}
+                        onClick={() => setActiveCity(activeCity === city ? null : city)}
+                        style={{
+                          background: activeCity === city ? "#C8FF47" : "transparent",
+                          color: activeCity === city ? "#0a0a0a" : T.textMid ?? "#aaa",
+                          border: `1.5px solid ${activeCity === city ? "#C8FF47" : T.border2 ?? "#2a2a2a"}`,
+                          borderRadius: 99, padding: "5px 14px", fontSize: 12,
+                          fontFamily: "'LBBody',sans-serif", cursor: "pointer",
+                          whiteSpace: "nowrap", transition: "all .15s",
+                        }}>
+                        {city}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Card feed */}
@@ -373,7 +409,7 @@ export default function App() {
             activeScore={activeScore} setActiveScore={setActiveScore}
             activeDiet={activeDiet} toggleDietFilter={toggleDietFilter}
             showSaved={showSaved} setShowSaved={setShowSaved}
-            onClearAll={() => { setCat("all"); setActiveScore(null); setActiveDiet([]); setShowSaved(false); }}
+            onClearAll={() => { setCat("all"); setActiveScore(null); setActiveDiet([]); setShowSaved(false); setActiveCity(null); }}
           />
         )}
 

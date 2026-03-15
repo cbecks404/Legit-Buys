@@ -2,13 +2,25 @@ import { useState, useRef } from "react";
 import { CAT_META, DIET_TAGS, PRICE_RANGE } from "../constants";
 import ScoreSelector from "./ScoreSelector";
 
+function extractCity(mapQuery) {
+  if (!mapQuery) return "";
+  const cityPatterns = [
+    /\b(London|Bristol|Manchester|Birmingham|Leeds|Liverpool|Edinburgh|Glasgow|Cardiff|Brighton|Oxford|Cambridge|Bath|York|Newcastle|Nottingham|Sheffield|Leicester|Coventry|Southampton)\b/i
+  ];
+  for (const pattern of cityPatterns) {
+    const match = mapQuery.match(pattern);
+    if (match) return match[1];
+  }
+  return "";
+}
+
 export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillName = "" }) {
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
   const [f, setF] = useState({
     product: "", category: "snacks", categories: ["snacks"], rating: 0, review: "",
     submitter: prefillName, where: "", price: "", priceRange: "fair",
-    link: "", mapQuery: "", dietTags: [], imageUrl: "",
+    link: "", mapQuery: "", dietTags: [], imageUrl: "", city: "",
   });
 
   const set = (k, v) => setF(p => ({ ...p, [k]: v }));
@@ -151,7 +163,11 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
       </div>
       <div>
         <label style={lbl}>Website or Instagram link</label>
-        <input style={inp} placeholder="https://leon.co or https://instagram.com/..." value={f.link} onChange={e => set("link", e.target.value)} />
+        <input style={inp} placeholder="e.g. Leon, London Bridge SE1 or SW1A 1AA" value={f.mapQuery} onChange={e => {
+          set("mapQuery", e.target.value);
+          const detected = extractCity(e.target.value);
+          if (detected) set("city", detected);
+        }} />
       </div>
       <div>
         <label style={lbl}>Photo link (optional)</label>
