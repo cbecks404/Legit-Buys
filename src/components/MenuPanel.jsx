@@ -1,4 +1,4 @@
-export default function MenuPanel({ onClose, onNavigate, adminUser, darkMode, toggleTheme, theme: T }) {
+export default function MenuPanel({ onClose, onNavigate, adminUser, user, darkMode, toggleTheme, theme: T }) {
   return (
     <>
       {/* Backdrop */}
@@ -33,9 +33,10 @@ export default function MenuPanel({ onClose, onNavigate, adminUser, darkMode, to
         <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
           {[
             { label: "Home",         icon: "◈", action: "home"    },
-            { label: "My Reviews",   icon: "✎", action: "profile" },
-            { label: "Scoring Guide",icon: "★", action: "guide"   },
+            { label: "My Reviews",    icon: "✎", action: "profile" },
+            { label: "Scoring Guide", icon: "★", action: "guide"   },
             ...(adminUser ? [{ label: "Admin", icon: "⚙", action: "admin" }] : []),
+            ...(!user ? [{ label: "Log in", icon: "→", action: "login" }] : []),
           ].map(item => (
             <button key={item.action} onClick={() => { onNavigate(item.action); onClose(); }}
               style={{
@@ -56,14 +57,29 @@ export default function MenuPanel({ onClose, onNavigate, adminUser, darkMode, to
         </nav>
 
         {/* Bottom controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 24 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingTop: 24 }}>
+          {user && (
+            <div style={{ fontSize: 11, color: T.textDim ?? "#555", fontFamily: "'DM Mono',monospace", letterSpacing: ".06em" }}>
+              ✦ {user.email}
+            </div>
+          )}
           <button onClick={toggleTheme} style={{
             background: "none", border: `1px solid ${T.border ?? "#1a1a1a"}`,
             borderRadius: 99, padding: "8px 16px", color: T.textMid ?? "#aaa",
-            fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer",
+            fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", width: "fit-content",
           }}>
             {darkMode ? "☀️ Light" : "🌙 Dark"}
           </button>
+          {adminUser && (
+            <button onClick={() => { onNavigate("logout"); onClose(); }} style={{
+              background: "transparent", color: "#E05A5A",
+              border: "1px solid #E05A5A33", borderRadius: 99,
+              padding: "8px 16px", fontFamily: "'LBBody',sans-serif",
+              fontSize: 12, cursor: "pointer", width: "fit-content",
+            }}>
+              Log out
+            </button>
+          )}
         </div>
       </div>
     </>

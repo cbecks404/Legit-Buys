@@ -2,12 +2,12 @@ import { useState, useRef } from "react";
 import { CAT_META, DIET_TAGS, PRICE_RANGE } from "../constants";
 import ScoreSelector from "./ScoreSelector";
 
-export default function SubmitFlow({ onSubmit, onClose, theme: T = {} }) {
+export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillName = "" }) {
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
   const [f, setF] = useState({
     product: "", category: "snacks", categories: ["snacks"], rating: 0, review: "",
-    submitter: "", where: "", price: "", priceRange: "fair",
+    submitter: prefillName, where: "", price: "", priceRange: "fair",
     link: "", mapQuery: "", dietTags: [], imageUrl: "",
   });
 
@@ -83,7 +83,7 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {} }) {
           })}
         </div>
       </div>
-      <div><label style={lbl}>Where to get it</label><input style={inp} placeholder="Tesco, Amazon, local deli…" value={f.where} onChange={e => set("where", e.target.value)} /></div>
+      <div><label style={lbl}>Where to get it</label><input style={inp} placeholder="City or Town i.e Bristol, London…" value={f.where} onChange={e => set("where", e.target.value)} /></div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         <div>
           <label style={lbl}>Price</label>
@@ -115,11 +115,10 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {} }) {
         <textarea style={{ ...inp, minHeight: 100, resize: "vertical" }} placeholder="What made it worth buying? Be specific." value={f.review} onChange={e => set("review", e.target.value)} />
       </div>
       <div style={{ background: T.surface2 ?? "#141414", border: `1px solid ${T.border ?? "#1c1c1c"}`, borderRadius: 10, padding: "12px 14px", fontSize: 12, color: T.textMid ?? "#ddd", fontFamily: "'LBBody',monospace", lineHeight: 1.6 }}>
-        ✓ Your name shows on the review so people know it's real.
+        ✓ Submitting as <span style={{ color: "#C8FF47" }}>{prefillName}</span>
       </div>
-      <div><label style={lbl}>Your name *</label><input style={inp} placeholder="First name + initial (e.g. Priya K.)" value={f.submitter} onChange={e => set("submitter", e.target.value)} /></div>
-      <button style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: (f.rating !== null && f.review && f.submitter) ? "pointer" : "not-allowed", opacity: (f.rating !== null && f.review && f.submitter) ? 1 : 0.35, marginTop: 6 }}
-        onClick={() => { if (f.rating !== null && f.review && f.submitter) goNext(2); }}>NEXT →</button>
+      <button style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: (f.rating !== null && f.review) ? "pointer" : "not-allowed", opacity: (f.rating !== null && f.review) ? 1 : 0.35, marginTop: 6 }}
+        onClick={() => { if (f.rating !== null && f.review) goNext(2); }}>NEXT →</button>
       <button style={{ background: "transparent", color: T.textMid ?? "#ccc", border: `1px solid ${T.border2 ?? "#2e2e2e"}`, borderRadius: 99, padding: "11px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", marginTop: 4 }} onClick={() => goBack(0)}>← Back</button>
     </div>,
 

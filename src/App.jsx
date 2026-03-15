@@ -16,6 +16,8 @@ import { Pill, DietPill } from "./components/Pills";
 import { AppIntro, SubmitGuide } from "./components/Walkthroughs";
 import MenuPanel from "./components/MenuPanel";
 import FilterPanel from "./components/FilterPanel";
+import UserAuth from "./components/UserAuth";
+import ProfilePage from "./components/ProfilePage";
 
 export default function App() {
   const [reviews, setReviews]           = useState([]);
@@ -42,9 +44,12 @@ export default function App() {
     catch { return true; }
   });
   const [showSubmitGuide, setShowSubmitGuide] = useState(false);
-  const [showMenu, setShowMenu]     = useState(false);
-  const [showFilter, setShowFilter] = useState(false);
-  const [screen, setScreen]         = useState("home");
+  const [showMenu, setShowMenu]       = useState(false);
+  const [showFilter, setShowFilter]   = useState(false);
+  const [screen, setScreen]           = useState("home");
+  const [user, setUser]                 = useState(null);
+  const [userProfile, setUserProfile]   = useState(null);
+  const [showUserAuth, setShowUserAuth] = useState(false);
   const [darkMode, setDarkMode]         = useState(() => {
     try { return localStorage.getItem("lb_theme") !== "light"; }
     catch { return true; }
@@ -75,8 +80,25 @@ export default function App() {
 
   // ── Data loading ───────────────────────────────────
   useEffect(() => {
+    const isAdmin = (u) => u?.app_metadata?.role === "admin";
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setAdminUser(session.user);
+      if (session) {
+        setUser(session.user);
+        if (isAdmin(session.user)) setAdminUser(session.user);
+        loadUserProfile(session.user);
+      }
+    });
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        if (isAdmin(session.user)) setAdminUser(session.user);
+        else setAdminUser(null);
+        loadUserProfile(session.user);
+      } else {
+        setAdminUser(null);
+        setUserProfile(null);
+      }
     });
     async function loadData() {
       const { data: liveReviews }    = await supabase.from("reviews").select("*").order("upvotes", { ascending: false });
@@ -108,6 +130,11 @@ export default function App() {
     .sort((a, b) => b.upvotes - a.upvotes);
 
   // ── Walkthroughs ───────────────────────────────────
+  const loadUserProfile = async (u) => {
+    if (!u) { setUserProfile(null); return; }
+    const { data } = await supabase.from("profiles").select("*").eq("id", u.id).single();
+    if (data) setUserProfile(data);
+  };
   const dismissIntro = (dontShow = false) => {
     if (dontShow) localStorage.setItem("lb_intro_seen", "true");
     setShowAppIntro(false);
@@ -132,7 +159,9 @@ export default function App() {
       where: f.where, price: f.price, price_range: f.priceRange,
       link: f.link, map_query: f.mapQuery, image_url: f.imageUrl,
       diet_tags: f.dietTags,
-      verified: !!(await supabase.auth.getSession()).data.session,
+      user_id: user?.id ?? null,
+      submitter_email: user?.email ?? null,
+      verified: !!user,
       upvotes: 0, date: new Date().toISOString().slice(0, 10),
     };
     const { data, error } = await supabase.from("pending_reviews").insert([newReview]).select();
@@ -285,6 +314,7 @@ export default function App() {
           </button>
           <button
             onClick={() => {
+              if (!user) { setShowUserAuth(true); return; }
               if (rateLimited) { setModal("rateLimited"); return; }
               const seen = localStorage.getItem("lb_submit_guide_seen") === "true";
               if (!seen) { setShowSubmitGuide(true); } else { setModal("submit"); }
@@ -310,13 +340,24 @@ export default function App() {
         {showMenu && (
           <MenuPanel
             onClose={() => setShowMenu(false)}
-            onNavigate={(action) => {
+            onNavigate={async (action) => {
               if (action === "home")    setScreen("home");
-              if (action === "profile") setScreen("profile");
+              if (action === "profile") {
+                if (user) { setScreen("profile"); }
+                else { setShowUserAuth(true); }
+              }
               if (action === "admin")   setModal("admin");
               if (action === "guide")   window.open("/scoring-guide.html", "_blank");
+              if (action === "login") setShowUserAuth(true);
+              if (action === "logout") {
+                await supabase.auth.signOut();
+                setUser(null);
+                setAdminUser(null);
+                setScreen("home");
+              }
             }}
             adminUser={adminUser}
+            user={user}
             darkMode={darkMode}
             toggleTheme={toggleTheme}
             theme={T}
@@ -336,12 +377,36 @@ export default function App() {
           />
         )}
 
+        {/* Profile screen */}
+        {screen === "profile" && user && (
+          <ProfilePage
+            user={user}
+            onClose={() => setScreen("home")}
+            onLogout={async () => {
+              await supabase.auth.signOut();
+              setUser(null);
+              setAdminUser(null);
+              setScreen("home");
+            }}
+            theme={T}
+          />
+        )}
+
+        {/* User auth */}
+        {showUserAuth && (
+          <UserAuth
+            onClose={() => setShowUserAuth(false)}
+            onLogin={(u) => { setUser(u); setScreen("profile"); }}
+            theme={T}
+          />
+        )}
+
         {/* Walkthroughs */}
         {showAppIntro && !splash && <AppIntro onDismiss={dismissIntro} theme={T} />}
         {showSubmitGuide && <SubmitGuide onDismiss={dismissSubmitGuide} theme={T} />}
 
         {/* Modals */}
-        {modal === "submit" && <SubmitFlow onSubmit={submit} onClose={() => setModal(null)} theme={T} />}
+        {modal === "submit" && <SubmitFlow onSubmit={submit} onClose={() => setModal(null)} theme={T} prefillName={userProfile?.display_name ?? ""} />}
 
         {modal === "adminLogin" && (
           <Sheet title="Admin login" onClose={() => setModal(null)} theme={T}>
