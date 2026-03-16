@@ -55,7 +55,7 @@ export function AppIntro({ onDismiss, theme: T }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
             {s.tip.map(t => (
               <div key={t.score} style={{ display: "flex", alignItems: "center", gap: 12, background: T.surface2 ?? "#161616", border: `1px solid ${T.border ?? "#1e1e1e"}`, borderRadius: 10, padding: "10px 14px" }}>
-                <span style={{ fontSize: 11, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: t.color, background: `${t.color}18`, border: `1px solid ${t.color}44`, padding: "3px 9px", borderRadius: 99, whiteSpace: "nowrap" }}>{t.label}</span>
+                <span style={{ fontSize: 11, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: t.color, background: `${t.color}18`, border: `1px solid ${t.color}44`, padding: "3px 9px", borderRadius: 99, whiteSpace: "nowrap" }}>{t.label.toUpperCase()}</span>
                 <span style={{ fontSize: 12, color: T.textMid ?? "#e0ddd8", fontFamily: "'LBBody', sans-serif" }}>{t.desc}</span>
               </div>
             ))}

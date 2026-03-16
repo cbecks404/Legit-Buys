@@ -98,11 +98,16 @@ export default function Card({ r, onUp, saved, onSave, theme: T = {} }) {
                 </span>
               ))}
             </div>
-            <div
-              onClick={() => setExpanded(e => !e)}
-              style={{ fontFamily: "'LBCardHeader', serif", fontSize: 18, color: T.text ?? "#f0ede8", lineHeight: 1.25, cursor: "pointer" }}>
-              {r.product}
-              <span style={{ fontSize: 9, color: "#ccc", fontFamily: "'LBBody',sans-serif", marginLeft: 8, letterSpacing: ".08em" }}>
+            <div onClick={() => setExpanded(e => !e)} style={{ cursor: "pointer" }}>
+              <div style={{ fontFamily: "'LBCardHeader', serif", fontSize: 18, color: T.text ?? "#f0ede8", lineHeight: 1.25, marginBottom: 6 }}>
+                {r.product}
+              </div>
+              <span style={{
+                fontSize: 10, color: "#f0ede8", fontFamily: "'DM Mono',sans-serif",
+                letterSpacing: ".08em", background: T.surface2 ?? "#161616",
+                border: `1px solid ${T.border2 ?? "#2a2a2a"}`,
+                padding: "4px 12px", borderRadius: 99, display: "inline-block",
+              }}>
                 {expanded ? "▲ less" : "▼ more"}
               </span>
             </div>
@@ -196,10 +201,10 @@ export default function Card({ r, onUp, saved, onSave, theme: T = {} }) {
               onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               style={{
-                background: saved ? "#ffffff14" : "transparent",
-                border: `1px solid ${saved ? "#f0ede8" : "#242424"}`,
-                color: saved ? "#f0ede8" : "#444",
-                borderRadius: 99, padding: "5px 11px", fontSize: 12,
+                background: saved ? `${accent}18` : "transparent",
+                border: `1px solid ${saved ? accent : T.border2 ?? "#2a2a2a"}`,
+                color: saved ? accent : T.textMid ?? "#888",
+                borderRadius: 99, padding: "7px 14px", fontSize: 14,
                 fontFamily: "'LBBody', sans-serif", cursor: "pointer", transition: "all .15s",
                 animation: saved ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
               }}>
@@ -211,9 +216,9 @@ export default function Card({ r, onUp, saved, onSave, theme: T = {} }) {
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               style={{
                 background: upped ? `${accent}18` : "transparent",
-                border: `1px solid ${upped ? accent : "#242424"}`,
-                color: upped ? accent : "#444",
-                borderRadius: 99, padding: "5px 13px", fontSize: 12,
+                border: `1px solid ${upped ? accent : T.border2 ?? "#2a2a2a"}`,
+                color: upped ? accent : T.textMid ?? "#888",
+                borderRadius: 99, padding: "7px 14px", fontSize: 14,
                 fontFamily: "'LBBody', sans-serif", cursor: upped ? "default" : "pointer", transition: "all .15s",
                 animation: upped ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
               }}>

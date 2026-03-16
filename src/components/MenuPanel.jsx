@@ -26,7 +26,7 @@ export default function MenuPanel({ onClose, onNavigate, adminUser, user, darkMo
         {/* Logo */}
         <div style={{ marginBottom: 40 }}>
           <span style={{ color: "#C8FF47", fontSize: 24 }}>✦</span>
-          <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 9, color: T.textDim ?? "#555", letterSpacing: ".22em", textTransform: "uppercase", marginLeft: 8 }}>Legit Buys</span>
+          <span style={{ fontFamily: "'LBTitle',sans-serif", fontSize: 30, color: T.text ?? "#f0ede8", letterSpacing: ".04em", textTransform: "uppercase", marginLeft: 8 }}>LEGIT BUYS</span>
         </div>
 
         {/* Nav items */}
@@ -63,13 +63,7 @@ export default function MenuPanel({ onClose, onNavigate, adminUser, user, darkMo
               ✦ {user.email}
             </div>
           )}
-          <button onClick={toggleTheme} style={{
-            background: "none", border: `1px solid ${T.border ?? "#1a1a1a"}`,
-            borderRadius: 99, padding: "8px 16px", color: T.textMid ?? "#aaa",
-            fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", width: "fit-content",
-          }}>
-            {darkMode ? "☀️ Light" : "🌙 Dark"}
-          </button>
+          
           {adminUser && (
             <button onClick={() => { onNavigate("logout"); onClose(); }} style={{
               background: "transparent", color: "#E05A5A",

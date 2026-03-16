@@ -293,7 +293,7 @@ export default function App() {
               if (cities.length === 0) return null;
               return (
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: T.textDim ?? "#555", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 10 }}>City</div>
+                  <div style={{ fontSize: 11, fontFamily: "'LBBody',sans-serif", color: "#f0ede8", marginBottom: 10, textTransform: "uppercase", letterSpacing: ".1em" }}>City</div>
                   <div style={{ display: "flex", gap: 7, overflowX: "auto", scrollbarWidth: "none", paddingBottom: 4 }}>
                     <button
                       onClick={() => setActiveCity(null)}
@@ -336,11 +336,16 @@ export default function App() {
         </div>
 
         {/* Bottom action bar */}
-        <div style={{ position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 100, display: "flex", gap: 10 }}>
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
+          display: "flex", justifyContent: "center", gap: 10,
+          padding: "16px 18px 36px",
+          background: "linear-gradient(to top, rgba(8,8,8,0.92) 20%, rgba(8,8,8,0.6) 50%, rgba(8,8,8,0.1) 80%, transparent 100%)",
+        }}>
           <button onClick={() => setShowFilter(true)} style={{
-            background: T.surface ?? "#111",
-            color: T.textMid ?? "#aaa",
-            border: `1px solid ${T.border2 ?? "#2a2a2a"}`,
+            background: "#080808",
+            color: "#C8FF47",
+            border: "1.5px solid #C8FF47",
             borderRadius: 99, padding: "16px 22px",
             fontFamily: "'LBTitle',sans-serif",
             fontSize: "clamp(13px, 3vw, 16px)", letterSpacing: ".06em",
@@ -351,7 +356,7 @@ export default function App() {
           <button
             onClick={() => {
               if (!user) { setShowUserAuth(true); return; }
-              if (rateLimited) { setModal("rateLimited"); return; }
+              if (rateLimited && !adminUser) { setModal("rateLimited"); return; }
               const seen = localStorage.getItem("lb_submit_guide_seen") === "true";
               if (!seen) { setShowSubmitGuide(true); } else { setModal("submit"); }
             }}
@@ -359,16 +364,16 @@ export default function App() {
             onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
             style={{
-              background: rateLimited ? "#111" : "#C8FF47",
-              color: rateLimited ? "#444" : "#0a0a0a",
-              border: rateLimited ? "1px solid #2a2a2a" : "none",
+              background: (rateLimited && !adminUser) ? "#111" : "#C8FF47",
+              color: (rateLimited && !adminUser) ? "#444" : "#0a0a0a",
+              border: (rateLimited && !adminUser) ? "1px solid #2a2a2a" : "none",
               borderRadius: 99, padding: "16px 28px",
               fontFamily: "'LBTitle', sans-serif",
               fontSize: "clamp(13px, 3vw, 16px)", letterSpacing: ".06em",
               cursor: "pointer", transition: "all .2s",
-              boxShadow: rateLimited ? "none" : "0 4px 24px #C8FF4744",
+              boxShadow: (rateLimited && !adminUser) ? "none" : "0 4px 24px #C8FF4744",
             }}>
-            {rateLimited ? "🔒 SUBMIT" : "SUBMIT A LEGIT BUY"}
+            {rateLimited && !adminUser ? "🔒 SUBMIT" : "SUBMIT A LEGIT BUY"}
           </button>
         </div>
 

@@ -54,7 +54,7 @@ export default function FilterPanel({
                   fontFamily: "'DM Mono',monospace", fontSize: 10, cursor: "pointer",
                   transition: "all .15s", fontWeight: isActive ? 700 : 400,
                 }}>
-                  {m.value}<br />{m.short}
+                  {m.value}<br />{m.short.toUpperCase()}
                 </button>
               );
             })}

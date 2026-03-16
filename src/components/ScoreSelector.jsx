@@ -16,7 +16,7 @@ export default function ScoreSelector({ value = null, interactive = false, onCha
         color, background: `${color}18`, border: `1px solid ${color}44`,
         padding: "3px 9px", borderRadius: 99, whiteSpace: "nowrap", letterSpacing: ".06em",
       }}>
-        {value === 3 ? "✦ " : ""}{meta.label}
+        {value === 3 ? "✦ " : ""}{meta.label.toUpperCase()}
       </span>
     );
   }
@@ -40,7 +40,7 @@ export default function ScoreSelector({ value = null, interactive = false, onCha
                 fontFamily: "'DM Mono',monospace", fontSize: 10, cursor: "pointer",
                 transition: "all .15s", lineHeight: 1.5, fontWeight: isActive ? 700 : 400,
               }}>
-              {m.value}<br />{m.short}
+              {m.value}<br />{m.short.toUpperCase()}
             </button>
           );
         })}
