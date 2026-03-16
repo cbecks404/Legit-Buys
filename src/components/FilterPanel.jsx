@@ -40,7 +40,7 @@ export default function FilterPanel({
 
         {/* Score */}
         <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: T.textDim ?? "#555", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>Score</div>
+          <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#f0ede8", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>Score</div>
           <div style={{ display: "flex", gap: 8 }}>
             {SCORE_META.map(m => {
               const color = SCORE_COLORS[m.value];
@@ -63,7 +63,7 @@ export default function FilterPanel({
 
         {/* Category */}
         <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: T.textDim ?? "#555", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>Category</div>
+          <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#f0ede8", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>Category</div>
           <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
             {Object.keys(CAT_META).map(c => <Pill key={c} cat={c} active={cat === c} onClick={() => setCat(c)} />)}
           </div>
@@ -71,7 +71,7 @@ export default function FilterPanel({
 
         {/* Dietary */}
         <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: T.textDim ?? "#555", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>Dietary</div>
+          <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#f0ede8", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>Dietary</div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {DIET_TAGS.map(tag => <DietPill key={tag.id} tag={tag} active={activeDiet.includes(tag.id)} onClick={() => toggleDietFilter(tag.id)} />)}
           </div>
@@ -79,7 +79,7 @@ export default function FilterPanel({
 
         {/* Saved */}
         <div>
-          <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: T.textDim ?? "#555", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>Saved</div>
+          <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#f0ede8", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>Saved</div>
           <button onClick={() => setShowSaved(s => !s)} style={{
             background: showSaved ? "#ffffff14" : "transparent",
             border: `1px solid ${showSaved ? "#f0ede8" : T.border2 ?? "#2e2e2e"}`,

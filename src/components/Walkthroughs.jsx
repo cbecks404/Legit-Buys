@@ -84,7 +84,18 @@ export function SubmitGuide({ onDismiss, theme: T }) {
       emoji: "✍️",
       title: "Writing a good review",
       body: "Be specific — what made it worth buying? Mention the taste, value, where to get it. Reviews like 'it was nice' don't help anyone.",
-      tip: "Think: would a colleague trust this recommendation?",
+      tip: "Think: would someone in the community trust this recommendation?",
+    },
+    {
+      emoji: "💷",
+      title: "Pricing guide",
+      body: "Price is relative to what you're buying — context matters. Here's a rough guide:",
+      pricing: [
+        { symbol: "£",   label: "Cheap",  examples: "Street food, meal deal, café snack — under ~£10" },
+        { symbol: "££",  label: "Fair",   examples: "Casual dining, most restaurants, a decent bottle of wine — £10–£40" },
+        { symbol: "£££", label: "Pricey", examples: "Fine dining, tasting menus, premium experiences — £40+" },
+      ],
+      tip: "A £30 main at a Michelin restaurant is fair. A £30 burger is pricey. Use your judgement.",
     },
     {
       emoji: "🏆",
@@ -118,9 +129,23 @@ export function SubmitGuide({ onDismiss, theme: T }) {
         <div style={{ fontFamily: "'LBCardHeader', serif", fontSize: 22, color: T.text ?? "#f0ede8", marginBottom: 12, lineHeight: 1.2 }}>{s.title}</div>
         <p style={{ margin: "0 0 16px", fontSize: 14, color: T.textMid ?? "#e0ddd8", fontFamily: "'LBBody', sans-serif", lineHeight: 1.7 }}>{s.body}</p>
 
+        {s.pricing && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+            {s.pricing.map(p => (
+              <div key={p.symbol} style={{ display: "flex", alignItems: "flex-start", gap: 12, background: T.surface2 ?? "#161616", border: `1px solid ${T.border ?? "#1e1e1e"}`, borderRadius: 10, padding: "10px 14px" }}>
+                <span style={{ fontSize: 13, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: "#C8FF47", background: "#C8FF4714", border: "1px solid #C8FF4733", padding: "3px 9px", borderRadius: 99, whiteSpace: "nowrap", minWidth: 40, textAlign: "center" }}>{p.symbol}</span>
+                <div>
+                  <div style={{ fontSize: 12, fontFamily: "'LBCardHeader',serif", color: T.text ?? "#f0ede8", marginBottom: 3 }}>{p.label}</div>
+                  <div style={{ fontSize: 11, fontFamily: "'LBBody',sans-serif", color: T.textMid ?? "#aaa", lineHeight: 1.5 }}>{p.examples}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {s.tip && (
           <div style={{ background: T.surface2 ?? "#161616", border: `1px solid ${T.border ?? "#1e1e1e"}`, borderRadius: 10, padding: "12px 14px", marginBottom: 20 }}>
-            <p style={{ margin: 0, fontSize: 12, color: "#C8FF47", fontFamily: "'LBBody', sans-serif", lineHeight: 1.6 }}>💡 {s.tip}</p>
+            <p style={{ margin:0, fontSize:12, color:"#C8FF47", fontFamily:"system-ui,sans-serif", lineHeight:1.6 }}>💡 {s.tip}</p>
             {s.link && (
               <a href="/scoring-guide.html" target="_blank" rel="noopener noreferrer"
                 style={{ fontSize: 11, color: "#C8FF47", fontFamily: "'LBBody', sans-serif", display: "block", marginTop: 8, opacity: 0.7 }}>
