@@ -48,6 +48,7 @@ export default function App() {
   const [showFilter, setShowFilter]   = useState(false);
   const [screen, setScreen]           = useState("home");
   const [activeCity, setActiveCity]   = useState(null);
+  const [userUpvotes, setUserUpvotes] = useState([]);
   const [user, setUser]                 = useState(null);
   const [userProfile, setUserProfile]   = useState(null);
   const [showUserAuth, setShowUserAuth] = useState(false);
@@ -90,6 +91,7 @@ export default function App() {
         loadUserProfile(session.user);
       }
     });
+
     supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -101,6 +103,7 @@ export default function App() {
         setUserProfile(null);
       }
     });
+
     async function loadData() {
       const { data: liveReviews }    = await supabase.from("reviews").select("*").order("upvotes", { ascending: false });
       const { data: pendingReviews } = await supabase.from("pending_reviews").select("*").order("date", { ascending: false });
@@ -109,6 +112,7 @@ export default function App() {
       setLoading(false);
       setTimeout(() => setSplash(false), 600);
     }
+
     loadData();
   }, []);
 
@@ -138,9 +142,13 @@ export default function App() {
 
   // ── Walkthroughs ───────────────────────────────────
   const loadUserProfile = async (u) => {
-    if (!u) { setUserProfile(null); return; }
-    const { data } = await supabase.from("profiles").select("*").eq("id", u.id).single();
-    if (data) setUserProfile(data);
+    if (!u) { setUserProfile(null); setUserUpvotes([]); return; }
+    const [{ data: prof }, { data: upvoteData }] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", u.id).single(),
+      supabase.from("upvotes").select("review_id").eq("user_id", u.id),
+    ]);
+    if (prof) setUserProfile(prof);
+    if (upvoteData) setUserUpvotes(upvoteData.map(u => u.review_id));
   };
   const dismissIntro = (dontShow = false) => {
     if (dontShow) localStorage.setItem("lb_intro_seen", "true");
@@ -155,8 +163,15 @@ export default function App() {
 
   // ── Supabase actions ───────────────────────────────
   const upvote = async (id) => {
-    setReviews(rs => rs.map(r => r.id === id ? { ...r, upvotes: r.upvotes + 1 } : r));
+    if (!user) { setShowUserAuth(true); return; }
+    if (userUpvotes.includes(id)) return;
+    
+    setUserUpvotes(prev => [...prev, id]);
+    await supabase.from("upvotes").insert({ user_id: user.id, review_id: id });
     await supabase.rpc("increment_upvotes", { row_id: id });
+    
+    const { data } = await supabase.from("reviews").select("*").eq("id", id).single();
+    if (data) setReviews(rs => rs.map(r => r.id === id ? data : r));
   };
 
   const submit = async (f) => {
@@ -331,7 +346,7 @@ export default function App() {
           <div style={{ padding: "8px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
             {loading && <div style={{ textAlign: "center", padding: "60px 0", color: "#CCC", fontSize: 13, fontFamily: "'DM Mono',monospace", letterSpacing: ".1em" }}>loading buys...</div>}
             {!loading && filtered.length === 0 && <div style={{ textAlign: "center", padding: "60px 0", color: "#222", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>No reviews match these filters.</div>}
-            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} theme={T} />)}
+            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} theme={T} upped={userUpvotes.includes(r.id)} />)}
           </div>
         </div>
 
@@ -373,7 +388,7 @@ export default function App() {
               cursor: "pointer", transition: "all .2s",
               boxShadow: (rateLimited && !adminUser) ? "none" : "0 4px 24px #C8FF4744",
             }}>
-            {rateLimited && !adminUser ? "🔒 SUBMIT" : "SUBMIT A LEGIT BUY"}
+            {rateLimited && !adminUser ? "🔒 SUBMIT" : "WHATS THE LEGIT BUY"}
           </button>
         </div>
 

@@ -69,8 +69,9 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
     <div key={0} style={{ display: "flex", flexDirection: "column", gap: 16, animation: anim(dir) }}>
       <div style={{ fontFamily: "'LBTitle', sans-serif", color: T.text ?? "#f0ede8", fontSize: "clamp(32px, 8vw, 52px)", letterSpacing: ".04em", lineHeight: 1, marginBottom: 16, textTransform: "uppercase" }}>THE BUY</div>
       <div>
-        <label style={lbl}>Product or place *</label>
-        <input style={inp} placeholder="e.g. Pip & Nut Almond Butter Cups" value={f.product} onChange={e => set("product", e.target.value)} />
+        <label style={lbl}>What's the Buy? *</label>
+        <input style={inp} placeholder="e.g. Truffle arancini, Oat flat white, Almond butter cups…" value={f.product} onChange={e=>set("product",e.target.value)} />
+        <div style={hint}>A specific dish, drink, or product — not the venue itself. Loved the whole place? Nominate their best thing.</div>
       </div>
       <div>
         <label style={lbl}>Category *</label>
@@ -124,7 +125,7 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
       </div>
       <div>
         <label style={lbl}>Your honest review *</label>
-        <textarea style={{ ...inp, minHeight: 100, resize: "vertical" }} placeholder="What made it worth buying? Be specific." value={f.review} onChange={e => set("review", e.target.value)} />
+        <textarea style={{ ...inp, minHeight:100, resize:"vertical" }} placeholder="What made this specific thing worth it? Taste, texture, value, occasion — be specific." value={f.review} onChange={e=>set("review",e.target.value)} />
       </div>
       <div style={{ background: T.surface2 ?? "#141414", border: `1px solid ${T.border ?? "#1c1c1c"}`, borderRadius: 10, padding: "12px 14px", fontSize: 12, color: T.textMid ?? "#ddd", fontFamily: "'LBBody',monospace", lineHeight: 1.6 }}>
         ✓ Submitting as <span style={{ color: "#C8FF47" }}>{prefillName}</span>

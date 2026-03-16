@@ -112,7 +112,7 @@ export default function UserAuth({ onClose, onLogin, theme: T }) {
         {mode === "choose" && !success && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <p style={{ margin: "0 0 8px", fontSize: 14, color: T.textMid ?? "#aaa", fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
-              Log in to see your reviews, edit them, and get a verified badge on your submissions.
+              Log in to see your reviews, edit them, and get a verified badge on your submissions. Join a growing community of food lovers sharing their best finds.
             </p>
             <button onClick={() => { setMode("login"); setError(""); }}
               style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: "pointer" }}>

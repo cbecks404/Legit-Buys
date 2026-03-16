@@ -6,7 +6,7 @@ export function AppIntro({ onDismiss, theme: T }) {
     {
       emoji: "✦",
       title: "Welcome to Legit Buys",
-      body: "Real food picks from real colleagues. No ads, no algorithms — just honest recommendations from people you actually know.",
+      body: "Real food picks from real people. No algorithms — just honest recommendations from a community of food lovers.",
       tip: null,
     },
     {
@@ -23,7 +23,7 @@ export function AppIntro({ onDismiss, theme: T }) {
     {
       emoji: "📝",
       title: "How to submit",
-      body: "Tap 'Submit a Legit Buy' to add your pick. Your review goes to admin for approval before going live — keeping things quality over quantity.",
+      body: "Tap 'Submit a Legit Buy' to add your pick. Your review goes to admin for approval before going live — keeping the quality high.",
       tip: null,
     },
   ];

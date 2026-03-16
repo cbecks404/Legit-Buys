@@ -33,8 +33,8 @@ function LinkButton({ link, where }) {
   );
 }
 
-export default function Card({ r, onUp, saved, onSave, theme: T = {} }) {
-  const [upped, setUpped] = useState(false);
+export default function Card({ r, onUp, saved, onSave, theme: T = {}, upped: initialUpped = false }) {
+  const upped = initialUpped;
   const [expanded, setExpanded] = useState(false);
   const accent = CAT_META[r.category]?.color ?? "#C8FF47";
   const rawDiet = r.diet_tags ?? r.dietTags ?? [];
@@ -201,21 +201,21 @@ export default function Card({ r, onUp, saved, onSave, theme: T = {} }) {
               onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               style={{
-                background: saved ? `${accent}18` : "transparent",
-                border: `1px solid ${saved ? accent : T.border2 ?? "#2a2a2a"}`,
-                color: saved ? accent : T.textMid ?? "#888",
+                background: saved ? "#ffffff14" : "transparent",
+                border: `1px solid ${saved ? "#f0ede8" : T.border2 ?? "#2a2a2a"}`,
+                color: saved ? "#f0ede8" : T.textMid ?? "#888",
                 borderRadius: 99, padding: "7px 14px", fontSize: 14,
                 fontFamily: "'LBBody', sans-serif", cursor: "pointer", transition: "all .15s",
                 animation: saved ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
               }}>
               {saved ? "★" : "☆"}
             </button>
-            <button onClick={() => { if (!upped) { setUpped(true); onUp(r.id); } }}
+            <button onClick={() => { onUp(r.id); }}
               onMouseDown={e => { if (!upped) e.currentTarget.style.transform = "scale(0.88)"; }}
               onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               style={{
-                background: upped ? `${accent}18` : "transparent",
+                background: upped ? `${accent}22` : "transparent",
                 border: `1px solid ${upped ? accent : T.border2 ?? "#2a2a2a"}`,
                 color: upped ? accent : T.textMid ?? "#888",
                 borderRadius: 99, padding: "7px 14px", fontSize: 14,
