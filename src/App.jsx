@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
+import "./theme.css";
 
 // Constants & utilities
 import {
@@ -79,6 +80,11 @@ export default function App() {
       return next;
     });
   };
+
+  // ── Sync data-theme attribute with darkMode (CSS variable theming) ──
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? "dark" : "light";
+  }, [darkMode]);
 
   // ── Data loading ───────────────────────────────────
   useEffect(() => {
