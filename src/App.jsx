@@ -420,8 +420,6 @@ export default function App() {
             }}
             adminUser={adminUser}
             user={user}
-            darkMode={darkMode}
-            toggleTheme={toggleTheme}
           />
         )}
 

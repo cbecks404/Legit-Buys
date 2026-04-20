@@ -1,4 +1,4 @@
-export default function MenuPanel({ onClose, onNavigate, adminUser, user, darkMode, toggleTheme }) {
+export default function MenuPanel({ onClose, onNavigate, adminUser, user }) {
   return (
     <>
       {/* Backdrop */}
