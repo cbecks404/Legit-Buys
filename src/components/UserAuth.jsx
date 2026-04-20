@@ -6,7 +6,7 @@ const baseInp = {
   fontSize: 14, outline: "none", boxSizing: "border-box",
   fontFamily: "system-ui,sans-serif",
 };
-export default function UserAuth({ onClose, onLogin, theme: T }) {
+export default function UserAuth({ onClose, onLogin }) {
   const [mode, setMode] = useState("choose"); // choose | login | signup | magic
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,9 +15,9 @@ export default function UserAuth({ onClose, onLogin, theme: T }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const inp = { ...baseInp, background: T.surface2 ?? "#161616", border: `1px solid ${T.border2 ?? "#333"}`, color: T.text ?? "#f0ede8" };
+  const inp = { ...baseInp, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)" };
   const lbl = {
-    fontSize: 9, fontFamily: "'DM Mono',monospace", color: T.textDim ?? "#888",
+    fontSize: 9, fontFamily: "'DM Mono',monospace", color: "var(--text-dim)",
     letterSpacing: ".14em", textTransform: "uppercase",
     display: "block", marginBottom: 7, fontWeight: 600,
   };
@@ -74,7 +74,7 @@ export default function UserAuth({ onClose, onLogin, theme: T }) {
     <div onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: "fixed", inset: 0, background: "#000000cc", backdropFilter: "blur(10px)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 300 }}>
       <div style={{
-        background: T.sheetBg ?? "#0d0d0d", borderTop: `1px solid ${T.sheetBorder ?? "#202020"}`,
+        background: "var(--sheet-bg)", borderTop: "1px solid var(--sheet-border)",
         borderRadius: "18px 18px 0 0", width: "100%", maxWidth: 520,
         padding: "26px 22px 50px", animation: "sheetUp .25s cubic-bezier(.16,1,.3,1)",
       }}>
@@ -83,15 +83,15 @@ export default function UserAuth({ onClose, onLogin, theme: T }) {
           <div>
             {mode !== "choose" && (
               <button onClick={() => { setMode("choose"); setError(""); setSuccess(""); }}
-                style={{ background: "none", border: "none", color: T.textDim ?? "#555", fontSize: 12, fontFamily: "'LBBody',sans-serif", cursor: "pointer", padding: 0, marginBottom: 4, display: "block" }}>
+                style={{ background: "none", border: "none", color: "var(--text-dim)", fontSize: 12, fontFamily: "'LBBody',sans-serif", cursor: "pointer", padding: 0, marginBottom: 4, display: "block" }}>
                 ← Back
               </button>
             )}
-            <span style={{ fontFamily: "'LBTitle',sans-serif", fontSize: 22, color: T.text ?? "#f0ede8", letterSpacing: ".04em" }}>
+            <span style={{ fontFamily: "'LBTitle',sans-serif", fontSize: 22, color: "var(--text)", letterSpacing: ".04em" }}>
               {mode === "choose" ? "MY ACCOUNT" : mode === "login" ? "LOG IN" : mode === "signup" ? "SIGN UP" : "MAGIC LINK"}
             </span>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: T.textDim ?? "#555", fontSize: 22, cursor: "pointer" }}>✕</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--text-dim)", fontSize: 22, cursor: "pointer" }}>✕</button>
         </div>
 
         {/* Success message */}
@@ -111,7 +111,7 @@ export default function UserAuth({ onClose, onLogin, theme: T }) {
         {/* Choose mode */}
         {mode === "choose" && !success && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <p style={{ margin: "0 0 8px", fontSize: 14, color: T.textMid ?? "#aaa", fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
+            <p style={{ margin: "0 0 8px", fontSize: 14, color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
               Log in to see your reviews, edit them, and get a verified badge on your submissions. Join a growing community of food lovers sharing their best finds.
             </p>
             <button onClick={() => { setMode("login"); setError(""); }}
@@ -119,11 +119,11 @@ export default function UserAuth({ onClose, onLogin, theme: T }) {
               LOG IN →
             </button>
             <button onClick={() => { setMode("signup"); setError(""); }}
-              style={{ background: "transparent", color: T.text ?? "#f0ede8", border: `1px solid ${T.border2 ?? "#333"}`, borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: "pointer" }}>
+              style={{ background: "transparent", color: "var(--text)", border: "1px solid var(--border2)", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: "pointer" }}>
               CREATE ACCOUNT →
             </button>
             <button onClick={() => { setMode("magic"); setError(""); }}
-              style={{ background: "transparent", color: T.textMid ?? "#aaa", border: "none", borderRadius: 99, padding: "10px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 13, cursor: "pointer" }}>
+              style={{ background: "transparent", color: "var(--text-mid)", border: "none", borderRadius: 99, padding: "10px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 13, cursor: "pointer" }}>
               ✉ Send me a magic link instead
             </button>
           </div>
@@ -139,7 +139,7 @@ export default function UserAuth({ onClose, onLogin, theme: T }) {
               {loading ? "Logging in…" : "LOG IN →"}
             </button>
             <button onClick={() => { setMode("magic"); setError(""); }}
-              style={{ background: "transparent", color: T.textMid ?? "#aaa", border: "none", padding: "8px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer" }}>
+              style={{ background: "transparent", color: "var(--text-mid)", border: "none", padding: "8px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer" }}>
               Forgot password? Send a magic link
             </button>
           </div>
@@ -162,7 +162,7 @@ export default function UserAuth({ onClose, onLogin, theme: T }) {
             </div>
             <div><label style={lbl}>Email</label><input style={inp} type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} /></div>
             <div><label style={lbl}>Password</label><input style={inp} type="password" placeholder="At least 6 characters" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSignUp()} /></div>
-            <div style={{ background: T.surface2 ?? "#161616", border: `1px solid ${T.border ?? "#1c1c1c"}`, borderRadius: 10, padding: "12px 14px", fontSize: 12, color: T.textMid ?? "#aaa", fontFamily: "'LBBody',sans-serif", lineHeight: 1.6 }}>
+            <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif", lineHeight: 1.6 }}>
               Your display name will appear on your reviews. Use your real name so colleagues know it's you.
             </div>
             <button onClick={handleSignUp} disabled={loading}
@@ -175,7 +175,7 @@ export default function UserAuth({ onClose, onLogin, theme: T }) {
         {/* Magic link */}
         {mode === "magic" && !success && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <p style={{ margin: "0 0 4px", fontSize: 14, color: T.textMid ?? "#aaa", fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
+            <p style={{ margin: "0 0 4px", fontSize: 14, color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
               Enter your email and we'll send you a link to log in instantly — no password needed.
             </p>
             <div><label style={lbl}>Email</label><input style={inp} type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === "Enter" && handleMagicLink()} /></div>

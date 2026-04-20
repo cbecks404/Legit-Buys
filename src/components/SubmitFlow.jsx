@@ -14,7 +14,7 @@ function extractCity(mapQuery) {
   return "";
 }
 
-export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillName = "" }) {
+export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
   const [f, setF] = useState({
@@ -54,9 +54,9 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
     touchStart.current = null;
   };
 
-  const inp = { width: "100%", background: T.surface2 ?? "#161616", border: `1px solid ${T.border2 ?? "#aaa"}`, borderRadius: 10, padding: "12px 14px", color: T.text ?? "#f0ede8", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "system-ui,sans-serif" };
+  const inp = { width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "12px 14px", color: "var(--text)", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "system-ui,sans-serif" };
   const lbl = { fontSize: 12, fontFamily: "'LBBody',sans-serif", color: "#f0ede8", letterSpacing: ".14em", textTransform: "uppercase", display: "block", marginBottom: 7, fontWeight: 600 };
-  const hint = { fontSize: 11, color: T.textDim ?? "#555", fontFamily: "'LBBody',sans-serif", marginTop: 5, lineHeight: 1.5 };
+  const hint = { fontSize: 11, color: "var(--text-dim)", fontFamily: "'LBBody',sans-serif", marginTop: 5, lineHeight: 1.5 };
   const handlePrice = (val) => set("price", val.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1"));
 
   const TOTAL_STEPS = 4;
@@ -67,7 +67,7 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
   const steps = [
     // Step 0 – The buy
     <div key={0} style={{ display: "flex", flexDirection: "column", gap: 16, animation: anim(dir) }}>
-      <div style={{ fontFamily: "'LBTitle', sans-serif", color: T.text ?? "#f0ede8", fontSize: "clamp(32px, 8vw, 52px)", letterSpacing: ".04em", lineHeight: 1, marginBottom: 16, textTransform: "uppercase" }}>THE BUY</div>
+      <div style={{ fontFamily: "'LBTitle', sans-serif", color: "var(--text)", fontSize: "clamp(32px, 8vw, 52px)", letterSpacing: ".04em", lineHeight: 1, marginBottom: 16, textTransform: "uppercase" }}>THE BUY</div>
       <div>
         <label style={lbl}>What's the Buy? *</label>
         <input style={inp} placeholder="e.g. Truffle arancini, Oat flat white, Almond butter cups…" value={f.product} onChange={e=>set("product",e.target.value)} />
@@ -75,16 +75,16 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
       </div>
       <div>
         <label style={lbl}>Category *</label>
-        <div style={{ fontSize: 11, color: T.textDim ?? "#e0ddd8", fontFamily: "'LBBody',sans-serif", marginBottom: 6 }}>Select all that apply</div>
+        <div style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "'LBBody',sans-serif", marginBottom: 6 }}>Select all that apply</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
           {Object.entries(CAT_META).filter(([k]) => k !== "all").map(([c, m]) => {
             const isActive = f.categories.includes(c);
             return (
               <button key={c} onClick={() => toggleCategory(c)} style={{
                 padding: "10px 4px", borderRadius: 10, border: "none", lineHeight: 1.5,
-                outline: `1.5px solid ${isActive ? m.color : T.border ?? "#1e1e1e"}`,
-                background: isActive ? `${m.color}14` : T.surface2 ?? "#161616",
-                color: isActive ? m.color : T.textDim ?? "#444",
+                outline: `1.5px solid ${isActive ? m.color : "var(--border)"}`,
+                background: isActive ? `${m.color}14` : "var(--surface2)",
+                color: isActive ? m.color : "var(--text-dim)",
                 fontFamily: "'DM Mono',monospace", fontSize: 11, cursor: "pointer", transition: "all .15s", position: "relative",
               }}>
                 {m.emoji}<br />{c}
@@ -101,14 +101,14 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
         <div>
           <label style={lbl}>Price</label>
           <div style={{ position: "relative" }}>
-            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: T.text ?? "#f0ede8", fontFamily: "'DM Mono',monospace", fontSize: 14, pointerEvents: "none" }}>£</span>
+            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text)", fontFamily: "'DM Mono',monospace", fontSize: 14, pointerEvents: "none" }}>£</span>
             <input style={{ ...inp, paddingLeft: 26 }} placeholder="3.99" value={f.price} onChange={e => handlePrice(e.target.value)} />
           </div>
         </div>
         <div>
           <label style={lbl}>Value</label>
           <select value={f.priceRange} onChange={e => set("priceRange", e.target.value)} style={{ ...inp, cursor: "pointer", appearance: "none", backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "calc(100% - 14px) center" }}>
-            {PRICE_RANGE.map(p => <option key={p.id} value={p.id} style={{ background: T.surface2 ?? "#161616" }}>{p.symbol} — {p.label}</option>)}
+            {PRICE_RANGE.map(p => <option key={p.id} value={p.id} style={{ background: "var(--surface2)" }}>{p.symbol} — {p.label}</option>)}
           </select>
         </div>
       </div>
@@ -118,7 +118,7 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
 
     // Step 1 – Score & name
     <div key={1} style={{ display: "flex", flexDirection: "column", gap: 16, animation: anim(dir) }}>
-      <div style={{ fontFamily: "'LBTitle', sans-serif", color: T.text ?? "#f0ede8", fontSize: "clamp(32px, 8vw, 52px)", letterSpacing: ".04em", lineHeight: 1, marginBottom: 16, textTransform: "uppercase" }}>YOUR VERDICT</div>
+      <div style={{ fontFamily: "'LBTitle', sans-serif", color: "var(--text)", fontSize: "clamp(32px, 8vw, 52px)", letterSpacing: ".04em", lineHeight: 1, marginBottom: 16, textTransform: "uppercase" }}>YOUR VERDICT</div>
       <div>
         <label style={lbl}>Score *</label>
         <ScoreSelector value={f.rating} interactive onChange={v => set("rating", v)} />
@@ -127,39 +127,39 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
         <label style={lbl}>Your honest review *</label>
         <textarea style={{ ...inp, minHeight:100, resize:"vertical" }} placeholder="What made this specific thing worth it? Taste, texture, value, occasion — be specific." value={f.review} onChange={e=>set("review",e.target.value)} />
       </div>
-      <div style={{ background: T.surface2 ?? "#141414", border: `1px solid ${T.border ?? "#1c1c1c"}`, borderRadius: 10, padding: "12px 14px", fontSize: 12, color: T.textMid ?? "#ddd", fontFamily: "'LBBody',monospace", lineHeight: 1.6 }}>
+      <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: "var(--text-mid)", fontFamily: "'LBBody',monospace", lineHeight: 1.6 }}>
         ✓ Submitting as <span style={{ color: "#C8FF47" }}>{prefillName}</span>
       </div>
       <button style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: (f.rating !== null && f.review) ? "pointer" : "not-allowed", opacity: (f.rating !== null && f.review) ? 1 : 0.35, marginTop: 6 }}
         onClick={() => { if (f.rating !== null && f.review) goNext(2); }}>NEXT →</button>
-      <button style={{ background: "transparent", color: T.textMid ?? "#ccc", border: `1px solid ${T.border2 ?? "#2e2e2e"}`, borderRadius: 99, padding: "11px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", marginTop: 4 }} onClick={() => goBack(0)}>← Back</button>
+      <button style={{ background: "transparent", color: "var(--text-mid)", border: "1px solid var(--border2)", borderRadius: 99, padding: "11px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", marginTop: 4 }} onClick={() => goBack(0)}>← Back</button>
     </div>,
 
     // Step 2 – Dietary info
     <div key={2} style={{ display: "flex", flexDirection: "column", gap: 16, animation: anim(dir) }}>
-      <div style={{ fontFamily: "'LBTitle', sans-serif", color: T.text ?? "#f0ede8", fontSize: "clamp(32px, 8vw, 52px)", letterSpacing: ".04em", lineHeight: 1, marginBottom: 16, textTransform: "uppercase" }}>DIETARY INFO</div>
-      <div style={{ background: T.surface2 ?? "#141414", border: `1px solid ${T.border ?? "#1c1c1c"}`, borderRadius: 10, padding: "12px 14px", fontSize: 12, color: T.textMid ?? "#ccc", fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
+      <div style={{ fontFamily: "'LBTitle', sans-serif", color: "var(--text)", fontSize: "clamp(32px, 8vw, 52px)", letterSpacing: ".04em", lineHeight: 1, marginBottom: 16, textTransform: "uppercase" }}>DIETARY INFO</div>
+      <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
         Tag any diets this suits. Optional — helps people filter for what works for them.
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {DIET_TAGS.map(tag => (
           <button key={tag.id} onClick={() => toggleDiet(tag.id)} style={{
             padding: "8px 14px", borderRadius: 99, fontSize: 12, cursor: "pointer", transition: "all .15s",
-            border: `1.5px solid ${f.dietTags.includes(tag.id) ? "#555" : T.border ?? "#1e1e1e"}`,
-            background: f.dietTags.includes(tag.id) ? "#ffffff14" : T.surface2 ?? "#161616",
-            color: f.dietTags.includes(tag.id) ? T.text ?? "#f0ede8" : T.textDim ?? "#bbb",
+            border: `1.5px solid ${f.dietTags.includes(tag.id) ? "#555" : "var(--border)"}`,
+            background: f.dietTags.includes(tag.id) ? "#ffffff14" : "var(--surface2)",
+            color: f.dietTags.includes(tag.id) ? "var(--text)" : "var(--text-dim)",
             fontFamily: "'LBBody',sans-serif",
           }}>{tag.label}</button>
         ))}
       </div>
       <button style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: "pointer", marginTop: 6 }} onClick={() => goNext(3)}>NEXT →</button>
-      <button style={{ background: "transparent", color: T.textMid ?? "#ccc", border: `1px solid ${T.border2 ?? "#2e2e2e"}`, borderRadius: 99, padding: "11px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", marginTop: 4 }} onClick={() => goBack(1)}>← Back</button>
+      <button style={{ background: "transparent", color: "var(--text-mid)", border: "1px solid var(--border2)", borderRadius: 99, padding: "11px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", marginTop: 4 }} onClick={() => goBack(1)}>← Back</button>
     </div>,
 
     // Step 3 – Links
     <div key={3} style={{ display: "flex", flexDirection: "column", gap: 16, animation: anim(dir) }}>
-      <div style={{ fontFamily: "'LBTitle', sans-serif", color: T.text ?? "#f0ede8", fontSize: "clamp(32px, 8vw, 52px)", letterSpacing: ".04em", lineHeight: 1, marginBottom: 16, textTransform: "uppercase" }}>LINKS</div>
-      <div style={{ background: T.surface2 ?? "#141414", border: `1px solid ${T.border ?? "#1c1c1c"}`, borderRadius: 10, padding: "12px 14px", fontSize: 12, color: T.textMid ?? "#ccc", fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
+      <div style={{ fontFamily: "'LBTitle', sans-serif", color: "var(--text)", fontSize: "clamp(32px, 8vw, 52px)", letterSpacing: ".04em", lineHeight: 1, marginBottom: 16, textTransform: "uppercase" }}>LINKS</div>
+      <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
         Help readers find it instantly. Both fields are optional — an admin can fill them in later.
       </div>
       <div>
@@ -182,30 +182,30 @@ export default function SubmitFlow({ onSubmit, onClose, theme: T = {}, prefillNa
       </div>
       <button style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: "pointer", marginTop: 6 }}
         onClick={() => { onSubmit(f); goNext(4); }}>SUBMIT FOR APPROVAL →</button>
-      <button style={{ background: "transparent", color: T.textMid ?? "#ccc", border: `1px solid ${T.border2 ?? "#2e2e2e"}`, borderRadius: 99, padding: "11px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", marginTop: 4 }} onClick={() => goBack(2)}>← Back</button>
+      <button style={{ background: "transparent", color: "var(--text-mid)", border: "1px solid var(--border2)", borderRadius: 99, padding: "11px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", marginTop: 4 }} onClick={() => goBack(2)}>← Back</button>
     </div>,
 
     // Done
     <div key={4} style={{ textAlign: "center", padding: "30px 0 10px", animation: "slideInRight .25s cubic-bezier(.16,1,.3,1)" }}>
       <div style={{ fontSize: 48, marginBottom: 16, color: "#C8FF47" }}>✦</div>
-      <div style={{ fontFamily: "'LBTitle',sans-serif", fontSize: 28, color: T.text ?? "#f0ede8", marginBottom: 8, letterSpacing: ".04em" }}>NICE ONE.</div>
-      <div style={{ fontSize: 13, color: T.textMid ?? "#ddd", lineHeight: 1.7, marginBottom: 28, fontFamily: "'LBBody',sans-serif" }}>Your review is in the queue.<br />It'll go live once approved.</div>
+      <div style={{ fontFamily: "'LBTitle',sans-serif", fontSize: 28, color: "var(--text)", marginBottom: 8, letterSpacing: ".04em" }}>NICE ONE.</div>
+      <div style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.7, marginBottom: 28, fontFamily: "'LBBody',sans-serif" }}>Your review is in the queue.<br />It'll go live once approved.</div>
       <button onClick={onClose} style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 32px", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: "pointer" }}>BACK TO BOARD</button>
     </div>,
   ];
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, background: T.bg ?? "#080808", display: "flex", flexDirection: "column", overflowY: "auto" }}
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column", overflowY: "auto" }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}>
       {/* Progress bar */}
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: T.bg ?? "#080808", paddingTop: "env(safe-area-inset-top)" }}>
-        <div style={{ height: 3, background: T.border ?? "#1a1a1a" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--bg)", paddingTop: "env(safe-area-inset-top)" }}>
+        <div style={{ height: 3, background: "var(--border)" }}>
           <div style={{ height: "100%", background: "#C8FF47", width: `${progress}%`, transition: "width .3s cubic-bezier(.16,1,.3,1)" }} />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 18px 8px" }}>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: T.textDim ?? "#555", fontSize: 13, fontFamily: "'LBBody',sans-serif", cursor: "pointer", padding: 0 }}>✕ Cancel</button>
-          <span style={{ fontSize: 11, color: T.textDim ?? "#555", fontFamily: "'LBBody',sans-serif", letterSpacing: ".1em" }}>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--text-dim)", fontSize: 13, fontFamily: "'LBBody',sans-serif", cursor: "pointer", padding: 0 }}>✕ Cancel</button>
+          <span style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "'LBBody',sans-serif", letterSpacing: ".1em" }}>
             {step < 4 ? `${step + 1} of 4` : ""}
           </span>
         </div>

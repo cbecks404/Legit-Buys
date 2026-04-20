@@ -33,7 +33,7 @@ function LinkButton({ link, where }) {
   );
 }
 
-export default function Card({ r, onUp, saved, onSave, theme: T = {}, upped: initialUpped = false }) {
+export default function Card({ r, onUp, saved, onSave, upped: initialUpped = false }) {
   const upped = initialUpped;
   const [expanded, setExpanded] = useState(false);
   const accent = CAT_META[r.category]?.color ?? "#C8FF47";
@@ -56,7 +56,7 @@ export default function Card({ r, onUp, saved, onSave, theme: T = {}, upped: ini
       style={{
         background: isHolo
           ? "linear-gradient(135deg,#1a1a2e 0%,#16213e 25%,#0f3460 50%,#1a1a2e 75%,#16213e 100%)"
-          : (T.cardBg ?? "#111"),
+          : "var(--card-bg)",
         backgroundSize: isHolo ? "300% 300%" : "auto",
         animation: isHolo ? "holo 6s ease infinite" : "none",
         border: isHolo ? "1px solid transparent" : `1px solid ${accent}55`,
@@ -99,13 +99,13 @@ export default function Card({ r, onUp, saved, onSave, theme: T = {}, upped: ini
               ))}
             </div>
             <div onClick={() => setExpanded(e => !e)} style={{ cursor: "pointer" }}>
-              <div style={{ fontFamily: "'LBCardHeader', serif", fontSize: 18, color: T.text ?? "#f0ede8", lineHeight: 1.25, marginBottom: 6 }}>
+              <div style={{ fontFamily: "'LBCardHeader', serif", fontSize: 18, color: "var(--text)", lineHeight: 1.25, marginBottom: 6 }}>
                 {r.product}
               </div>
               <span style={{
                 fontSize: 10, color: "#f0ede8", fontFamily: "'DM Mono',sans-serif",
-                letterSpacing: ".08em", background: T.surface2 ?? "#161616",
-                border: `1px solid ${T.border2 ?? "#2a2a2a"}`,
+                letterSpacing: ".08em", background: "var(--surface2)",
+                border: "1px solid var(--border2)",
                 padding: "4px 12px", borderRadius: 99, display: "inline-block",
               }}>
                 {expanded ? "▲ less" : "▼ more"}
@@ -116,7 +116,7 @@ export default function Card({ r, onUp, saved, onSave, theme: T = {}, upped: ini
         </div>
 
         {/* Review text */}
-        <p style={{ margin: 0, fontSize: 13.5, color: T.textMid ?? "#e0ddd8", lineHeight: 1.65, fontFamily: "'LBReview', serif" }}>{r.review}</p>
+        <p style={{ margin: 0, fontSize: 13.5, color: "var(--text-mid)", lineHeight: 1.65, fontFamily: "'LBReview', serif" }}>{r.review}</p>
 
         {/* Diet tags */}
         {dietTags.length > 0 && (
@@ -202,8 +202,8 @@ export default function Card({ r, onUp, saved, onSave, theme: T = {}, upped: ini
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               style={{
                 background: saved ? "#ffffff14" : "transparent",
-                border: `1px solid ${saved ? "#f0ede8" : T.border2 ?? "#2a2a2a"}`,
-                color: saved ? "#f0ede8" : T.textMid ?? "#888",
+                border: `1px solid ${saved ? "#f0ede8" : "var(--border2)"}`,
+                color: saved ? "#f0ede8" : "var(--text-mid)",
                 borderRadius: 99, padding: "7px 14px", fontSize: 14,
                 fontFamily: "'LBBody', sans-serif", cursor: "pointer", transition: "all .15s",
                 animation: saved ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
@@ -216,8 +216,8 @@ export default function Card({ r, onUp, saved, onSave, theme: T = {}, upped: ini
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               style={{
                 background: upped ? `${accent}22` : "transparent",
-                border: `1px solid ${upped ? accent : T.border2 ?? "#2a2a2a"}`,
-                color: upped ? accent : T.textMid ?? "#888",
+                border: `1px solid ${upped ? accent : "var(--border2)"}`,
+                color: upped ? accent : "var(--text-mid)",
                 borderRadius: 99, padding: "7px 14px", fontSize: 14,
                 fontFamily: "'LBBody', sans-serif", cursor: upped ? "default" : "pointer", transition: "all .15s",
                 animation: upped ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",

@@ -352,7 +352,7 @@ export default function App() {
           <div style={{ padding: "8px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
             {loading && <div style={{ textAlign: "center", padding: "60px 0", color: "#CCC", fontSize: 13, fontFamily: "'DM Mono',monospace", letterSpacing: ".1em" }}>loading buys...</div>}
             {!loading && filtered.length === 0 && <div style={{ textAlign: "center", padding: "60px 0", color: "#222", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>No reviews match these filters.</div>}
-            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} theme={T} upped={userUpvotes.includes(r.id)} />)}
+            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} />)}
           </div>
         </div>
 
@@ -422,7 +422,6 @@ export default function App() {
             user={user}
             darkMode={darkMode}
             toggleTheme={toggleTheme}
-            theme={T}
           />
         )}
 
@@ -430,7 +429,6 @@ export default function App() {
         {showFilter && (
           <FilterPanel
             onClose={() => setShowFilter(false)}
-            theme={T}
             cat={cat} setCat={setCat}
             activeScore={activeScore} setActiveScore={setActiveScore}
             activeDiet={activeDiet} toggleDietFilter={toggleDietFilter}
@@ -450,7 +448,6 @@ export default function App() {
               setAdminUser(null);
               setScreen("home");
             }}
-            theme={T}
           />
         )}
 
@@ -459,19 +456,18 @@ export default function App() {
           <UserAuth
             onClose={() => setShowUserAuth(false)}
             onLogin={(u) => { setUser(u); setScreen("profile"); }}
-            theme={T}
           />
         )}
 
         {/* Walkthroughs */}
-        {showAppIntro && !splash && <AppIntro onDismiss={dismissIntro} theme={T} />}
-        {showSubmitGuide && <SubmitGuide onDismiss={dismissSubmitGuide} theme={T} />}
+        {showAppIntro && !splash && <AppIntro onDismiss={dismissIntro} />}
+        {showSubmitGuide && <SubmitGuide onDismiss={dismissSubmitGuide} />}
 
         {/* Modals */}
-        {modal === "submit" && <SubmitFlow onSubmit={submit} onClose={() => setModal(null)} theme={T} prefillName={userProfile?.display_name ?? ""} />}
+        {modal === "submit" && <SubmitFlow onSubmit={submit} onClose={() => setModal(null)} prefillName={userProfile?.display_name ?? ""} />}
 
         {modal === "adminLogin" && (
-          <Sheet title="Admin login" onClose={() => setModal(null)} theme={T}>
+          <Sheet title="Admin login" onClose={() => setModal(null)}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div>
                 <label style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#bbb", letterSpacing: ".14em", textTransform: "uppercase", display: "block", marginBottom: 7, fontWeight: 600 }}>Email</label>
@@ -494,7 +490,7 @@ export default function App() {
         )}
 
         {modal === "rateLimited" && (
-          <Sheet title="Submission limit reached" onClose={() => setModal(null)} theme={T}>
+          <Sheet title="Submission limit reached" onClose={() => setModal(null)}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div style={{ background: "#141414", border: "1px solid #1c1c1c", borderRadius: 10, padding: "14px 16px", fontSize: 13, color: "#ccc", fontFamily: "'DM Mono',monospace", lineHeight: 1.7 }}>
                 You've submitted {RATE_LIMIT} reviews in the last 24 hours — that's the daily limit to keep things quality over quantity.
@@ -510,7 +506,7 @@ export default function App() {
         )}
 
         {modal === "admin" && (
-          <Sheet title={`Admin${pending.length ? ` · ${pending.length} pending` : ""}`} onClose={() => setModal(null)} theme={T}>
+          <Sheet title={`Admin${pending.length ? ` · ${pending.length} pending` : ""}`} onClose={() => setModal(null)}>
             <AdminQueue pending={pending} onApprove={approve} onReject={reject} approved={reviews} onEditApproved={editApproved} onUpdatePending={updatePending} />
             <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid #1a1a1a" }}>
               <div style={{ fontSize: 11, color: "#CCC", fontFamily: "'DM Mono',monospace", marginBottom: 10 }}>

@@ -1,4 +1,4 @@
-export default function Sheet({ title, onClose, children, theme: T = {} }) {
+export default function Sheet({ title, onClose, children }) {
   return (
     <div
       onClick={e => e.target === e.currentTarget && onClose()}
@@ -8,8 +8,8 @@ export default function Sheet({ title, onClose, children, theme: T = {} }) {
         alignItems: "flex-end", justifyContent: "center", zIndex: 200,
       }}>
       <div style={{
-        background: T.sheetBg ?? "#0d0d0d",
-        borderTop: `1px solid ${T.sheetBorder ?? "#202020"}`,
+        background: "var(--sheet-bg)",
+        borderTop: "1px solid var(--sheet-border)",
         borderRadius: "18px 18px 0 0", width: "100%", maxWidth: 520,
         maxHeight: "92vh", overflowY: "auto", padding: "26px 22px 50px",
         animation: "sheetUp .25s cubic-bezier(.16,1,.3,1)",

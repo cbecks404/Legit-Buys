@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export function AppIntro({ onDismiss, theme: T }) {
+export function AppIntro({ onDismiss }) {
   const [step, setStep] = useState(0);
   const steps = [
     {
@@ -34,29 +34,29 @@ export function AppIntro({ onDismiss, theme: T }) {
     <div onClick={e => e.target === e.currentTarget && onDismiss(false)}
       style={{ position: "fixed", inset: 0, background: "#000000cc", backdropFilter: "blur(10px)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 300 }}>
       <div style={{
-        background: T.sheetBg ?? "#0d0d0d", borderTop: `1px solid ${T.sheetBorder ?? "#202020"}`,
+        background: "var(--sheet-bg)", borderTop: "1px solid var(--sheet-border)",
         borderRadius: "18px 18px 0 0", width: "100%", maxWidth: 520,
         padding: "26px 22px 50px", animation: "sheetUp .25s cubic-bezier(.16,1,.3,1)",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div style={{ display: "flex", gap: 6 }}>
             {steps.map((_, i) => (
-              <div key={i} style={{ width: i === step ? 20 : 6, height: 6, borderRadius: 99, background: i < step ? "#C8FF4788" : i === step ? "#C8FF47" : T.border ?? "#1e1e1e", transition: "all .3s" }} />
+              <div key={i} style={{ width: i === step ? 20 : 6, height: 6, borderRadius: 99, background: i < step ? "#C8FF4788" : i === step ? "#C8FF47" : "var(--border)", transition: "all .3s" }} />
             ))}
           </div>
-          <button onClick={() => onDismiss(false)} style={{ background: "none", border: "none", color: T.textDim ?? "#555", fontSize: 20, cursor: "pointer" }}>✕</button>
+          <button onClick={() => onDismiss(false)} style={{ background: "none", border: "none", color: "var(--text-dim)", fontSize: 20, cursor: "pointer" }}>✕</button>
         </div>
 
         <div style={{ fontSize: 40, marginBottom: 16, color: s.emoji === "✦" ? "#C8FF47" : "inherit" }}>{s.emoji}</div>
-        <div style={{ fontFamily: "'LBCardHeader', serif", fontSize: 22, color: T.text ?? "#f0ede8", marginBottom: 12, lineHeight: 1.2 }}>{s.title}</div>
-        <p style={{ margin: "0 0 20px", fontSize: 14, color: T.textMid ?? "#e0ddd8", fontFamily: "'LBBody', sans-serif", lineHeight: 1.7 }}>{s.body}</p>
+        <div style={{ fontFamily: "'LBCardHeader', serif", fontSize: 22, color: "var(--text)", marginBottom: 12, lineHeight: 1.2 }}>{s.title}</div>
+        <p style={{ margin: "0 0 20px", fontSize: 14, color: "var(--text-mid)", fontFamily: "'LBBody', sans-serif", lineHeight: 1.7 }}>{s.body}</p>
 
         {s.tip && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
             {s.tip.map(t => (
-              <div key={t.score} style={{ display: "flex", alignItems: "center", gap: 12, background: T.surface2 ?? "#161616", border: `1px solid ${T.border ?? "#1e1e1e"}`, borderRadius: 10, padding: "10px 14px" }}>
+              <div key={t.score} style={{ display: "flex", alignItems: "center", gap: 12, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px 14px" }}>
                 <span style={{ fontSize: 11, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: t.color, background: `${t.color}18`, border: `1px solid ${t.color}44`, padding: "3px 9px", borderRadius: 99, whiteSpace: "nowrap" }}>{t.label.toUpperCase()}</span>
-                <span style={{ fontSize: 12, color: T.textMid ?? "#e0ddd8", fontFamily: "'LBBody', sans-serif" }}>{t.desc}</span>
+                <span style={{ fontSize: 12, color: "var(--text-mid)", fontFamily: "'LBBody', sans-serif" }}>{t.desc}</span>
               </div>
             ))}
           </div>
@@ -68,7 +68,7 @@ export function AppIntro({ onDismiss, theme: T }) {
           {isLast ? "LET'S GO →" : "NEXT →"}
         </button>
         {isLast && (
-          <button onClick={() => onDismiss(true)} style={{ background: "none", border: "none", color: T.textDim ?? "#555", fontSize: 12, fontFamily: "'LBBody', sans-serif", cursor: "pointer", width: "100%", padding: "8px 0" }}>
+          <button onClick={() => onDismiss(true)} style={{ background: "none", border: "none", color: "var(--text-dim)", fontSize: 12, fontFamily: "'LBBody', sans-serif", cursor: "pointer", width: "100%", padding: "8px 0" }}>
             Don't show this again
           </button>
         )}
@@ -77,7 +77,7 @@ export function AppIntro({ onDismiss, theme: T }) {
   );
 }
 
-export function SubmitGuide({ onDismiss, theme: T }) {
+export function SubmitGuide({ onDismiss }) {
   const [step, setStep] = useState(0);
   const steps = [
     {
@@ -112,31 +112,31 @@ export function SubmitGuide({ onDismiss, theme: T }) {
     <div onClick={e => e.target === e.currentTarget && onDismiss(false)}
       style={{ position: "fixed", inset: 0, background: "#000000cc", backdropFilter: "blur(10px)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 300 }}>
       <div style={{
-        background: T.sheetBg ?? "#0d0d0d", borderTop: `1px solid ${T.sheetBorder ?? "#202020"}`,
+        background: "var(--sheet-bg)", borderTop: "1px solid var(--sheet-border)",
         borderRadius: "18px 18px 0 0", width: "100%", maxWidth: 520,
         padding: "26px 22px 50px", animation: "sheetUp .25s cubic-bezier(.16,1,.3,1)",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div style={{ display: "flex", gap: 6 }}>
             {steps.map((_, i) => (
-              <div key={i} style={{ width: i === step ? 20 : 6, height: 6, borderRadius: 99, background: i < step ? "#C8FF4788" : i === step ? "#C8FF47" : T.border ?? "#1e1e1e", transition: "all .3s" }} />
+              <div key={i} style={{ width: i === step ? 20 : 6, height: 6, borderRadius: 99, background: i < step ? "#C8FF4788" : i === step ? "#C8FF47" : "var(--border)", transition: "all .3s" }} />
             ))}
           </div>
-          <button onClick={() => onDismiss(false)} style={{ background: "none", border: "none", color: T.textDim ?? "#555", fontSize: 20, cursor: "pointer" }}>✕</button>
+          <button onClick={() => onDismiss(false)} style={{ background: "none", border: "none", color: "var(--text-dim)", fontSize: 20, cursor: "pointer" }}>✕</button>
         </div>
 
         <div style={{ fontSize: 40, marginBottom: 16 }}>{s.emoji}</div>
-        <div style={{ fontFamily: "'LBCardHeader', serif", fontSize: 22, color: T.text ?? "#f0ede8", marginBottom: 12, lineHeight: 1.2 }}>{s.title}</div>
-        <p style={{ margin: "0 0 16px", fontSize: 14, color: T.textMid ?? "#e0ddd8", fontFamily: "'LBBody', sans-serif", lineHeight: 1.7 }}>{s.body}</p>
+        <div style={{ fontFamily: "'LBCardHeader', serif", fontSize: 22, color: "var(--text)", marginBottom: 12, lineHeight: 1.2 }}>{s.title}</div>
+        <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--text-mid)", fontFamily: "'LBBody', sans-serif", lineHeight: 1.7 }}>{s.body}</p>
 
         {s.pricing && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
             {s.pricing.map(p => (
-              <div key={p.symbol} style={{ display: "flex", alignItems: "flex-start", gap: 12, background: T.surface2 ?? "#161616", border: `1px solid ${T.border ?? "#1e1e1e"}`, borderRadius: 10, padding: "10px 14px" }}>
+              <div key={p.symbol} style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px 14px" }}>
                 <span style={{ fontSize: 13, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: "#C8FF47", background: "#C8FF4714", border: "1px solid #C8FF4733", padding: "3px 9px", borderRadius: 99, whiteSpace: "nowrap", minWidth: 40, textAlign: "center" }}>{p.symbol}</span>
                 <div>
-                  <div style={{ fontSize: 12, fontFamily: "'LBCardHeader',serif", color: T.text ?? "#f0ede8", marginBottom: 3 }}>{p.label}</div>
-                  <div style={{ fontSize: 11, fontFamily: "'LBBody',sans-serif", color: T.textMid ?? "#aaa", lineHeight: 1.5 }}>{p.examples}</div>
+                  <div style={{ fontSize: 12, fontFamily: "'LBCardHeader',serif", color: "var(--text)", marginBottom: 3 }}>{p.label}</div>
+                  <div style={{ fontSize: 11, fontFamily: "'LBBody',sans-serif", color: "var(--text-mid)", lineHeight: 1.5 }}>{p.examples}</div>
                 </div>
               </div>
             ))}
@@ -144,7 +144,7 @@ export function SubmitGuide({ onDismiss, theme: T }) {
         )}
 
         {s.tip && (
-          <div style={{ background: T.surface2 ?? "#161616", border: `1px solid ${T.border ?? "#1e1e1e"}`, borderRadius: 10, padding: "12px 14px", marginBottom: 20 }}>
+          <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", marginBottom: 20 }}>
             <p style={{ margin:0, fontSize:12, color:"#C8FF47", fontFamily:"system-ui,sans-serif", lineHeight:1.6 }}>💡 {s.tip}</p>
             {s.link && (
               <a href="/scoring-guide.html" target="_blank" rel="noopener noreferrer"
@@ -161,7 +161,7 @@ export function SubmitGuide({ onDismiss, theme: T }) {
           {isLast ? "START REVIEWING →" : "NEXT →"}
         </button>
         {isLast && (
-          <button onClick={() => onDismiss(true)} style={{ background: "none", border: "none", color: T.textDim ?? "#555", fontSize: 12, fontFamily: "'LBBody', sans-serif", cursor: "pointer", width: "100%", padding: "8px 0" }}>
+          <button onClick={() => onDismiss(true)} style={{ background: "none", border: "none", color: "var(--text-dim)", fontSize: 12, fontFamily: "'LBBody', sans-serif", cursor: "pointer", width: "100%", padding: "8px 0" }}>
             Don't show this again
           </button>
         )}

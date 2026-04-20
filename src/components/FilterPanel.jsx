@@ -2,7 +2,7 @@ import { CAT_META, DIET_TAGS, SCORE_META, SCORE_COLORS } from "../constants";
 import { Pill, DietPill } from "./Pills";
 
 export default function FilterPanel({
-  onClose, theme: T,
+  onClose,
   cat, setCat,
   activeScore, setActiveScore,
   activeDiet, toggleDietFilter,
@@ -15,8 +15,8 @@ export default function FilterPanel({
     <div onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: "fixed", inset: 0, background: "#000000cc", backdropFilter: "blur(10px)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 200 }}>
       <div style={{
-        background: T.sheetBg ?? "#0d0d0d",
-        borderTop: `1px solid ${T.sheetBorder ?? "#202020"}`,
+        background: "var(--sheet-bg)",
+        borderTop: "1px solid var(--sheet-border)",
         borderRadius: "18px 18px 0 0", width: "100%", maxWidth: 520,
         maxHeight: "85vh", overflowY: "auto",
         padding: "26px 22px 50px",
@@ -24,17 +24,17 @@ export default function FilterPanel({
       }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
-          <span style={{ fontFamily: "'LBTitle',sans-serif", fontSize: 22, color: T.text ?? "#f0ede8", letterSpacing: ".04em" }}>FILTERS</span>
+          <span style={{ fontFamily: "'LBTitle',sans-serif", fontSize: 22, color: "var(--text)", letterSpacing: ".04em" }}>FILTERS</span>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             {hasFilters && (
               <button onClick={onClearAll} style={{
-                background: "none", border: `1px solid ${T.border2 ?? "#333"}`,
+                background: "none", border: "1px solid var(--border2)",
                 borderRadius: 99, padding: "5px 12px",
-                color: T.textMid ?? "#aaa", fontFamily: "'LBBody',sans-serif",
+                color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif",
                 fontSize: 11, cursor: "pointer",
               }}>Clear all</button>
             )}
-            <button onClick={onClose} style={{ background: "none", border: "none", color: T.textDim ?? "#555", fontSize: 22, cursor: "pointer" }}>✕</button>
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--text-dim)", fontSize: 22, cursor: "pointer" }}>✕</button>
           </div>
         </div>
 
@@ -82,8 +82,8 @@ export default function FilterPanel({
           <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#f0ede8", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>Saved</div>
           <button onClick={() => setShowSaved(s => !s)} style={{
             background: showSaved ? "#ffffff14" : "transparent",
-            border: `1px solid ${showSaved ? "#f0ede8" : T.border2 ?? "#2e2e2e"}`,
-            color: showSaved ? "#f0ede8" : T.textMid ?? "#BBB",
+            border: `1px solid ${showSaved ? "#f0ede8" : "var(--border2)"}`,
+            color: showSaved ? "#f0ede8" : "var(--text-mid)",
             borderRadius: 99, padding: "7px 16px", fontSize: 11,
             fontFamily: "'DM Mono',monospace", cursor: "pointer", transition: "all .2s",
           }}>
