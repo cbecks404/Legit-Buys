@@ -46,7 +46,7 @@ Footer submitter becomes a tap target. `Card` exposes `onSubmitterClick(submitte
 
 **Drop the `T` prop entirely.**
 
-- New file: `src/theme.css`. Defines both palettes as CSS custom properties under `[data-theme="light"]` and `[data-theme="dark"]`. Same keys `T` carries today (`--bg`, `--surface`, `--surface2`, `--border`, `--border2`, `--text`, `--text-mid`, `--text-dim`, `--pill`, `--card-bg`, `--sheet-bg`, `--sheet-border`, `--accent`, `--accent-dark`, `--accent-text`). Score colors exposed as `--score-0` through `--score-3`.
+- New file: `src/theme.css`. Defines both palettes as CSS custom properties under `[data-theme="light"]` and `[data-theme="dark"]`. Keys mirror the worktree's current `T` object (`--bg`, `--surface`, `--surface2`, `--border`, `--border2`, `--text`, `--text-mid`, `--text-dim`, `--pill`, `--card-bg`, `--sheet-bg`, `--sheet-border`). Score colors exposed as `--score-0` through `--score-3`. No new accent keys.
 - `App.jsx` keeps the `darkMode` state and the theme-toggle button. On toggle it sets `document.documentElement.dataset.theme = 'dark' | 'light'` and persists to localStorage. No more `T` object constructed in `App`.
 - Every component that currently takes `theme={T}` is converted in the same PR:
   - `Card`, `Sheet`, `Pills`, `FilterPanel`, `MenuPanel`, `ProfilePage`, `SubmitFlow`, `AdminQueue`, `UserAuth`, `Walkthroughs`, `ScoreSelector`.
