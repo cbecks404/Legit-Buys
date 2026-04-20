@@ -1,5 +1,9 @@
 :root {
   color-scheme: light dark;
+  --score-0: #808080;
+  --score-1: #60C3F5;
+  --score-2: #F4A942;
+  --score-3: #C8FF47;
 }
 
 [data-theme="light"] {
@@ -15,10 +19,6 @@
   --card-bg:       #ffffff;
   --sheet-bg:      #faf8f5;
   --sheet-border:  #d0c8be;
-  --score-0:       #808080;
-  --score-1:       #60C3F5;
-  --score-2:       #F4A942;
-  --score-3:       #C8FF47;
 }
 
 [data-theme="dark"] {
@@ -34,8 +34,4 @@
   --card-bg:       #111111;
   --sheet-bg:      #0d0d0d;
   --sheet-border:  #202020;
-  --score-0:       #808080;
-  --score-1:       #60C3F5;
-  --score-2:       #F4A942;
-  --score-3:       #C8FF47;
 }
