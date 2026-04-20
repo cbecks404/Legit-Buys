@@ -58,29 +58,6 @@ export default function App() {
     catch { return true; }
   });
 
-  // ── Theme ──────────────────────────────────────────
-  const T = darkMode ? {
-    bg: "#080808", surface: "#111", surface2: "#161616",
-    border: "#1c1c1c", border2: "#2a2a2a",
-    text: "#f0ede8", textMid: "#e0ddd8", textDim: "#555",
-    pill: "#232323", cardBg: "#111",
-    sheetBg: "#0d0d0d", sheetBorder: "#202020",
-  } : {
-    bg: "#f5f2ee", surface: "#ffffff", surface2: "#f0ede8",
-    border: "#d0c8be", border2: "#b8b0a6",
-    text: "#0f0d0b", textMid: "#2e2a26", textDim: "#6b6158",
-    pill: "#e0d8d0", cardBg: "#ffffff",
-    sheetBg: "#faf8f5", sheetBorder: "#d0c8be",
-  };
-
-  const toggleTheme = () => {
-    setDarkMode(d => {
-      const next = !d;
-      localStorage.setItem("lb_theme", next ? "dark" : "light");
-      return next;
-    });
-  };
-
   // ── Sync data-theme attribute with darkMode (CSS variable theming) ──
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? "dark" : "light";
@@ -250,17 +227,17 @@ export default function App() {
         {/* Splash screen */}
         {splash && (
           <div style={{
-            position: "fixed", inset: 0, zIndex: 999, background: T.bg,
+            position: "fixed", inset: 0, zIndex: 999, background: "var(--bg)",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
             animation: loading ? "none" : "splashFadeOut .8s ease forwards",
             pointerEvents: loading ? "all" : "none",
           }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, animation: "splashFadeIn .6s cubic-bezier(.16,1,.3,1) forwards" }}>
               <div style={{ fontSize: 48, color: "#C8FF47", animation: "pulse 2s ease infinite" }}>✦</div>
-              <h1 style={{ margin: "0 0 6px", fontFamily: "'LBTitle', sans-serif", fontSize: "clamp(48px, 11vw, 120px)", lineHeight: 1, color: T.text, fontWeight: 400, letterSpacing: ".04em", textTransform: "uppercase" }}>
+              <h1 style={{ margin: "0 0 6px", fontFamily: "'LBTitle', sans-serif", fontSize: "clamp(48px, 11vw, 120px)", lineHeight: 1, color: "var(--text)", fontWeight: 400, letterSpacing: ".04em", textTransform: "uppercase" }}>
                 LEGIT BUYS
               </h1>
-              <p style={{ margin: "0 0 24px", color: T.textMid, fontSize: 13.5, lineHeight: 1.6, fontFamily: "'LBBody', sans-serif", letterSpacing: ".18em", textTransform: "uppercase" }}>
+              <p style={{ margin: "0 0 24px", color: "var(--text-mid)", fontSize: 13.5, lineHeight: 1.6, fontFamily: "'LBBody', sans-serif", letterSpacing: ".18em", textTransform: "uppercase" }}>
                 Real picks from real foodies
               </p>
             </div>
@@ -277,7 +254,7 @@ export default function App() {
         {/* Global styles */}
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,700;1,400&family=DM+Mono:wght@400;600;700&display=swap');
-          *{box-sizing:border-box;} body{margin:0;background:${T.bg};transition:background .3s;}
+          *{box-sizing:border-box;} body{margin:0;background:var(--bg);transition:background .3s;}
           @keyframes sheetUp      {from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
           @keyframes holo         {0%{background-position:0% 50%;filter:hue-rotate(0deg)}50%{background-position:100% 50%;filter:hue-rotate(180deg)}100%{background-position:0% 50%;filter:hue-rotate(360deg)}}
           @keyframes shimmer      {0%{transform:translateX(-100%) rotate(45deg)}100%{transform:translateX(200%) rotate(45deg)}}
@@ -296,15 +273,15 @@ export default function App() {
         `}</style>
 
         {/* Main board */}
-        <div style={{ maxWidth: 520, margin: "0 auto", minHeight: "100vh", paddingBottom: 120, overflowX: "hidden", background: T.bg, transition: "background .3s" }}>
-          <div style={{ padding: "20px 18px 0", position: "relative", background: T.bg }}>
+        <div style={{ maxWidth: 520, margin: "0 auto", minHeight: "100vh", paddingBottom: 120, overflowX: "hidden", background: "var(--bg)", transition: "background .3s" }}>
+          <div style={{ padding: "20px 18px 0", position: "relative", background: "var(--bg)" }}>
 
             {/* Top bar */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <span style={{ color: "#C8FF47", fontSize: 28, lineHeight: 1 }}>✦</span>
               <button onClick={() => setShowMenu(true)} style={{
                 background: "none", border: "none", cursor: "pointer",
-                color: T.textMid ?? "#aaa", fontSize: 22, padding: 4, lineHeight: 1,
+                color: "var(--text-mid)", fontSize: 22, padding: 4, lineHeight: 1,
               }}>☰</button>
             </div>
 
@@ -320,8 +297,8 @@ export default function App() {
                       onClick={() => setActiveCity(null)}
                       style={{
                         background: !activeCity ? "#C8FF47" : "transparent",
-                        color: !activeCity ? "#0a0a0a" : T.textMid ?? "#aaa",
-                        border: `1.5px solid ${!activeCity ? "#C8FF47" : T.border2 ?? "#2a2a2a"}`,
+                        color: !activeCity ? "#0a0a0a" : "var(--text-mid)",
+                        border: `1.5px solid ${!activeCity ? "#C8FF47" : "var(--border2)"}`,
                         borderRadius: 99, padding: "5px 14px", fontSize: 12,
                         fontFamily: "'LBBody',sans-serif", cursor: "pointer",
                         whiteSpace: "nowrap", transition: "all .15s",
@@ -333,8 +310,8 @@ export default function App() {
                         onClick={() => setActiveCity(activeCity === city ? null : city)}
                         style={{
                           background: activeCity === city ? "#C8FF47" : "transparent",
-                          color: activeCity === city ? "#0a0a0a" : T.textMid ?? "#aaa",
-                          border: `1.5px solid ${activeCity === city ? "#C8FF47" : T.border2 ?? "#2a2a2a"}`,
+                          color: activeCity === city ? "#0a0a0a" : "var(--text-mid)",
+                          border: `1.5px solid ${activeCity === city ? "#C8FF47" : "var(--border2)"}`,
                           borderRadius: 99, padding: "5px 14px", fontSize: 12,
                           fontFamily: "'LBBody',sans-serif", cursor: "pointer",
                           whiteSpace: "nowrap", transition: "all .15s",
