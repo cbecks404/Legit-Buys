@@ -267,12 +267,12 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
         }}>
           <button
             type="button"
-            onClick={undefined}
+            onClick={onSubmitterClick ? () => onSubmitterClick(r.user_id ?? r.submitter) : undefined}
             style={{
               background: "none",
               border: "none",
               padding: 0,
-              cursor: "default",
+              cursor: onSubmitterClick ? "pointer" : "default",
               fontSize: 11,
               color: "var(--text-mid)",
               fontFamily: "'LBBody', sans-serif",
@@ -290,9 +290,9 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
               onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               style={{
-                background: saved ? "#ffffff14" : "transparent",
-                border: `1px solid ${saved ? "var(--text)" : "var(--border2)"}`,
-                color: saved ? "var(--text)" : "var(--text-mid)",
+                background: saved ? "#2D6A4F18" : "transparent",
+                border: `1px solid ${saved ? "#2D6A4F" : "var(--border2)"}`,
+                color: saved ? "#2D6A4F" : "var(--text-mid)",
                 borderRadius: 99,
                 padding: "7px 14px",
                 fontSize: 14,

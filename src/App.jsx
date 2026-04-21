@@ -329,7 +329,7 @@ export default function App() {
           <div style={{ padding: "8px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
             {loading && <div style={{ textAlign: "center", padding: "60px 0", color: "#CCC", fontSize: 13, fontFamily: "'DM Mono',monospace", letterSpacing: ".1em" }}>loading buys...</div>}
             {!loading && filtered.length === 0 && <div style={{ textAlign: "center", padding: "60px 0", color: "#222", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>No reviews match these filters.</div>}
-            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} />)}
+            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={(id) => console.log("submitter clicked:", id)} />)}
           </div>
         </div>
 
