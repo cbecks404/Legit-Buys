@@ -107,7 +107,7 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
           </div>
         )}
 
-        {/* 2e. Expand block */}
+        {/* 2d. Expand block */}
         {expanded && (
           <div style={{
             borderTop: "1px solid var(--border)",
@@ -257,7 +257,7 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
           </div>
         )}
 
-        {/* 2d. Footer */}
+        {/* 2e. Footer */}
         <div style={{
           display: "flex",
           justifyContent: "space-between",
