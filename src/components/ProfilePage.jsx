@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { CAT_META, SCORE_COLORS, SCORE_META, priceSymbol } from "../constants";
 
-export default function ProfilePage({ user, onClose, onLogout }) {
+export default function ProfilePage({ user, onClose }) {
   const [profile, setProfile]       = useState(null);
   const [myReviews, setMyReviews]   = useState([]);
   const [myPending, setMyPending]   = useState([]);

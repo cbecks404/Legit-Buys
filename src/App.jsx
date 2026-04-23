@@ -12,7 +12,7 @@ import {
 import Card from "./components/Card";
 import Sheet from "./components/Sheet";
 import SubmitFlow from "./components/SubmitFlow";
-import AdminQueue from "./components/AdminQueue";
+import VerifiedUsers from "./components/VerifiedUsers";
 import { Pill, DietPill } from "./components/Pills";
 import { AppIntro, SubmitGuide } from "./components/Walkthroughs";
 import MenuPanel from "./components/MenuPanel";
@@ -22,7 +22,6 @@ import ProfilePage from "./components/ProfilePage";
 
 export default function App() {
   const [reviews, setReviews]           = useState([]);
-  const [pending, setPending]           = useState([]);
   const [loading, setLoading]           = useState(true);
   const [cat, setCat]                   = useState("all");
   const [showSaved, setShowSaved]       = useState(false);
@@ -53,7 +52,7 @@ export default function App() {
   const [user, setUser]                 = useState(null);
   const [userProfile, setUserProfile]   = useState(null);
   const [showUserAuth, setShowUserAuth] = useState(false);
-  const [darkMode, setDarkMode]         = useState(() => {
+  const [darkMode]                       = useState(() => {
     try { return localStorage.getItem("lb_theme") !== "light"; }
     catch { return true; }
   });
@@ -62,6 +61,40 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? "dark" : "light";
   }, [darkMode]);
+
+  // ── Helpers ────────────────────────────────────────
+  const loadUserProfile = async (u) => {
+    if (!u) { setUserProfile(null); setUserUpvotes([]); return; }
+    const [{ data: prof }, { data: upvoteData }] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", u.id).single(),
+      supabase.from("upvotes").select("review_id").eq("user_id", u.id),
+    ]);
+    if (prof) setUserProfile(prof);
+    if (upvoteData) setUserUpvotes(upvoteData.map(u => u.review_id));
+  };
+
+  const toggleSave = (id) => {
+    setSaved(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+      localStorage.setItem("lb_saved", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const toggleDietFilter = (id) => setActiveDiet(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+
+  const filtered = [...reviews]
+    .filter(r => !showSaved || saved.includes(r.id))
+    .filter(r => cat === "all" || (r.categories ?? [r.category]).includes(cat))
+    .filter(r => activeDiet.length === 0 || activeDiet.every(d => (r.diet_tags ?? []).includes(d)))
+    .filter(r => activeScore === null || r.rating === activeScore)
+    .filter(r => !activeCity || r.city === activeCity)
+    .sort((a, b) => {
+      const aHolo = a.rating === 3 && (a.price_range === "pricey") ? 1 : 0;
+      const bHolo = b.rating === 3 && (b.price_range === "pricey") ? 1 : 0;
+      if (bHolo !== aHolo) return bHolo - aHolo;
+      return b.upvotes - a.upvotes;
+    });
 
   // ── Data loading ───────────────────────────────────
   useEffect(() => {
@@ -88,51 +121,14 @@ export default function App() {
     });
 
     async function loadData() {
-      const { data: liveReviews }    = await supabase.from("reviews").select("*").order("upvotes", { ascending: false });
-      const { data: pendingReviews } = await supabase.from("pending_reviews").select("*").order("date", { ascending: false });
-      if (liveReviews)    setReviews(liveReviews);
-      if (pendingReviews) setPending(pendingReviews);
+      const { data: liveReviews } = await supabase.from("reviews").select("*").order("upvotes", { ascending: false });
+      if (liveReviews) setReviews(liveReviews);
       setLoading(false);
       setTimeout(() => setSplash(false), 600);
     }
 
     loadData();
   }, []);
-
-  // ── Helpers ────────────────────────────────────────
-  const toggleSave = (id) => {
-    setSaved(prev => {
-      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
-      localStorage.setItem("lb_saved", JSON.stringify(next));
-      return next;
-    });
-  };
-
-  const toggleDietFilter = (id) => setActiveDiet(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
-
-  const filtered = [...reviews]
-    .filter(r => !showSaved || saved.includes(r.id))
-    .filter(r => cat === "all" || (r.categories ?? [r.category]).includes(cat))
-    .filter(r => activeDiet.length === 0 || activeDiet.every(d => (r.diet_tags ?? []).includes(d)))
-    .filter(r => activeScore === null || r.rating === activeScore)
-    .filter(r => !activeCity || r.city === activeCity)
-    .sort((a, b) => {
-      const aHolo = a.rating === 3 && (a.price_range === "pricey") ? 1 : 0;
-      const bHolo = b.rating === 3 && (b.price_range === "pricey") ? 1 : 0;
-      if (bHolo !== aHolo) return bHolo - aHolo;
-      return b.upvotes - a.upvotes;
-    });
-
-  // ── Walkthroughs ───────────────────────────────────
-  const loadUserProfile = async (u) => {
-    if (!u) { setUserProfile(null); setUserUpvotes([]); return; }
-    const [{ data: prof }, { data: upvoteData }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", u.id).single(),
-      supabase.from("upvotes").select("review_id").eq("user_id", u.id),
-    ]);
-    if (prof) setUserProfile(prof);
-    if (upvoteData) setUserUpvotes(upvoteData.map(u => u.review_id));
-  };
   const dismissIntro = (dontShow = false) => {
     if (dontShow) localStorage.setItem("lb_intro_seen", "true");
     setShowAppIntro(false);
@@ -169,42 +165,12 @@ export default function App() {
       verified: !!user,
       upvotes: 0, date: new Date().toISOString().slice(0, 10),
     };
-    const { data, error } = await supabase.from("pending_reviews").insert([newReview]).select();
+    const { data, error } = await supabase.from("reviews").insert([newReview]).select();
     if (error) { console.error("Submit error:", error); }
-    else { setPending(p => [...p, data[0]]); recordSubmission(); setRateLimited(!canSubmit()); }
+    else { setReviews(rs => [...rs, data[0]]); recordSubmission(); setRateLimited(!canSubmit()); }
   };
-
-  const approve = async (id) => {
-    const r = pending.find(x => x.id === id);
-    if (!r) return;
-    const { id: _id, ...reviewData } = r;
-    const { data, error } = await supabase.from("reviews").insert([{ ...reviewData, verified: true }]).select();
-    if (error) { console.error("Approve error:", error); return; }
-    await supabase.from("pending_reviews").delete().eq("id", id);
-    setReviews(rs => [...rs, data[0]]);
-    setPending(p => p.filter(x => x.id !== id));
-  };
-
-  const reject = async (id) => {
-    const { error } = await supabase.from("pending_reviews").delete().eq("id", id);
-    if (error) { console.error("Reject error:", error); return; }
-    setPending(p => p.filter(x => x.id !== id));
-  };
-
-  const editApproved = async (id, fields) => {
-    const update = { link: fields.link, map_query: fields.mapQuery };
-    await supabase.from("reviews").update(update).eq("id", id);
-    setReviews(rs => rs.map(r => r.id === id ? { ...r, ...update } : r));
-  };
-
-  const updatePending = (id, fields) => setPending(p => p.map(r => r.id === id ? { ...r, ...fields } : r));
 
   // ── Admin auth ─────────────────────────────────────
-  const openAdmin = () => {
-    if (adminUser) { setModal("admin"); return; }
-    setModal("adminLogin");
-  };
-
   const handleAdminLogin = async () => {
     setAdminLoading(true);
     setAdminError("");
@@ -481,8 +447,8 @@ export default function App() {
         )}
 
         {modal === "admin" && (
-          <Sheet title={`Admin${pending.length ? ` · ${pending.length} pending` : ""}`} onClose={() => setModal(null)}>
-            <AdminQueue pending={pending} onApprove={approve} onReject={reject} approved={reviews} onEditApproved={editApproved} onUpdatePending={updatePending} />
+          <Sheet title="Admin" onClose={() => setModal(null)}>
+            <VerifiedUsers />
             <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid #1a1a1a" }}>
               <div style={{ fontSize: 11, color: "#CCC", fontFamily: "'DM Mono',monospace", marginBottom: 10 }}>
                 Logged in as {adminUser?.email}

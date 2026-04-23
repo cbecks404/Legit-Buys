@@ -60,6 +60,7 @@ export function recordSubmission() {
   try {
     const recent = getRecentSubmissions();
     localStorage.setItem(SUBMISSION_KEY, JSON.stringify([...recent, Date.now()]));
+  // eslint-disable-next-line no-empty
   } catch {}
 }
 
