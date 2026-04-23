@@ -8,12 +8,14 @@
 --    Stores the directed follow relationships between users.
 -- ============================================================
 
-CREATE TABLE follows (
+CREATE TABLE IF NOT EXISTS follows (
   follower_id  uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   followee_id  uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at   timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (follower_id, followee_id)
 );
+
+CREATE INDEX IF NOT EXISTS follows_followee_idx ON follows(followee_id);
 
 -- Enable Row Level Security
 ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
@@ -60,6 +62,7 @@ ALTER TABLE reviews ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(
 -- Adjust column names to match your actual pending_reviews schema if needed before running.
 -- ============================================================
 
+-- reviews.verified already exists in this schema; remove it from the column list below if yours does not
 -- First: publish all pending reviews as approved
 INSERT INTO reviews (
   product, category, categories, rating, review, submitter,
@@ -92,6 +95,7 @@ AS $$
   WHERE r.user_id IN (
     SELECT followee_id FROM follows WHERE follower_id = p_user_id
   )
+  -- created_at is Supabase's auto-generated timestamp; substitute r.date if your reviews table uses a date column instead
   ORDER BY r.created_at DESC;
 $$;
 
