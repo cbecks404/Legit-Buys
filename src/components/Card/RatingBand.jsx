@@ -43,25 +43,16 @@ export default function RatingBand({ score, priceRange }) {
     background = "var(--score-3)";
   }
 
-  // Dots: first `score` filled, remaining outlined. Score 0 → all outlined.
-  const dots = [0, 1, 2].map(i => {
-    const filled = i < score;
-    return (
-      <span
-        key={i}
-        aria-hidden="true"
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: "50%",
-          background: filled ? labelColor : "transparent",
-          border: `1.5px solid ${labelColor}`,
-          display: "inline-block",
-          flexShrink: 0,
-        }}
-      />
-    );
-  });
+  // Stars: first `score` filled (★), remaining outlined (☆). Score 0 → all outlined.
+  const dots = [0, 1, 2].map(i => (
+    <span
+      key={i}
+      aria-hidden="true"
+      style={{ color: labelColor, fontSize: 14, lineHeight: 1 }}
+    >
+      {i < score ? "★" : "☆"}
+    </span>
+  ));
 
   return (
     <div
