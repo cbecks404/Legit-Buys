@@ -7,12 +7,15 @@ export default function SuggestedUsers({ user, onFollowDone }) {
   const [followed, setFollowed]       = useState({});
 
   useEffect(() => {
-    supabase
-      .rpc("get_suggested_users", { p_user_id: user.id, p_limit: 8 })
-      .then(({ data }) => {
+    async function load() {
+      try {
+        const { data } = await supabase.rpc("get_suggested_users", { p_user_id: user.id, p_limit: 8 });
         setSuggestions(data ?? []);
+      } finally {
         setLoading(false);
-      });
+      }
+    }
+    load();
   }, [user.id]);
 
   if (loading || suggestions.length === 0) return null;
@@ -93,6 +96,7 @@ export default function SuggestedUsers({ user, onFollowDone }) {
 
           {/* Follow button */}
           <button
+            type="button"
             onClick={() => handleFollow(s)}
             disabled={followed[s.user_id]}
             style={followed[s.user_id] ? {
