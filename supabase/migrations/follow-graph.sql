@@ -95,8 +95,7 @@ AS $$
   WHERE r.user_id IN (
     SELECT followee_id FROM follows WHERE follower_id = p_user_id
   )
-  -- created_at is Supabase's auto-generated timestamp; substitute r.date if your reviews table uses a date column instead
-  ORDER BY r.created_at DESC;
+  ORDER BY r.date DESC;
 $$;
 
 
