@@ -19,6 +19,7 @@ import MenuPanel from "./components/MenuPanel";
 import FilterPanel from "./components/FilterPanel";
 import UserAuth from "./components/UserAuth";
 import ProfilePage from "./components/ProfilePage";
+import SuggestedUsers from "./components/SuggestedUsers";
 
 export default function App() {
   const [reviews, setReviews]           = useState([]);
@@ -55,6 +56,7 @@ export default function App() {
   const [feedTab, setFeedTab]           = useState("all"); // "all" | "following"
   const [followingReviews, setFollowingReviews] = useState([]);
   const [viewingUserId, setViewingUserId] = useState(null);
+  const [followingCount, setFollowingCount] = useState(0);
   const [darkMode]                       = useState(() => {
     try { return localStorage.getItem("lb_theme") !== "light"; }
     catch { return true; }
@@ -81,6 +83,11 @@ export default function App() {
     ]);
     if (prof) setUserProfile(prof);
     if (upvoteData) setUserUpvotes(upvoteData.map(u => u.review_id));
+    const { count: fCount } = await supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_id", u.id);
+    setFollowingCount(fCount ?? 0);
   };
 
   const toggleSave = (id) => {
@@ -131,6 +138,7 @@ export default function App() {
         setUserProfile(null);
         setFollowingReviews([]);
         setFeedTab("all");
+        setFollowingCount(0);
       }
     });
 
@@ -340,6 +348,16 @@ export default function App() {
                   : "No reviews match these filters."}
               </div>
             )}
+            {feedTab === "following" && user && followingCount === 0 && (
+              <SuggestedUsers
+                user={user}
+                onFollowDone={() => {
+                  setFollowingCount(c => c + 1);
+                  supabase.rpc("get_following_reviews", { p_user_id: user.id })
+                    .then(({ data }) => { if (data) setFollowingReviews(data); });
+                }}
+              />
+            )}
             {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={(userId) => {
               const isUuid = typeof userId === "string" && /^[0-9a-f-]{36}$/.test(userId);
               if (!isUuid || userId === user?.id) return;
@@ -410,6 +428,7 @@ export default function App() {
                 setScreen("home");
                 setFeedTab("all");
                 setFollowingReviews([]);
+                setFollowingCount(0);
               }
             }}
             adminUser={adminUser}
@@ -441,6 +460,7 @@ export default function App() {
               setScreen("home");
               setFeedTab("all");
               setFollowingReviews([]);
+              setFollowingCount(0);
             }}
           />
         )}
