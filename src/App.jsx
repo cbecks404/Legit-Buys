@@ -35,10 +35,6 @@ export default function App() {
   });
   const [modal, setModal]               = useState(null);
   const [adminUser, setAdminUser]       = useState(null);
-  const [adminEmail, setAdminEmail]     = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
-  const [adminError, setAdminError]     = useState("");
-  const [adminLoading, setAdminLoading] = useState(false);
   const [splash, setSplash]             = useState(true);
   const [showAppIntro, setShowAppIntro] = useState(() => {
     try { return localStorage.getItem("lb_intro_seen") !== "true"; }
@@ -193,16 +189,6 @@ export default function App() {
   };
 
   // ── Admin auth ─────────────────────────────────────
-  const handleAdminLogin = async () => {
-    setAdminLoading(true);
-    setAdminError("");
-    const { data, error } = await supabase.auth.signInWithPassword({ email: adminEmail, password: adminPassword });
-    setAdminLoading(false);
-    if (error) { setAdminError("Incorrect email or password."); return; }
-    setAdminUser(data.user);
-    setModal("admin");
-  };
-
   const handleAdminLogout = async () => {
     await supabase.auth.signOut();
     setAdminUser(null);
@@ -495,29 +481,6 @@ export default function App() {
         {/* Modals */}
         {modal === "submit" && <SubmitFlow onSubmit={submit} onClose={() => setModal(null)} prefillName={userProfile?.display_name ?? ""} />}
 
-        {modal === "adminLogin" && (
-          <Sheet title="Admin login" onClose={() => setModal(null)}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div>
-                <label style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#bbb", letterSpacing: ".14em", textTransform: "uppercase", display: "block", marginBottom: 7, fontWeight: 600 }}>Email</label>
-                <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="your@email.com"
-                  style={{ width: "100%", background: "#161616", border: "1px solid #666", borderRadius: 10, padding: "12px 14px", color: "#f0ede8", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "system-ui,sans-serif" }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#bbb", letterSpacing: ".14em", textTransform: "uppercase", display: "block", marginBottom: 7, fontWeight: 600 }}>Password</label>
-                <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="••••••••"
-                  onKeyDown={e => e.key === "Enter" && handleAdminLogin()}
-                  style={{ width: "100%", background: "#161616", border: "1px solid #666", borderRadius: 10, padding: "12px 14px", color: "#f0ede8", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "system-ui,sans-serif" }} />
-              </div>
-              {adminError && <div style={{ fontSize: 12, color: "#E05A5A", fontFamily: "'DM Mono',monospace" }}>{adminError}</div>}
-              <button onClick={handleAdminLogin} disabled={adminLoading}
-                style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'DM Mono',monospace", fontSize: 13, fontWeight: 700, cursor: adminLoading ? "not-allowed" : "pointer", opacity: adminLoading ? 0.5 : 1 }}>
-                {adminLoading ? "Logging in…" : "Log in →"}
-              </button>
-            </div>
-          </Sheet>
-        )}
-
         {modal === "rateLimited" && (
           <Sheet title="Submission limit reached" onClose={() => setModal(null)}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -534,7 +497,7 @@ export default function App() {
           </Sheet>
         )}
 
-        {modal === "admin" && (
+        {modal === "admin" && adminUser && (
           <Sheet title="Admin" onClose={() => setModal(null)}>
             <VerifiedUsers />
             <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid #1a1a1a" }}>
