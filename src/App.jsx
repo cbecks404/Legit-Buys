@@ -52,6 +52,9 @@ export default function App() {
   const [user, setUser]                 = useState(null);
   const [userProfile, setUserProfile]   = useState(null);
   const [showUserAuth, setShowUserAuth] = useState(false);
+  const [feedTab, setFeedTab]           = useState("all"); // "all" | "following"
+  const [followingReviews, setFollowingReviews] = useState([]);
+  const [viewingUserId, setViewingUserId] = useState(null);
   const [darkMode]                       = useState(() => {
     try { return localStorage.getItem("lb_theme") !== "light"; }
     catch { return true; }
@@ -61,6 +64,13 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? "dark" : "light";
   }, [darkMode]);
+
+  // ── Following feed ─────────────────────────────────
+  useEffect(() => {
+    if (feedTab !== "following" || !user) return;
+    supabase.rpc("get_following_reviews", { p_user_id: user.id })
+      .then(({ data }) => { if (data) setFollowingReviews(data); });
+  }, [feedTab, user]);
 
   // ── Helpers ────────────────────────────────────────
   const loadUserProfile = async (u) => {
@@ -83,7 +93,9 @@ export default function App() {
 
   const toggleDietFilter = (id) => setActiveDiet(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
 
-  const filtered = [...reviews]
+  const activeReviews = feedTab === "following" ? followingReviews : reviews;
+
+  const filtered = [...activeReviews]
     .filter(r => !showSaved || saved.includes(r.id))
     .filter(r => cat === "all" || (r.categories ?? [r.category]).includes(cat))
     .filter(r => activeDiet.length === 0 || activeDiet.every(d => (r.diet_tags ?? []).includes(d)))
@@ -289,13 +301,47 @@ export default function App() {
                 </div>
               );
             })()}
+
+            {/* Feed tab toggle */}
+            <div style={{ display: "flex", marginBottom: 12 }}>
+              <button
+                onClick={() => {
+                  const next = feedTab === "all" ? "following" : "all";
+                  if (next === "following" && !user) { setShowUserAuth(true); return; }
+                  setFeedTab(next);
+                }}
+                style={{
+                  background: feedTab === "following" ? "#C8FF47" : "transparent",
+                  color: feedTab === "following" ? "#0a0a0a" : "var(--text-mid)",
+                  border: `1.5px solid ${feedTab === "following" ? "#C8FF47" : "var(--border2)"}`,
+                  borderRadius: 99,
+                  padding: "6px 18px",
+                  fontSize: 11,
+                  fontFamily: "'DM Mono', monospace",
+                  letterSpacing: ".1em",
+                  cursor: "pointer",
+                  transition: "all .15s",
+                }}
+              >
+                {feedTab === "following" ? "FOLLOWING" : "ALL"}
+              </button>
+            </div>
           </div>
 
           {/* Card feed */}
           <div style={{ padding: "8px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
             {loading && <div style={{ textAlign: "center", padding: "60px 0", color: "#CCC", fontSize: 13, fontFamily: "'DM Mono',monospace", letterSpacing: ".1em" }}>loading buys...</div>}
-            {!loading && filtered.length === 0 && <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>No reviews match these filters.</div>}
-            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={() => {}} />)}
+            {!loading && filtered.length === 0 && (
+              <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>
+                {feedTab === "following"
+                  ? "None of your follows have reviewed this yet."
+                  : "No reviews match these filters."}
+              </div>
+            )}
+            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={(userId) => {
+              if (!userId || userId === user?.id) return;
+              setViewingUserId(userId);
+            }} />)}
           </div>
         </div>
 
@@ -388,6 +434,21 @@ export default function App() {
               setUser(null);
               setAdminUser(null);
               setScreen("home");
+            }}
+          />
+        )}
+
+        {/* Other-user profile */}
+        {viewingUserId && (
+          <ProfilePage
+            user={user}
+            targetUserId={viewingUserId}
+            onClose={() => setViewingUserId(null)}
+            onFollowChange={() => {
+              if (feedTab === "following") {
+                supabase.rpc("get_following_reviews", { p_user_id: user.id })
+                  .then(({ data }) => { if (data) setFollowingReviews(data); });
+              }
             }}
           />
         )}

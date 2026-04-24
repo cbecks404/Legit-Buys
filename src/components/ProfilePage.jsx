@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabaseClient";
 import { CAT_META, SCORE_COLORS, SCORE_META, priceSymbol } from "../constants";
 
-export default function ProfilePage({ user, targetUserId, onClose, onLogout }) {
+export default function ProfilePage({ user, targetUserId, onClose, onLogout, onFollowChange }) {
   // Determine mode: own profile if targetUserId is absent or equals logged-in user
   const isOwnProfile = !targetUserId || targetUserId === user.id;
   const profileUserId = isOwnProfile ? user.id : targetUserId;
@@ -104,6 +104,7 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout }) {
         });
         if (error) throw error;
       }
+      onFollowChange?.();
     } catch {
       // Revert on error
       setIsFollowing(wasFollowing);
