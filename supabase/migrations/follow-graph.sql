@@ -66,7 +66,7 @@ ALTER TABLE reviews ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(
 -- First: publish all pending reviews as approved
 INSERT INTO reviews (
   product, category, categories, rating, review, submitter,
-  where_field, price, price_range, link, map_query, image_url,
+  "where", price, price_range, link, map_query, image_url,
   city, diet_tags, user_id, submitter_email, verified, upvotes, date
 )
 SELECT
