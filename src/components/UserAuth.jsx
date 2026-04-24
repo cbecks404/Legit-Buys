@@ -39,8 +39,6 @@ export default function UserAuth({ onClose, onLogin }) {
       // Link any existing reviews by email
       await supabase.from("reviews").update({ user_id: data.user.id, submitter_email: email })
         .eq("submitter_email", email);
-      await supabase.from("pending_reviews").update({ user_id: data.user.id, submitter_email: email })
-        .eq("submitter_email", email);
     }
     setLoading(false);
     setSuccess("Account created! Check your email to confirm, then log in.");
@@ -53,8 +51,6 @@ export default function UserAuth({ onClose, onLogin }) {
     if (loginError) { setError("Incorrect email or password."); setLoading(false); return; }
     // Link reviews by email on login
     await supabase.from("reviews").update({ user_id: data.user.id })
-      .eq("submitter_email", email).is("user_id", null);
-    await supabase.from("pending_reviews").update({ user_id: data.user.id })
       .eq("submitter_email", email).is("user_id", null);
     setLoading(false);
     onLogin(data.user);

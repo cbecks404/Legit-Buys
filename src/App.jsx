@@ -12,17 +12,17 @@ import {
 import Card from "./components/Card";
 import Sheet from "./components/Sheet";
 import SubmitFlow from "./components/SubmitFlow";
-import AdminQueue from "./components/AdminQueue";
+import VerifiedUsers from "./components/VerifiedUsers";
 import { Pill, DietPill } from "./components/Pills";
 import { AppIntro, SubmitGuide } from "./components/Walkthroughs";
 import MenuPanel from "./components/MenuPanel";
 import FilterPanel from "./components/FilterPanel";
 import UserAuth from "./components/UserAuth";
 import ProfilePage from "./components/ProfilePage";
+import SuggestedUsers from "./components/SuggestedUsers";
 
 export default function App() {
   const [reviews, setReviews]           = useState([]);
-  const [pending, setPending]           = useState([]);
   const [loading, setLoading]           = useState(true);
   const [cat, setCat]                   = useState("all");
   const [showSaved, setShowSaved]       = useState(false);
@@ -35,10 +35,6 @@ export default function App() {
   });
   const [modal, setModal]               = useState(null);
   const [adminUser, setAdminUser]       = useState(null);
-  const [adminEmail, setAdminEmail]     = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
-  const [adminError, setAdminError]     = useState("");
-  const [adminLoading, setAdminLoading] = useState(false);
   const [splash, setSplash]             = useState(true);
   const [showAppIntro, setShowAppIntro] = useState(() => {
     try { return localStorage.getItem("lb_intro_seen") !== "true"; }
@@ -53,7 +49,11 @@ export default function App() {
   const [user, setUser]                 = useState(null);
   const [userProfile, setUserProfile]   = useState(null);
   const [showUserAuth, setShowUserAuth] = useState(false);
-  const [darkMode, setDarkMode]         = useState(() => {
+  const [feedTab, setFeedTab]           = useState("all"); // "all" | "following"
+  const [followingReviews, setFollowingReviews] = useState([]);
+  const [viewingUserId, setViewingUserId] = useState(null);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [darkMode]                       = useState(() => {
     try { return localStorage.getItem("lb_theme") !== "light"; }
     catch { return true; }
   });
@@ -62,6 +62,54 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? "dark" : "light";
   }, [darkMode]);
+
+  // ── Following feed ─────────────────────────────────
+  useEffect(() => {
+    if (feedTab !== "following" || !user) return;
+    supabase.rpc("get_following_reviews", { p_user_id: user.id })
+      .then(({ data }) => { if (data) setFollowingReviews(data); });
+  }, [feedTab, user]);
+
+  // ── Helpers ────────────────────────────────────────
+  const loadUserProfile = async (u) => {
+    if (!u) { setUserProfile(null); setUserUpvotes([]); return; }
+    const [{ data: prof }, { data: upvoteData }] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", u.id).single(),
+      supabase.from("upvotes").select("review_id").eq("user_id", u.id),
+    ]);
+    if (prof) setUserProfile(prof);
+    if (upvoteData) setUserUpvotes(upvoteData.map(u => u.review_id));
+    const { count: fCount } = await supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_id", u.id);
+    setFollowingCount(fCount ?? 0);
+  };
+
+  const toggleSave = (id) => {
+    setSaved(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+      localStorage.setItem("lb_saved", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const toggleDietFilter = (id) => setActiveDiet(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+
+  const activeReviews = feedTab === "following" ? followingReviews : reviews;
+
+  const filtered = [...activeReviews]
+    .filter(r => !showSaved || saved.includes(r.id))
+    .filter(r => cat === "all" || (r.categories ?? [r.category]).includes(cat))
+    .filter(r => activeDiet.length === 0 || activeDiet.every(d => (r.diet_tags ?? []).includes(d)))
+    .filter(r => activeScore === null || r.rating === activeScore)
+    .filter(r => !activeCity || r.city === activeCity)
+    .sort((a, b) => {
+      const aHolo = a.rating === 3 && (a.price_range === "pricey") ? 1 : 0;
+      const bHolo = b.rating === 3 && (b.price_range === "pricey") ? 1 : 0;
+      if (bHolo !== aHolo) return bHolo - aHolo;
+      return b.upvotes - a.upvotes;
+    });
 
   // ── Data loading ───────────────────────────────────
   useEffect(() => {
@@ -84,55 +132,21 @@ export default function App() {
       } else {
         setAdminUser(null);
         setUserProfile(null);
+        setFollowingReviews([]);
+        setFeedTab("all");
+        setFollowingCount(0);
       }
     });
 
     async function loadData() {
-      const { data: liveReviews }    = await supabase.from("reviews").select("*").order("upvotes", { ascending: false });
-      const { data: pendingReviews } = await supabase.from("pending_reviews").select("*").order("date", { ascending: false });
-      if (liveReviews)    setReviews(liveReviews);
-      if (pendingReviews) setPending(pendingReviews);
+      const { data: liveReviews } = await supabase.from("reviews").select("*").order("upvotes", { ascending: false });
+      if (liveReviews) setReviews(liveReviews);
       setLoading(false);
       setTimeout(() => setSplash(false), 600);
     }
 
     loadData();
   }, []);
-
-  // ── Helpers ────────────────────────────────────────
-  const toggleSave = (id) => {
-    setSaved(prev => {
-      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
-      localStorage.setItem("lb_saved", JSON.stringify(next));
-      return next;
-    });
-  };
-
-  const toggleDietFilter = (id) => setActiveDiet(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
-
-  const filtered = [...reviews]
-    .filter(r => !showSaved || saved.includes(r.id))
-    .filter(r => cat === "all" || (r.categories ?? [r.category]).includes(cat))
-    .filter(r => activeDiet.length === 0 || activeDiet.every(d => (r.diet_tags ?? []).includes(d)))
-    .filter(r => activeScore === null || r.rating === activeScore)
-    .filter(r => !activeCity || r.city === activeCity)
-    .sort((a, b) => {
-      const aHolo = a.rating === 3 && (a.price_range === "pricey") ? 1 : 0;
-      const bHolo = b.rating === 3 && (b.price_range === "pricey") ? 1 : 0;
-      if (bHolo !== aHolo) return bHolo - aHolo;
-      return b.upvotes - a.upvotes;
-    });
-
-  // ── Walkthroughs ───────────────────────────────────
-  const loadUserProfile = async (u) => {
-    if (!u) { setUserProfile(null); setUserUpvotes([]); return; }
-    const [{ data: prof }, { data: upvoteData }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", u.id).single(),
-      supabase.from("upvotes").select("review_id").eq("user_id", u.id),
-    ]);
-    if (prof) setUserProfile(prof);
-    if (upvoteData) setUserUpvotes(upvoteData.map(u => u.review_id));
-  };
   const dismissIntro = (dontShow = false) => {
     if (dontShow) localStorage.setItem("lb_intro_seen", "true");
     setShowAppIntro(false);
@@ -169,52 +183,12 @@ export default function App() {
       verified: !!user,
       upvotes: 0, date: new Date().toISOString().slice(0, 10),
     };
-    const { data, error } = await supabase.from("pending_reviews").insert([newReview]).select();
+    const { data, error } = await supabase.from("reviews").insert([newReview]).select();
     if (error) { console.error("Submit error:", error); }
-    else { setPending(p => [...p, data[0]]); recordSubmission(); setRateLimited(!canSubmit()); }
+    else { setReviews(rs => [...rs, data[0]]); recordSubmission(); setRateLimited(!canSubmit()); }
   };
-
-  const approve = async (id) => {
-    const r = pending.find(x => x.id === id);
-    if (!r) return;
-    const { id: _id, ...reviewData } = r;
-    const { data, error } = await supabase.from("reviews").insert([{ ...reviewData, verified: true }]).select();
-    if (error) { console.error("Approve error:", error); return; }
-    await supabase.from("pending_reviews").delete().eq("id", id);
-    setReviews(rs => [...rs, data[0]]);
-    setPending(p => p.filter(x => x.id !== id));
-  };
-
-  const reject = async (id) => {
-    const { error } = await supabase.from("pending_reviews").delete().eq("id", id);
-    if (error) { console.error("Reject error:", error); return; }
-    setPending(p => p.filter(x => x.id !== id));
-  };
-
-  const editApproved = async (id, fields) => {
-    const update = { link: fields.link, map_query: fields.mapQuery };
-    await supabase.from("reviews").update(update).eq("id", id);
-    setReviews(rs => rs.map(r => r.id === id ? { ...r, ...update } : r));
-  };
-
-  const updatePending = (id, fields) => setPending(p => p.map(r => r.id === id ? { ...r, ...fields } : r));
 
   // ── Admin auth ─────────────────────────────────────
-  const openAdmin = () => {
-    if (adminUser) { setModal("admin"); return; }
-    setModal("adminLogin");
-  };
-
-  const handleAdminLogin = async () => {
-    setAdminLoading(true);
-    setAdminError("");
-    const { data, error } = await supabase.auth.signInWithPassword({ email: adminEmail, password: adminPassword });
-    setAdminLoading(false);
-    if (error) { setAdminError("Incorrect email or password."); return; }
-    setAdminUser(data.user);
-    setModal("admin");
-  };
-
   const handleAdminLogout = async () => {
     await supabase.auth.signOut();
     setAdminUser(null);
@@ -323,13 +297,58 @@ export default function App() {
                 </div>
               );
             })()}
+
+            {/* Feed tab toggle */}
+            <div style={{ display: "flex", marginBottom: 12 }}>
+              <button
+                onClick={() => {
+                  const next = feedTab === "all" ? "following" : "all";
+                  if (next === "following" && !user) { setShowUserAuth(true); return; }
+                  setFeedTab(next);
+                }}
+                style={{
+                  background: feedTab === "following" ? "#C8FF47" : "transparent",
+                  color: feedTab === "following" ? "#0a0a0a" : "var(--text-mid)",
+                  border: `1.5px solid ${feedTab === "following" ? "#C8FF47" : "var(--border2)"}`,
+                  borderRadius: 99,
+                  padding: "6px 18px",
+                  fontSize: 11,
+                  fontFamily: "'DM Mono', monospace",
+                  letterSpacing: ".1em",
+                  cursor: "pointer",
+                  transition: "all .15s",
+                }}
+              >
+                {feedTab === "following" ? "FOLLOWING" : "ALL"}
+              </button>
+            </div>
           </div>
 
           {/* Card feed */}
           <div style={{ padding: "8px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
             {loading && <div style={{ textAlign: "center", padding: "60px 0", color: "#CCC", fontSize: 13, fontFamily: "'DM Mono',monospace", letterSpacing: ".1em" }}>loading buys...</div>}
-            {!loading && filtered.length === 0 && <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>No reviews match these filters.</div>}
-            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={() => {}} />)}
+            {!loading && filtered.length === 0 && (
+              <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>
+                {feedTab === "following"
+                  ? "None of your follows have reviewed this yet."
+                  : "No reviews match these filters."}
+              </div>
+            )}
+            {feedTab === "following" && user && followingCount === 0 && (
+              <SuggestedUsers
+                user={user}
+                onFollowDone={() => {
+                  setFollowingCount(c => c + 1);
+                  supabase.rpc("get_following_reviews", { p_user_id: user.id })
+                    .then(({ data }) => { if (data) setFollowingReviews(data); });
+                }}
+              />
+            )}
+            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={(userId) => {
+              const isUuid = typeof userId === "string" && /^[0-9a-f-]{36}$/.test(userId);
+              if (!isUuid || userId === user?.id) return;
+              setViewingUserId(userId);
+            }} />)}
           </div>
         </div>
 
@@ -393,6 +412,9 @@ export default function App() {
                 setUser(null);
                 setAdminUser(null);
                 setScreen("home");
+                setFeedTab("all");
+                setFollowingReviews([]);
+                setFollowingCount(0);
               }
             }}
             adminUser={adminUser}
@@ -422,6 +444,24 @@ export default function App() {
               setUser(null);
               setAdminUser(null);
               setScreen("home");
+              setFeedTab("all");
+              setFollowingReviews([]);
+              setFollowingCount(0);
+            }}
+          />
+        )}
+
+        {/* Other-user profile */}
+        {viewingUserId && (
+          <ProfilePage
+            user={user}
+            targetUserId={viewingUserId}
+            onClose={() => setViewingUserId(null)}
+            onFollowChange={() => {
+              if (feedTab === "following") {
+                supabase.rpc("get_following_reviews", { p_user_id: user.id })
+                  .then(({ data }) => { if (data) setFollowingReviews(data); });
+              }
             }}
           />
         )}
@@ -441,29 +481,6 @@ export default function App() {
         {/* Modals */}
         {modal === "submit" && <SubmitFlow onSubmit={submit} onClose={() => setModal(null)} prefillName={userProfile?.display_name ?? ""} />}
 
-        {modal === "adminLogin" && (
-          <Sheet title="Admin login" onClose={() => setModal(null)}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div>
-                <label style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#bbb", letterSpacing: ".14em", textTransform: "uppercase", display: "block", marginBottom: 7, fontWeight: 600 }}>Email</label>
-                <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="your@email.com"
-                  style={{ width: "100%", background: "#161616", border: "1px solid #666", borderRadius: 10, padding: "12px 14px", color: "#f0ede8", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "system-ui,sans-serif" }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "#bbb", letterSpacing: ".14em", textTransform: "uppercase", display: "block", marginBottom: 7, fontWeight: 600 }}>Password</label>
-                <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="••••••••"
-                  onKeyDown={e => e.key === "Enter" && handleAdminLogin()}
-                  style={{ width: "100%", background: "#161616", border: "1px solid #666", borderRadius: 10, padding: "12px 14px", color: "#f0ede8", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "system-ui,sans-serif" }} />
-              </div>
-              {adminError && <div style={{ fontSize: 12, color: "#E05A5A", fontFamily: "'DM Mono',monospace" }}>{adminError}</div>}
-              <button onClick={handleAdminLogin} disabled={adminLoading}
-                style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'DM Mono',monospace", fontSize: 13, fontWeight: 700, cursor: adminLoading ? "not-allowed" : "pointer", opacity: adminLoading ? 0.5 : 1 }}>
-                {adminLoading ? "Logging in…" : "Log in →"}
-              </button>
-            </div>
-          </Sheet>
-        )}
-
         {modal === "rateLimited" && (
           <Sheet title="Submission limit reached" onClose={() => setModal(null)}>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -480,9 +497,9 @@ export default function App() {
           </Sheet>
         )}
 
-        {modal === "admin" && (
-          <Sheet title={`Admin${pending.length ? ` · ${pending.length} pending` : ""}`} onClose={() => setModal(null)}>
-            <AdminQueue pending={pending} onApprove={approve} onReject={reject} approved={reviews} onEditApproved={editApproved} onUpdatePending={updatePending} />
+        {modal === "admin" && adminUser && (
+          <Sheet title="Admin" onClose={() => setModal(null)}>
+            <VerifiedUsers />
             <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid #1a1a1a" }}>
               <div style={{ fontSize: 11, color: "#CCC", fontFamily: "'DM Mono',monospace", marginBottom: 10 }}>
                 Logged in as {adminUser?.email}
