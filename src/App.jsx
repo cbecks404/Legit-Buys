@@ -129,6 +129,8 @@ export default function App() {
       } else {
         setAdminUser(null);
         setUserProfile(null);
+        setFollowingReviews([]);
+        setFeedTab("all");
       }
     });
 
@@ -339,7 +341,8 @@ export default function App() {
               </div>
             )}
             {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={(userId) => {
-              if (!userId || userId === user?.id) return;
+              const isUuid = typeof userId === "string" && /^[0-9a-f-]{36}$/.test(userId);
+              if (!isUuid || userId === user?.id) return;
               setViewingUserId(userId);
             }} />)}
           </div>
@@ -405,6 +408,8 @@ export default function App() {
                 setUser(null);
                 setAdminUser(null);
                 setScreen("home");
+                setFeedTab("all");
+                setFollowingReviews([]);
               }
             }}
             adminUser={adminUser}
@@ -434,6 +439,8 @@ export default function App() {
               setUser(null);
               setAdminUser(null);
               setScreen("home");
+              setFeedTab("all");
+              setFollowingReviews([]);
             }}
           />
         )}
