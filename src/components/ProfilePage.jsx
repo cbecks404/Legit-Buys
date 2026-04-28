@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabaseClient";
 import { CAT_META, SCORE_COLORS, SCORE_META, priceSymbol } from "../constants";
 
-export default function ProfilePage({ user, targetUserId, onClose, onLogout, onFollowChange }) {
+export default function ProfilePage({ user, targetUserId, onClose, onLogout, onFollowChange, onChangePassword }) {
   // Determine mode: own profile if targetUserId is absent or equals logged-in user
   const isOwnProfile = !targetUserId || targetUserId === user.id;
   const profileUserId = isOwnProfile ? user.id : targetUserId;
@@ -205,7 +205,14 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
 
               {isOwnProfile ? (
                 <>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "'LBBody',sans-serif", marginBottom: 12 }}>{user.email}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "'LBBody',sans-serif" }}>{user.email}</div>
+                    {onChangePassword && (
+                      <button onClick={onChangePassword} style={{ background: "none", border: "1px solid var(--border2)", borderRadius: 99, padding: "4px 12px", color: "var(--text-dim)", fontFamily: "'LBBody',sans-serif", fontSize: 11, cursor: "pointer" }}>
+                        Change password
+                      </button>
+                    )}
+                  </div>
 
                   {profile?.display_name && !editingName ? (
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

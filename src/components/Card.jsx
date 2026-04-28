@@ -2,9 +2,35 @@ import { useState } from "react";
 import { CAT_META, DIET_TAGS, priceSymbol } from "../constants";
 import RatingBand from "./Card/RatingBand";
 
+const BookmarkIcon = ({ filled }) => (
+  <svg width="13" height="15" viewBox="0 0 13 15" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+    <path d="M1 1h11v13l-5.5-3.5L1 14z" />
+  </svg>
+);
+
+const ShareIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" />
+  </svg>
+);
+
+const AVATAR_PALETTE = ["#C8FF47", "#60C3F5", "#F4A942", "#C084FC", "#FF6B6B", "#4ECDC4", "#FFB347"];
+function getAvatarColor(name) {
+  if (!name) return AVATAR_PALETTE[0];
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (name.charCodeAt(i) + ((h << 5) - h)) | 0;
+  return AVATAR_PALETTE[Math.abs(h) % AVATAR_PALETTE.length];
+}
+function getInitials(name) {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  return parts.length === 1 ? parts[0][0].toUpperCase() : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export default function Card({ r, onUp, saved, onSave, upped: initialUpped = false, onSubmitterClick }) {
   const upped = initialUpped;
   const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
   const accent = CAT_META[r.category]?.color ?? "#C8FF47";
   const rawDiet = r.diet_tags ?? r.dietTags ?? [];
   const dietTags = Array.isArray(rawDiet)
@@ -23,9 +49,20 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
   const catMeta = CAT_META[r.category];
   const categorySegment = catMeta ? `${catMeta.emoji} ${r.category}` : "";
   const metaSegments = [priceText, categorySegment, r.where].filter(Boolean);
+  const avatarColor = getAvatarColor(r.submitter);
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?r=${r.id}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: r.product, text: r.review?.slice(0, 100), url }); } catch {}
+    } else {
+      try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {}
+    }
+  };
 
   return (
     <div
+      id={`card-${r.id}`}
       onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}
       onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}
       style={{
@@ -265,25 +302,44 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
           paddingTop: 8,
           borderTop: "1px solid var(--border)",
         }}>
-          <button
-            type="button"
-            onClick={onSubmitterClick ? () => onSubmitterClick(r.user_id ?? r.submitter) : undefined}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: onSubmitterClick ? "pointer" : "default",
-              fontSize: 11,
-              color: "var(--text-mid)",
-              fontFamily: "'LBBody', sans-serif",
-              fontWeight: 500,
-              textAlign: "left",
-            }}
-          >
-            {r.verified && <span style={{ color: "#2D6A4F", marginRight: 4 }}>✓</span>}
-            {r.submitter}
-          </button>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
+              background: `${avatarColor}20`, border: `1px solid ${avatarColor}40`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 9, fontFamily: "'DM Mono',monospace", fontWeight: 700, color: avatarColor,
+            }}>
+              {getInitials(r.submitter)}
+            </div>
+            <button
+              type="button"
+              onClick={onSubmitterClick ? () => onSubmitterClick(r.user_id ?? r.submitter) : undefined}
+              style={{
+                background: "none", border: "none", padding: 0,
+                cursor: onSubmitterClick ? "pointer" : "default",
+                fontSize: 13, color: "var(--text)", fontFamily: "'LBBody', sans-serif",
+                fontWeight: 700, textAlign: "left", minWidth: 0,
+              }}
+            >
+              {r.verified && <span style={{ color: "#2D6A4F", marginRight: 4 }}>✓</span>}
+              {r.submitter}
+            </button>
+          </div>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
+            <button
+              onClick={handleShare}
+              onMouseDown={e => e.currentTarget.style.transform = "scale(0.88)"}
+              onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
+              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+              style={{
+                background: "transparent", border: `1px solid ${copied ? "#C8FF47" : "var(--border2)"}`,
+                color: copied ? "#C8FF47" : "var(--text-mid)",
+                borderRadius: 99, padding: "7px 11px", cursor: "pointer", transition: "all .15s",
+                display: "flex", alignItems: "center", lineHeight: 1,
+              }}
+            >
+              {copied ? <span style={{ fontSize: 11, fontWeight: 700 }}>✓</span> : <ShareIcon />}
+            </button>
             <button
               onClick={() => onSave(r.id)}
               onMouseDown={e => e.currentTarget.style.transform = "scale(0.88)"}
@@ -293,16 +349,12 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
                 background: saved ? "#2D6A4F18" : "transparent",
                 border: `1px solid ${saved ? "#2D6A4F" : "var(--border2)"}`,
                 color: saved ? "#2D6A4F" : "var(--text-mid)",
-                borderRadius: 99,
-                padding: "7px 14px",
-                fontSize: 14,
-                fontFamily: "'LBBody', sans-serif",
-                cursor: "pointer",
-                transition: "all .15s",
+                borderRadius: 99, padding: "7px 11px", cursor: "pointer", transition: "all .15s",
                 animation: saved ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
+                display: "flex", alignItems: "center", lineHeight: 1,
               }}
             >
-              {saved ? "★" : "☆"}
+              <BookmarkIcon filled={saved} />
             </button>
             <button
               onClick={() => { onUp(r.id); }}

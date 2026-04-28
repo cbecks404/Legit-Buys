@@ -164,11 +164,7 @@ export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
       </div>
       <div>
         <label style={lbl}>Website or Instagram link</label>
-        <input style={inp} placeholder="e.g. Leon, London Bridge SE1 or SW1A 1AA" value={f.mapQuery} onChange={e => {
-          set("mapQuery", e.target.value);
-          const detected = extractCity(e.target.value);
-          if (detected) set("city", detected);
-        }} />
+        <input style={inp} placeholder="https://leon.co or @leonrestaurants" value={f.link} onChange={e => set("link", e.target.value)} />
       </div>
       <div>
         <label style={lbl}>Photo link (optional)</label>
@@ -181,7 +177,7 @@ export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
         <div style={hint}>Typed exactly into Google Maps when tapped.</div>
       </div>
       <button style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: "pointer", marginTop: 6 }}
-        onClick={() => { onSubmit(f); goNext(4); }}>SUBMIT FOR APPROVAL →</button>
+        onClick={() => { onSubmit(f); goNext(4); }}>SUBMIT →</button>
       <button style={{ background: "transparent", color: "var(--text-mid)", border: "1px solid var(--border2)", borderRadius: 99, padding: "11px 0", width: "100%", fontFamily: "'LBBody',sans-serif", fontSize: 12, cursor: "pointer", marginTop: 4 }} onClick={() => goBack(2)}>← Back</button>
     </div>,
 
@@ -189,7 +185,7 @@ export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
     <div key={4} style={{ textAlign: "center", padding: "30px 0 10px", animation: "slideInRight .25s cubic-bezier(.16,1,.3,1)" }}>
       <div style={{ fontSize: 48, marginBottom: 16, color: "#C8FF47" }}>✦</div>
       <div style={{ fontFamily: "'LBTitle',sans-serif", fontSize: 28, color: "var(--text)", marginBottom: 8, letterSpacing: ".04em" }}>NICE ONE.</div>
-      <div style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.7, marginBottom: 28, fontFamily: "'LBBody',sans-serif" }}>Your review is in the queue.<br />It'll go live once approved.</div>
+      <div style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.7, marginBottom: 28, fontFamily: "'LBBody',sans-serif" }}>Your review is now live on the board.</div>
       <button onClick={onClose} style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 32px", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: "pointer" }}>BACK TO BOARD</button>
     </div>,
   ];

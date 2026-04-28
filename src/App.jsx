@@ -49,6 +49,7 @@ export default function App() {
   const [user, setUser]                 = useState(null);
   const [userProfile, setUserProfile]   = useState(null);
   const [showUserAuth, setShowUserAuth] = useState(false);
+  const [userAuthMode, setUserAuthMode] = useState("choose");
   const [feedTab, setFeedTab]           = useState("all"); // "all" | "following"
   const [followingReviews, setFollowingReviews] = useState([]);
   const [viewingUserId, setViewingUserId] = useState(null);
@@ -123,7 +124,13 @@ export default function App() {
       }
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        if (session?.user) setUser(session.user);
+        setUserAuthMode("changePassword");
+        setShowUserAuth(true);
+        return;
+      }
       setUser(session?.user ?? null);
       if (session?.user) {
         if (isAdmin(session.user)) setAdminUser(session.user);
@@ -140,7 +147,16 @@ export default function App() {
 
     async function loadData() {
       const { data: liveReviews } = await supabase.from("reviews").select("*").order("upvotes", { ascending: false });
-      if (liveReviews) setReviews(liveReviews);
+      if (liveReviews) {
+        setReviews(liveReviews);
+        const rid = new URLSearchParams(window.location.search).get("r");
+        if (rid) {
+          setTimeout(() => {
+            const el = document.getElementById(`card-${rid}`);
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 400);
+        }
+      }
       setLoading(false);
       setTimeout(() => setSplash(false), 600);
     }
@@ -185,7 +201,7 @@ export default function App() {
     };
     const { data, error } = await supabase.from("reviews").insert([newReview]).select();
     if (error) { console.error("Submit error:", error); }
-    else { setReviews(rs => [...rs, data[0]]); recordSubmission(); setRateLimited(!canSubmit()); }
+    else { setReviews(rs => [data[0], ...rs]); recordSubmission(); setRateLimited(!canSubmit()); }
   };
 
   // ── Admin auth ─────────────────────────────────────
@@ -448,6 +464,7 @@ export default function App() {
               setFollowingReviews([]);
               setFollowingCount(0);
             }}
+            onChangePassword={() => { setUserAuthMode("changePassword"); setShowUserAuth(true); }}
           />
         )}
 
@@ -469,7 +486,8 @@ export default function App() {
         {/* User auth */}
         {showUserAuth && (
           <UserAuth
-            onClose={() => setShowUserAuth(false)}
+            initialMode={userAuthMode}
+            onClose={() => { setShowUserAuth(false); setUserAuthMode("choose"); }}
             onLogin={(u) => { setUser(u); setScreen("profile"); }}
           />
         )}
