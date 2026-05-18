@@ -14,6 +14,9 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
   const [isFollowing, setIsFollowing]   = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [loading, setLoading]           = useState(true);
+  const [tab, setTab]                   = useState("reviews"); // "reviews" | "saved"
+  const [savedReviews, setSavedReviews] = useState(null); // null = not loaded yet
+  const [savedLoading, setSavedLoading] = useState(false);
 
   // Own-profile-only state
   const [editingId, setEditingId]       = useState(null);
@@ -63,6 +66,28 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
   }, [profileUserId, isOwnProfile, user.id]);
 
   useEffect(() => { load(); }, [load]);
+
+  const loadSaved = useCallback(async () => {
+    if (!isOwnProfile) return;
+    setSavedLoading(true);
+    const { data } = await supabase
+      .from("saved_reviews")
+      .select("review_id, created_at, reviews(*)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    setSavedReviews((data ?? []).map(row => row.reviews).filter(Boolean));
+    setSavedLoading(false);
+  }, [isOwnProfile, user.id]);
+
+  useEffect(() => {
+    if (tab === "saved" && savedReviews === null) loadSaved();
+  }, [tab, savedReviews, loadSaved]);
+
+  const unsave = async (reviewId) => {
+    setSavedReviews(prev => prev?.filter(r => r.id !== reviewId) ?? []);
+    await supabase.from("saved_reviews").delete()
+      .eq("user_id", user.id).eq("review_id", reviewId);
+  };
 
   const saveDisplayName = async () => {
     setSavingName(true);
@@ -125,7 +150,7 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
     </span>
   );
 
-  const ReviewCard = ({ r, canEdit = true }) => {
+  const ReviewCard = ({ r, canEdit = true, onUnsave }) => {
     const accent = CAT_META[r.category]?.color ?? "#C8FF47";
     const meta = SCORE_META[r.rating];
     const color = SCORE_COLORS[r.rating];
@@ -171,6 +196,11 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
               {canEdit && (
                 <button onClick={() => startEdit(r)} style={{ background: "none", border: "1px solid var(--border2)", borderRadius: 99, padding: "5px 14px", color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif", fontSize: 11, cursor: "pointer" }}>
                   Edit
+                </button>
+              )}
+              {onUnsave && (
+                <button onClick={onUnsave} style={{ background: "none", border: "1px solid var(--border2)", borderRadius: 99, padding: "5px 14px", color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif", fontSize: 11, cursor: "pointer" }}>
+                  Unsave
                 </button>
               )}
             </div>
@@ -301,22 +331,66 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
               )}
             </div>
 
-            {/* Reviews section */}
-            <div>
-              <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "var(--text-dim)", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 14 }}>
-                {isOwnProfile ? `Live reviews (${reviews.length})` : `Reviews (${reviews.length})`}
+            {/* Tabs (own profile only) */}
+            {isOwnProfile && (
+              <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: "1px solid var(--border)", paddingBottom: 0 }}>
+                {[
+                  { key: "reviews", label: `Reviews (${reviews.length})` },
+                  { key: "saved", label: `Saved${savedReviews ? ` (${savedReviews.length})` : ""}` },
+                ].map(t => (
+                  <button
+                    key={t.key}
+                    onClick={() => setTab(t.key)}
+                    style={{
+                      background: "none", border: "none", cursor: "pointer",
+                      padding: "10px 14px",
+                      fontFamily: "'DM Mono',monospace", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase",
+                      color: tab === t.key ? "var(--text)" : "var(--text-dim)",
+                      borderBottom: tab === t.key ? "2px solid #C8FF47" : "2px solid transparent",
+                      marginBottom: -1,
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
+            )}
 
-              {reviews.length === 0 && (
-                <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
-                  {isOwnProfile ? <>No reviews yet.<br />Submit your first Legit Buy!</> : "No reviews yet."}
-                </div>
-              )}
+            {/* Reviews tab */}
+            {(!isOwnProfile || tab === "reviews") && (
+              <div>
+                {!isOwnProfile && (
+                  <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "var(--text-dim)", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 14 }}>
+                    Reviews ({reviews.length})
+                  </div>
+                )}
+                {reviews.length === 0 && (
+                  <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
+                    {isOwnProfile ? <>No reviews yet.<br />Submit your first Legit Buy!</> : "No reviews yet."}
+                  </div>
+                )}
+                {reviews.map(r => (
+                  <ReviewCard key={r.id} r={r} canEdit={isOwnProfile} />
+                ))}
+              </div>
+            )}
 
-              {reviews.map(r => (
-                <ReviewCard key={r.id} r={r} canEdit={isOwnProfile} />
-              ))}
-            </div>
+            {/* Saved tab (own profile only) */}
+            {isOwnProfile && tab === "saved" && (
+              <div>
+                {savedLoading && savedReviews === null ? (
+                  <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>Loading…</div>
+                ) : (savedReviews?.length ?? 0) === 0 ? (
+                  <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
+                    Nothing saved yet.<br />Tap the bookmark on a review to save it here.
+                  </div>
+                ) : (
+                  savedReviews.map(r => (
+                    <ReviewCard key={r.id} r={r} canEdit={false} onUnsave={() => unsave(r.id)} />
+                  ))
+                )}
+              </div>
+            )}
           </>
         )}
       </div>

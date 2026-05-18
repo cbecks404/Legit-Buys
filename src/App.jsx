@@ -29,10 +29,7 @@ export default function App() {
   const [activeDiet, setActiveDiet]     = useState([]);
   const [activeScore, setActiveScore]   = useState(null);
   const [rateLimited, setRateLimited]   = useState(!canSubmit());
-  const [saved, setSaved]               = useState(() => {
-    try { return JSON.parse(localStorage.getItem("lb_saved") || "[]"); }
-    catch { return []; }
-  });
+  const [saved, setSaved]               = useState([]);
   const [modal, setModal]               = useState(null);
   const [adminUser, setAdminUser]       = useState(null);
   const [splash, setSplash]             = useState(true);
@@ -73,13 +70,15 @@ export default function App() {
 
   // ── Helpers ────────────────────────────────────────
   const loadUserProfile = async (u) => {
-    if (!u) { setUserProfile(null); setUserUpvotes([]); return; }
-    const [{ data: prof }, { data: upvoteData }] = await Promise.all([
+    if (!u) { setUserProfile(null); setUserUpvotes([]); setSaved([]); return; }
+    const [{ data: prof }, { data: upvoteData }, { data: savedData }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", u.id).single(),
       supabase.from("upvotes").select("review_id").eq("user_id", u.id),
+      supabase.from("saved_reviews").select("review_id").eq("user_id", u.id),
     ]);
     if (prof) setUserProfile(prof);
     if (upvoteData) setUserUpvotes(upvoteData.map(u => u.review_id));
+    setSaved(savedData ? savedData.map(s => s.review_id) : []);
     const { count: fCount } = await supabase
       .from("follows")
       .select("*", { count: "exact", head: true })
@@ -87,12 +86,14 @@ export default function App() {
     setFollowingCount(fCount ?? 0);
   };
 
-  const toggleSave = (id) => {
-    setSaved(prev => {
-      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
-      localStorage.setItem("lb_saved", JSON.stringify(next));
-      return next;
-    });
+  const toggleSave = async (id) => {
+    if (!user) { setShowUserAuth(true); return; }
+    const isSaved = saved.includes(id);
+    setSaved(prev => isSaved ? prev.filter(x => x !== id) : [...prev, id]);
+    const { error } = isSaved
+      ? await supabase.from("saved_reviews").delete().eq("user_id", user.id).eq("review_id", id)
+      : await supabase.from("saved_reviews").insert({ user_id: user.id, review_id: id });
+    if (error) setSaved(prev => isSaved ? [...prev, id] : prev.filter(x => x !== id));
   };
 
   const toggleDietFilter = (id) => setActiveDiet(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
@@ -361,6 +362,7 @@ export default function App() {
               />
             )}
             {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={(userId) => {
+              if (!user) { setShowUserAuth(true); return; }
               const isUuid = typeof userId === "string" && /^[0-9a-f-]{36}$/.test(userId);
               if (!isUuid || userId === user?.id) return;
               setViewingUserId(userId);
