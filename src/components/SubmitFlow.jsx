@@ -2,18 +2,6 @@ import { useState, useRef } from "react";
 import { CAT_META, DIET_TAGS, PRICE_RANGE } from "../constants";
 import ScoreSelector from "./ScoreSelector";
 
-function extractCity(mapQuery) {
-  if (!mapQuery) return "";
-  const cityPatterns = [
-    /\b(London|Bristol|Manchester|Birmingham|Leeds|Liverpool|Edinburgh|Glasgow|Cardiff|Brighton|Oxford|Cambridge|Bath|York|Newcastle|Nottingham|Sheffield|Leicester|Coventry|Southampton)\b/i
-  ];
-  for (const pattern of cityPatterns) {
-    const match = mapQuery.match(pattern);
-    if (match) return match[1];
-  }
-  return "";
-}
-
 export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);

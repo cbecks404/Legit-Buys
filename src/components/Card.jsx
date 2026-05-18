@@ -54,9 +54,9 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
   const handleShare = async () => {
     const url = `${window.location.origin}${window.location.pathname}?r=${r.id}`;
     if (navigator.share) {
-      try { await navigator.share({ title: r.product, text: r.review?.slice(0, 100), url }); } catch {}
+      try { await navigator.share({ title: r.product, text: r.review?.slice(0, 100), url }); } catch { /* user cancelled */ }
     } else {
-      try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {}
+      try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { /* clipboard blocked */ }
     }
   };
 
