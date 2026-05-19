@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <style>
+      .label { font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 900; letter-spacing: 0.08em; }
+      .brand { font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 800; letter-spacing: 0.32em; }
+      .tag   { font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 600; letter-spacing: 0.04em; font-style: italic; }
+    </style>
+  </defs>
+  <!-- Outer frame: colored band with transparent center -->
+  <path d="
+    M 48 0
+    H 1032
+    Q 1080 0 1080 48
+    V 1032
+    Q 1080 1080 1032 1080
+    H 48
+    Q 0 1080 0 1032
+    V 48
+    Q 0 0 48 0
+    Z
+    M 90 130
+    V 950
+    H 990
+    V 130
+    Z
+  " fill="#808080" fill-rule="evenodd"/>
+
+  <!-- Inner accent line -->
+  <rect x="84" y="124" width="912" height="6" fill="#FFFFFF" opacity="0.18"/>
+  <rect x="84" y="950" width="912" height="6" fill="#FFFFFF" opacity="0.18"/>
+
+  <!-- Rank label on top band -->
+  <text x="540" y="63" text-anchor="middle" class="label"
+        font-size="86" fill="#FFFFFF">PASS</text>
+
+  <!-- Bottom: brand + tagline -->
+  <text x="540" y="1027" text-anchor="middle" class="brand"
+        font-size="36" fill="#FFFFFF">LEGIT BUYS</text>
+  <text x="540" y="1063" text-anchor="middle" class="tag"
+        font-size="22" fill="#FFFFFF" opacity="0.78">Skip it.</text>
+
+  <!-- Corner stars -->
+  <polygon points="45.00,23.00 51.53,38.47 67.00,45.00 51.53,51.53 45.00,67.00 38.47,51.53 23.00,45.00 38.47,38.47" fill="#FFFFFF" opacity="0.85"/>
+  <polygon points="1035.00,23.00 1041.53,38.47 1057.00,45.00 1041.53,51.53 1035.00,67.00 1028.47,51.53 1013.00,45.00 1028.47,38.47" fill="#FFFFFF" opacity="0.85"/>
+  <polygon points="45.00,1013.00 51.53,1028.47 67.00,1035.00 51.53,1041.53 45.00,1057.00 38.47,1041.53 23.00,1035.00 38.47,1028.47" fill="#FFFFFF" opacity="0.85"/>
+  <polygon points="1035.00,1013.00 1041.53,1028.47 1057.00,1035.00 1041.53,1041.53 1035.00,1057.00 1028.47,1041.53 1013.00,1035.00 1028.47,1028.47" fill="#FFFFFF" opacity="0.85"/>
+</svg>

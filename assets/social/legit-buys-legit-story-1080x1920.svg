@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <style>
+      .label { font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 900; letter-spacing: 0.06em; }
+      .brand { font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 800; letter-spacing: 0.36em; }
+      .tag   { font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 600; letter-spacing: 0.04em; font-style: italic; }
+      .small { font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 700; letter-spacing: 0.24em; }
+    </style>
+  </defs>
+
+  <!-- Top header band -->
+  <rect x="0" y="0" width="1080" height="380" fill="#60C3F5"/>
+  <!-- Bottom footer band -->
+  <rect x="0" y="1600" width="1080" height="320" fill="#60C3F5"/>
+
+  <!-- Decorative tick lines -->
+  <rect x="60" y="366" width="960" height="8" fill="#0B1620" opacity="0.22"/>
+  <rect x="60" y="1606" width="960" height="8" fill="#0B1620" opacity="0.22"/>
+
+  <!-- Eyebrow tag -->
+  <text x="540" y="120" text-anchor="middle" class="small"
+        font-size="30" fill="#0B1620" opacity="0.72">REVIEW VERDICT</text>
+
+  <!-- Rank label -->
+  <text x="540" y="266.72" text-anchor="middle" class="label"
+        font-size="124" fill="#0B1620">LEGIT</text>
+
+  <!-- Tagline under rank -->
+  <text x="540" y="340" text-anchor="middle" class="tag"
+        font-size="32" fill="#0B1620" opacity="0.86">Worth picking up.</text>
+
+  <!-- Footer brand block -->
+  <text x="540" y="1730" text-anchor="middle" class="brand"
+        font-size="64" fill="#0B1620">LEGIT BUYS</text>
+  <text x="540" y="1790" text-anchor="middle" class="small"
+        font-size="28" fill="#0B1620" opacity="0.7">FOOD &amp; DRINK REVIEWS</text>
+
+  <!-- Star accents -->
+  <polygon points="90.00,62.00 98.32,81.68 118.00,90.00 98.32,98.32 90.00,118.00 81.68,98.32 62.00,90.00 81.68,81.68" fill="#0B1620" opacity="0.85"/>
+  <polygon points="990.00,62.00 998.32,81.68 1018.00,90.00 998.32,98.32 990.00,118.00 981.68,98.32 962.00,90.00 981.68,81.68" fill="#0B1620" opacity="0.85"/>
+  <polygon points="90.00,1802.00 98.32,1821.68 118.00,1830.00 98.32,1838.32 90.00,1858.00 81.68,1838.32 62.00,1830.00 81.68,1821.68" fill="#0B1620" opacity="0.85"/>
+  <polygon points="990.00,1802.00 998.32,1821.68 1018.00,1830.00 998.32,1838.32 990.00,1858.00 981.68,1838.32 962.00,1830.00 981.68,1821.68" fill="#0B1620" opacity="0.85"/>
+</svg>
