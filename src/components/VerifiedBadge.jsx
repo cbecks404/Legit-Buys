@@ -1,12 +1,21 @@
-export default function VerifiedBadge() {
+export default function VerifiedBadge({ size = 16 }) {
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 5,
-      background: "#C8FF4718", border: "1px solid #C8FF4744",
-      borderRadius: 99, padding: "3px 10px", fontSize: 10,
-      fontFamily: "'DM Mono', monospace", color: "#C8FF47", letterSpacing: ".12em",
-    }}>
-      ✦ VERIFIED
-    </span>
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      aria-label="Verified"
+      role="img"
+      style={{ flexShrink: 0, display: "inline-block", verticalAlign: "middle" }}
+    >
+      <path
+        fill="#C8FF47"
+        d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81-1.01 1.01-1.27 2.52-.81 3.91-1.31.67-2.19 1.91-2.19 3.34s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.27 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"
+      />
+      <path
+        fill="#0a0a0a"
+        d="M10.4 16.2l-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4z"
+      />
+    </svg>
   );
 }
