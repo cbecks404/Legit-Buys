@@ -48,7 +48,7 @@ export default function RatingBand({ score, priceRange }) {
     <span
       key={i}
       aria-hidden="true"
-      style={{ color: labelColor, fontSize: 14, lineHeight: 1 }}
+      style={{ color: labelColor, fontSize: 20, lineHeight: 1 }}
     >
       {i < score ? "★" : "☆"}
     </span>
@@ -117,8 +117,8 @@ export default function RatingBand({ score, priceRange }) {
         <span
           style={{
             fontFamily: "'DM Mono', monospace",
-            fontSize: 12,
-            fontWeight: 700,
+            fontSize: 13,
+            fontWeight: 800,
             letterSpacing: ".18em",
             textTransform: "uppercase",
             color: labelColor,

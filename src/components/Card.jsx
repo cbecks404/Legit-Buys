@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { CAT_META, DIET_TAGS, priceSymbol } from "../constants";
+import { CAT_META, DIET_TAGS, SCORE_COLORS, priceSymbol } from "../constants";
 import RatingBand from "./Card/RatingBand";
+import VerifiedBadge from "./VerifiedBadge";
 
 const BookmarkIcon = ({ filled }) => (
   <svg width="13" height="15" viewBox="0 0 13 15" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
@@ -11,6 +12,12 @@ const BookmarkIcon = ({ filled }) => (
 const ShareIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" />
+  </svg>
+);
+
+const MapPinIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
   </svg>
 );
 
@@ -31,7 +38,7 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
   const upped = initialUpped;
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
-  const accent = CAT_META[r.category]?.color ?? "#C8FF47";
+  const ratingColor = SCORE_COLORS[r.rating] ?? "#C8FF47";
   const rawDiet = r.diet_tags ?? r.dietTags ?? [];
   const dietTags = Array.isArray(rawDiet)
     ? rawDiet
@@ -101,16 +108,25 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
             {r.product}
           </span>
           <span style={{
-            fontFamily: "'DM Mono', monospace",
-            fontSize: 10,
-            color: "var(--text-dim)",
-            background: "var(--surface2)",
-            border: "1px solid var(--border2)",
+            color: "#fff",
+            background: expanded ? "#ffffff14" : "transparent",
+            border: `1px solid ${expanded ? "#ffffff66" : "var(--border2)"}`,
             borderRadius: 99,
-            padding: "2px 7px",
+            padding: "4px 8px",
+            display: "inline-flex",
+            alignItems: "center",
+            lineHeight: 1,
             flexShrink: 0,
+            transition: "all .25s cubic-bezier(.16,1,.3,1)",
           }}>
-            {expanded ? "▲" : "▼"}
+            <span style={{
+              display: "inline-flex",
+              transform: expanded ? "scale(1.18) rotate(-12deg)" : "scale(1) rotate(0deg)",
+              transformOrigin: "50% 85%",
+              transition: "transform .35s cubic-bezier(.34,1.56,.64,1)",
+            }}>
+              <MapPinIcon />
+            </span>
           </span>
         </div>
 
@@ -136,8 +152,9 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
         {metaSegments.length > 0 && (
           <div style={{
             fontFamily: "'DM Mono', monospace",
-            fontSize: 10,
-            color: "var(--text-dim)",
+            fontSize: 12,
+            fontWeight: 600,
+            color: "var(--text-mid)",
             letterSpacing: ".04em",
           }}>
             {metaSegments.join(" · ")}
@@ -321,9 +338,9 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
                 fontWeight: 700, textAlign: "left", minWidth: 0,
               }}
             >
-              {r.verified && <span style={{ color: "#2D6A4F", marginRight: 4 }}>✓</span>}
               {r.submitter}
             </button>
+            {r.verified && <VerifiedBadge />}
           </div>
           <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
             <button
@@ -346,9 +363,9 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
               onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               style={{
-                background: saved ? "#2D6A4F18" : "transparent",
-                border: `1px solid ${saved ? "#2D6A4F" : "var(--border2)"}`,
-                color: saved ? "#2D6A4F" : "var(--text-mid)",
+                background: saved ? `${ratingColor}22` : "transparent",
+                border: `1px solid ${saved ? ratingColor : "var(--border2)"}`,
+                color: saved ? ratingColor : "var(--text-mid)",
                 borderRadius: 99, padding: "7px 11px", cursor: "pointer", transition: "all .15s",
                 animation: saved ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
                 display: "flex", alignItems: "center", lineHeight: 1,
@@ -363,9 +380,9 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
               onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               disabled={upped}
               style={{
-                background: upped ? `${accent}22` : "transparent",
-                border: `1px solid ${upped ? accent : "var(--border2)"}`,
-                color: upped ? accent : "var(--text-mid)",
+                background: upped ? "#C8FF4722" : "transparent",
+                border: `1px solid ${upped ? "#C8FF47" : "var(--border2)"}`,
+                color: upped ? "#C8FF47" : "var(--text-mid)",
                 borderRadius: 99,
                 padding: "7px 14px",
                 fontSize: 14,

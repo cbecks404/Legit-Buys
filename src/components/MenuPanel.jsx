@@ -32,8 +32,7 @@ export default function MenuPanel({ onClose, onNavigate, adminUser, user }) {
         {/* Nav items */}
         <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
           {[
-            { label: "Home",         icon: "◈", action: "home"    },
-            { label: "My Reviews",    icon: "✎", action: "profile" },
+            { label: "Profile",       icon: "✎", action: "profile" },
             { label: "Scoring Guide", icon: "★", action: "guide"   },
             ...(adminUser ? [{ label: "Admin", icon: "⚙", action: "admin" }] : []),
             ...(!user ? [{ label: "Log in", icon: "→", action: "login" }] : []),

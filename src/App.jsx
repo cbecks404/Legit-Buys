@@ -197,7 +197,7 @@ export default function App() {
       diet_tags: f.dietTags,
       user_id: user?.id ?? null,
       submitter_email: user?.email ?? null,
-      verified: !!user,
+      verified: !!userProfile?.verified,
       upvotes: 0, date: new Date().toISOString().slice(0, 10),
     };
     const { data, error } = await supabase.from("reviews").insert([newReview]).select();
@@ -364,7 +364,8 @@ export default function App() {
             {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={(userId) => {
               if (!user) { setShowUserAuth(true); return; }
               const isUuid = typeof userId === "string" && /^[0-9a-f-]{36}$/.test(userId);
-              if (!isUuid || userId === user?.id) return;
+              if (!isUuid) return;
+              if (userId === user.id) { setScreen("profile"); return; }
               setViewingUserId(userId);
             }} />)}
           </div>

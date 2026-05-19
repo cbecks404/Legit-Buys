@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabaseClient";
 import { CAT_META, SCORE_COLORS, SCORE_META, priceSymbol } from "../constants";
+import VerifiedBadge from "./VerifiedBadge";
 
 export default function ProfilePage({ user, targetUserId, onClose, onLogout, onFollowChange, onChangePassword }) {
   // Determine mode: own profile if targetUserId is absent or equals logged-in user
@@ -139,17 +140,6 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
     }
   };
 
-  const VerifiedBadge = () => (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 5,
-      background: "#C8FF4718", border: "1px solid #C8FF4744",
-      borderRadius: 99, padding: "3px 10px", fontSize: 10,
-      fontFamily: "'DM Mono', monospace", color: "#C8FF47", letterSpacing: ".12em",
-    }}>
-      ✦ VERIFIED
-    </span>
-  );
-
   const ReviewCard = ({ r, canEdit = true, onUnsave }) => {
     const accent = CAT_META[r.category]?.color ?? "#C8FF47";
     const meta = SCORE_META[r.rating];
@@ -188,6 +178,57 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
         ) : (
           <>
             <p style={{ margin: "0 0 10px", fontSize: 13, color: "var(--text-mid)", fontFamily: "'LBReview',serif", lineHeight: 1.6 }}>{r.review}</p>
+
+            {r.image_url && (
+              <img
+                src={r.image_url}
+                alt={r.product}
+                style={{ width: "100%", borderRadius: 10, objectFit: "cover", maxHeight: 220, display: "block", marginBottom: 10 }}
+                onError={e => e.currentTarget.style.display = "none"}
+              />
+            )}
+
+            {(r.map_query ?? r.mapQuery) && (
+              <div style={{ marginBottom: 10 }}>
+                <iframe
+                  title="map"
+                  width="100%"
+                  height="160"
+                  style={{ border: "none", borderRadius: 10 }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(r.map_query ?? r.mapQuery)}&output=embed`}
+                />
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.map_query ?? r.mapQuery)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: 10, fontFamily: "'LBBody',sans-serif", color: "var(--text-mid)", textDecoration: "none", display: "block", marginTop: 4 }}
+                >
+                  Open in Google Maps &#8599;
+                </a>
+              </div>
+            )}
+
+            {r.link && (
+              <a
+                href={r.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "10px 14px", textDecoration: "none", marginBottom: 10 }}
+              >
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>🔗</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12, color: "var(--text)", fontFamily: "'LBBody',sans-serif", marginBottom: 2 }}>
+                    {(() => { try { return new URL(r.link).hostname.replace("www.", ""); } catch { return r.link; } })()}
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--text-dim)", fontFamily: "'LBBody',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {r.link.slice(0, 40)}{r.link.length > 40 ? "…" : ""}
+                  </div>
+                </div>
+              </a>
+            )}
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 {r.price && <span style={{ fontSize: 12, color: accent, fontFamily: "'DM Mono',monospace", fontWeight: 600 }}>£{r.price}</span>}

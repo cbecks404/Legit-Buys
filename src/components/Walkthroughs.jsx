@@ -23,7 +23,13 @@ export function AppIntro({ onDismiss }) {
     {
       emoji: "📝",
       title: "How to submit",
-      body: "Tap 'Submit a Legit Buy' to add your pick. Your review goes to admin for approval before going live — keeping the quality high.",
+      body: "Tap 'WHATS THE LEGIT BUY' to add your pick. Reviews go live straight away — only submit picks you genuinely stand behind so the community can trust the feed.",
+      tip: null,
+    },
+    {
+      emoji: "🔖",
+      title: "Save & follow",
+      body: "Bookmark a card to keep it in your Saved tab on your Profile. Tap any reviewer's name to see their picks, follow them, and surface their new reviews in your Following feed.",
       tip: null,
     },
   ];
