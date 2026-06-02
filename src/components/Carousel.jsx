@@ -69,18 +69,21 @@ export default function Carousel({ items, getKey, children, bottomInset = 96, ga
   }, [items.length]);
 
   return (
-    <div ref={wrapRef} style={{ position: "relative", height: finalHeight }}>
+    <div ref={wrapRef} style={{ height: finalHeight, display: "flex", flexDirection: "column" }}>
       <style>{`.lb-carousel::-webkit-scrollbar{display:none}`}</style>
 
+      {/* Progress slider — sits between whatever is above and the cards */}
       {items.length > 1 && (
-        <div style={{
-          position: "absolute", top: 14, right: 18, zIndex: 5,
-          fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 700, letterSpacing: ".08em",
-          background: "rgba(0,0,0,.7)", border: "1px solid var(--border2)", color: "var(--text-mid)",
-          padding: "5px 11px", borderRadius: 99, backdropFilter: "blur(6px)",
-          pointerEvents: "none",
-        }}>
-          {activeIndex + 1} / {items.length}
+        <div style={{ flex: "0 0 auto", padding: "4px 5% 10px" }}>
+          <div style={{ position: "relative", height: 4, borderRadius: 99, background: "var(--border2)" }}>
+            <div style={{
+              position: "absolute", top: 0, bottom: 0,
+              left: `${(activeIndex / items.length) * 100}%`,
+              width: `${100 / items.length}%`,
+              background: "#C8FF47", borderRadius: 99,
+              transition: "left .25s cubic-bezier(.16,1,.3,1)",
+            }} />
+          </div>
         </div>
       )}
 
@@ -88,7 +91,7 @@ export default function Carousel({ items, getKey, children, bottomInset = 96, ga
         ref={scrollRef}
         className="lb-carousel"
         style={{
-          height: "100%", display: "flex", gap,
+          flex: "1 1 auto", minHeight: 0, display: "flex", gap,
           overflowX: "auto", overflowY: "hidden",
           scrollSnapType: "x mandatory",
           WebkitOverflowScrolling: "touch",
