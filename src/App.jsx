@@ -193,7 +193,7 @@ export default function App() {
     const newReview = {
       product: f.product, category: f.category, categories: f.categories,
       rating: f.rating, review: f.review, submitter: f.submitter,
-      where: f.where, price: f.price, price_range: f.priceRange,
+      where: f.where, place_name: f.placeName, price: f.price, price_range: f.priceRange,
       link: f.link, map_query: f.mapQuery, image_url: f.imageUrl, city: f.city,
       diet_tags: f.dietTags,
       user_id: user?.id ?? null,

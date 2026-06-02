@@ -46,6 +46,7 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
       : [];
   const priceRange = r.price_range ?? r.priceRange ?? "";
   const mapQuery = r.map_query ?? r.mapQuery ?? "";
+  const placeName = r.place_name ?? r.placeName ?? "";
   const sym = priceSymbol(priceRange);
 
   // Metadata line segments
@@ -88,30 +89,32 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
       {/* 2. Scrollable content area */}
       <div style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto", padding: "12px 16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
 
-        {/* 2a. Product name row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {/* 2a. Title — dish + venue, for scanning by place */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <span style={{
             fontFamily: "'LBCardHeader', serif",
             fontSize: 17,
             fontWeight: 700,
             color: "var(--text)",
             lineHeight: 1.3,
-            flex: 1,
           }}>
             {r.product}
           </span>
-          <span style={{
-            color: "var(--text-mid)",
-            border: "1px solid var(--border2)",
-            borderRadius: 99,
-            padding: "4px 8px",
-            display: "inline-flex",
-            alignItems: "center",
-            lineHeight: 1,
-            flexShrink: 0,
-          }}>
-            <MapPinIcon />
-          </span>
+          {placeName && (
+            <span style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              color: "#C8FF47",
+              fontFamily: "'DM Mono', monospace",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: ".02em",
+            }}>
+              <MapPinIcon />
+              {placeName}
+            </span>
+          )}
         </div>
 
         {/* 2b. Review quote — shown in full */}

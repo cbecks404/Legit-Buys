@@ -7,7 +7,7 @@ export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
   const [dir, setDir] = useState(1);
   const [f, setF] = useState({
     product: "", category: "snacks", categories: ["snacks"], rating: 0, review: "",
-    submitter: prefillName, where: "", price: "", priceRange: "fair",
+    submitter: prefillName, where: "", placeName: "", price: "", priceRange: "fair",
     link: "", mapQuery: "", dietTags: [], imageUrl: "", city: "",
   });
 
@@ -83,6 +83,11 @@ export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
             );
           })}
         </div>
+      </div>
+      <div>
+        <label style={lbl}>Place / venue name</label>
+        <input style={inp} placeholder="e.g. Leon, Padella, The Gallery Cafe…" value={f.placeName} onChange={e => set("placeName", e.target.value)} />
+        <div style={hint}>The spot itself — shows next to the dish so people can scan by place.</div>
       </div>
       <div><label style={lbl}>Where to get it</label><input style={inp} placeholder="City or Town i.e Bristol, London…" value={f.where} onChange={e => set("where", e.target.value)} /></div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
