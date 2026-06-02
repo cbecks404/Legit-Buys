@@ -22,7 +22,7 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
 
   // Own-profile-only state
   const [editingId, setEditingId]       = useState(null);
-  const [editFields, setEditFields]     = useState({ review: "", price: "" });
+  const [editFields, setEditFields]     = useState({ review: "", price: "", placeName: "" });
   const [displayName, setDisplayName]   = useState("");
   const [savingName, setSavingName]     = useState(false);
   const [editingName, setEditingName]   = useState(false);
@@ -127,12 +127,13 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
 
   const startEdit = (r) => {
     setEditingId(r.id);
-    setEditFields({ review: r.review, price: r.price ?? "" });
+    setEditFields({ review: r.review, price: r.price ?? "", placeName: r.place_name ?? r.placeName ?? "" });
   };
 
   const saveEdit = async () => {
-    await supabase.from("reviews").update({ review: editFields.review, price: editFields.price }).eq("id", editingId);
-    setReviews(rs => rs.map(r => r.id === editingId ? { ...r, ...editFields } : r));
+    const patch = { review: editFields.review, price: editFields.price, place_name: editFields.placeName };
+    await supabase.from("reviews").update(patch).eq("id", editingId);
+    setReviews(rs => rs.map(r => r.id === editingId ? { ...r, ...patch } : r));
     setEditingId(null);
   };
 
@@ -180,6 +181,10 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
         <div style={{ width: "100%", height: "100%", overflowY: "auto", background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 16px 18px" }}>
           <div style={{ fontFamily: "'LBCardHeader',serif", fontSize: 16, color: "var(--text)", marginBottom: 12 }}>{r.product}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div>
+              <label style={lbl}>Place / venue name</label>
+              <input style={inp} type="text" placeholder="e.g. Leon, Padella…" value={editFields.placeName} onChange={e => setEditFields(p => ({ ...p, placeName: e.target.value }))} />
+            </div>
             <div>
               <label style={lbl}>Review</label>
               <textarea style={{ ...inp, minHeight: 80, resize: "vertical" }} value={editFields.review} onChange={e => setEditFields(p => ({ ...p, review: e.target.value }))} />
