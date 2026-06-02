@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabaseClient";
-import { CAT_META, SCORE_COLORS, SCORE_META, priceSymbol } from "../constants";
 import VerifiedBadge from "./VerifiedBadge";
+import Card from "./Card";
+import Carousel from "./Carousel";
 
 export default function ProfilePage({ user, targetUserId, onClose, onLogout, onFollowChange, onChangePassword }) {
   // Determine mode: own profile if targetUserId is absent or equals logged-in user
@@ -140,28 +141,20 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
     }
   };
 
-  const ReviewCard = ({ r, canEdit = true, onUnsave }) => {
-    const accent = CAT_META[r.category]?.color ?? "#C8FF47";
-    const meta = SCORE_META[r.rating];
-    const color = SCORE_COLORS[r.rating];
-    const isEditing = editingId === r.id;
+  const profileActionBtn = {
+    background: "none", border: "1px solid var(--border2)", borderRadius: 99,
+    padding: "7px 14px", color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif",
+    fontSize: 12, cursor: "pointer",
+  };
 
-    return (
-      <div style={{ background: "var(--surface)", border: `1px solid ${accent}44`, borderRadius: 14, padding: "16px 16px 14px", marginBottom: 10 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-          <div>
-            <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: accent, letterSpacing: ".18em", textTransform: "uppercase", fontWeight: 600, marginBottom: 4 }}>
-              {CAT_META[r.category]?.emoji} {r.category}
-            </div>
-            <div style={{ fontFamily: "'LBCardHeader',serif", fontSize: 16, color: "var(--text)" }}>{r.product}</div>
-          </div>
-          <span style={{ fontSize: 10, fontFamily: "'DM Mono',monospace", fontWeight: 700, color, background: `${color}18`, border: `1px solid ${color}44`, padding: "3px 9px", borderRadius: 99, whiteSpace: "nowrap" }}>
-            {r.rating === 3 ? "✦ " : ""}{meta?.label}
-          </span>
-        </div>
-
-        {isEditing && canEdit ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 8 }}>
+  // Renders one review inside a Carousel slot: inline edit form when this
+  // review is being edited, otherwise the shared full-size Card.
+  const renderItem = (r, isActive, { canEdit = false, onUnsave } = {}) => {
+    if (editingId === r.id && canEdit) {
+      return (
+        <div style={{ width: "100%", height: "100%", overflowY: "auto", background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 16px 18px" }}>
+          <div style={{ fontFamily: "'LBCardHeader',serif", fontSize: 16, color: "var(--text)", marginBottom: 12 }}>{r.product}</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div>
               <label style={lbl}>Review</label>
               <textarea style={{ ...inp, minHeight: 80, resize: "vertical" }} value={editFields.review} onChange={e => setEditFields(p => ({ ...p, review: e.target.value }))} />
@@ -175,79 +168,24 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
               <button onClick={() => setEditingId(null)} style={{ flex: 1, background: "transparent", color: "var(--text-mid)", border: "1px solid var(--border2)", borderRadius: 99, padding: "11px 0", fontFamily: "'LBBody',sans-serif", fontSize: 13, cursor: "pointer" }}>Cancel</button>
             </div>
           </div>
-        ) : (
+        </div>
+      );
+    }
+    return (
+      <Card
+        r={r}
+        isActive={isActive}
+        extraActions={
           <>
-            <p style={{ margin: "0 0 10px", fontSize: 13, color: "var(--text-mid)", fontFamily: "'LBReview',serif", lineHeight: 1.6 }}>{r.review}</p>
-
-            {r.image_url && (
-              <img
-                src={r.image_url}
-                alt={r.product}
-                style={{ width: "100%", borderRadius: 10, objectFit: "cover", maxHeight: 220, display: "block", marginBottom: 10 }}
-                onError={e => e.currentTarget.style.display = "none"}
-              />
+            {canEdit && (
+              <button onClick={() => startEdit(r)} style={profileActionBtn}>Edit</button>
             )}
-
-            {(r.map_query ?? r.mapQuery) && (
-              <div style={{ marginBottom: 10 }}>
-                <iframe
-                  title="map"
-                  width="100%"
-                  height="160"
-                  style={{ border: "none", borderRadius: 10 }}
-                  loading="lazy"
-                  allowFullScreen
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(r.map_query ?? r.mapQuery)}&output=embed`}
-                />
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.map_query ?? r.mapQuery)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontSize: 10, fontFamily: "'LBBody',sans-serif", color: "var(--text-mid)", textDecoration: "none", display: "block", marginTop: 4 }}
-                >
-                  Open in Google Maps &#8599;
-                </a>
-              </div>
+            {onUnsave && (
+              <button onClick={onUnsave} style={profileActionBtn}>Unsave</button>
             )}
-
-            {r.link && (
-              <a
-                href={r.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "10px 14px", textDecoration: "none", marginBottom: 10 }}
-              >
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>🔗</div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 12, color: "var(--text)", fontFamily: "'LBBody',sans-serif", marginBottom: 2 }}>
-                    {(() => { try { return new URL(r.link).hostname.replace("www.", ""); } catch { return r.link; } })()}
-                  </div>
-                  <div style={{ fontSize: 10, color: "var(--text-dim)", fontFamily: "'LBBody',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {r.link.slice(0, 40)}{r.link.length > 40 ? "…" : ""}
-                  </div>
-                </div>
-              </a>
-            )}
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                {r.price && <span style={{ fontSize: 12, color: accent, fontFamily: "'DM Mono',monospace", fontWeight: 600 }}>£{r.price}</span>}
-                {r.price_range && <span style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "'DM Mono',monospace", background: "var(--surface2)", border: "1px solid var(--border)", padding: "1px 7px", borderRadius: 99 }}>{priceSymbol(r.price_range)}</span>}
-              </div>
-              {canEdit && (
-                <button onClick={() => startEdit(r)} style={{ background: "none", border: "1px solid var(--border2)", borderRadius: 99, padding: "5px 14px", color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif", fontSize: 11, cursor: "pointer" }}>
-                  Edit
-                </button>
-              )}
-              {onUnsave && (
-                <button onClick={onUnsave} style={{ background: "none", border: "1px solid var(--border2)", borderRadius: 99, padding: "5px 14px", color: "var(--text-mid)", fontFamily: "'LBBody',sans-serif", fontSize: 11, cursor: "pointer" }}>
-                  Unsave
-                </button>
-              )}
-            </div>
           </>
-        )}
-      </div>
+        }
+      />
     );
   };
 
@@ -410,9 +348,11 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
                     {isOwnProfile ? <>No reviews yet.<br />Submit your first Legit Buy!</> : "No reviews yet."}
                   </div>
                 )}
-                {reviews.map(r => (
-                  <ReviewCard key={r.id} r={r} canEdit={isOwnProfile} />
-                ))}
+                {reviews.length > 0 && (
+                  <Carousel items={reviews} getKey={r => r.id} bottomInset={32}>
+                    {(r, isActive) => renderItem(r, isActive, { canEdit: isOwnProfile })}
+                  </Carousel>
+                )}
               </div>
             )}
 
@@ -426,9 +366,9 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
                     Nothing saved yet.<br />Tap the bookmark on a review to save it here.
                   </div>
                 ) : (
-                  savedReviews.map(r => (
-                    <ReviewCard key={r.id} r={r} canEdit={false} onUnsave={() => unsave(r.id)} />
-                  ))
+                  <Carousel items={savedReviews} getKey={r => r.id} bottomInset={32}>
+                    {(r, isActive) => renderItem(r, isActive, { onUnsave: () => unsave(r.id) })}
+                  </Carousel>
                 )}
               </div>
             )}

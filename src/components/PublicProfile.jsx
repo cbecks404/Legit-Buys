@@ -1,4 +1,5 @@
-import { CAT_META, SCORE_COLORS, SCORE_META, priceSymbol } from "../constants";
+import Card from "./Card";
+import Carousel from "./Carousel";
 
 const AVATAR_PALETTE = ["#C8FF47", "#60C3F5", "#F4A942", "#C084FC", "#FF6B6B", "#4ECDC4", "#FFB347"];
 
@@ -68,34 +69,9 @@ export default function PublicProfile({ displayName, userId, allReviews, onClose
             No reviews yet.
           </div>
         ) : (
-          reviews.map(r => {
-            const accent = CAT_META[r.category]?.color ?? "#C8FF47";
-            const meta = SCORE_META[r.rating];
-            const color = SCORE_COLORS[r.rating];
-            const sym = priceSymbol(r.price_range ?? "");
-            return (
-              <div key={r.id} style={{ background: "#111", border: `1px solid ${accent}44`, borderRadius: 14, padding: "16px 16px 14px", marginBottom: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, gap: 8 }}>
-                  <div>
-                    <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: accent, letterSpacing: ".18em", textTransform: "uppercase", fontWeight: 600, marginBottom: 4 }}>
-                      {CAT_META[r.category]?.emoji} {r.category}
-                    </div>
-                    <div style={{ fontFamily: "'LBCardHeader',serif", fontSize: 16, color: "#f0ede8" }}>{r.product}</div>
-                  </div>
-                  <span style={{ fontSize: 10, fontFamily: "'DM Mono',monospace", fontWeight: 700, color, background: `${color}18`, border: `1px solid ${color}44`, padding: "3px 9px", borderRadius: 99, whiteSpace: "nowrap", flexShrink: 0 }}>
-                    {r.rating === 3 ? "✦ " : ""}{meta?.label}
-                  </span>
-                </div>
-                <p style={{ margin: "0 0 10px", fontSize: 13, color: "#e0ddd8", fontFamily: "'LBReview',serif", lineHeight: 1.6 }}>{r.review}</p>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  {r.where && <span style={{ fontSize: 10, color: "#666", fontFamily: "'DM Mono',monospace" }}>{r.where}</span>}
-                  {r.price && <span style={{ fontSize: 11, color: accent, fontFamily: "'DM Mono',monospace", fontWeight: 600 }}>£{r.price}</span>}
-                  {sym && <span style={{ fontSize: 10, color: "#555", fontFamily: "'DM Mono',monospace", background: "#161616", border: "1px solid #1c1c1c", padding: "1px 7px", borderRadius: 99 }}>{sym}</span>}
-                  <span style={{ fontSize: 10, color: "#555", fontFamily: "'DM Mono',monospace", marginLeft: "auto" }}>↑ {r.upvotes ?? 0}</span>
-                </div>
-              </div>
-            );
-          })
+          <Carousel items={reviews} getKey={r => r.id} bottomInset={32}>
+            {(r, isActive) => <Card r={r} isActive={isActive} />}
+          </Carousel>
         )}
       </div>
     </div>

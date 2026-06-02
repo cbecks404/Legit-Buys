@@ -1,0 +1,122 @@
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+
+/**
+ * Horizontal swipe carousel built on native CSS scroll-snap.
+ *
+ * - One item per screen (~90% width) snapped to center, with neighbors peeking.
+ * - Peeking (non-active) items are blurred / dimmed / slightly shrunk.
+ * - Tracks the centered item via IntersectionObserver and exposes `isActive`.
+ * - Renders a counter chip ("3 / 24") when there is more than one item.
+ * - Self-sizes to fill the viewport below its own top, minus `bottomInset`
+ *   (room for a fixed bottom bar), so each item can scroll internally.
+ *
+ * Usage:
+ *   <Carousel items={list} getKey={r => r.id} bottomInset={96}>
+ *     {(item, isActive, index) => <Card r={item} isActive={isActive} />}
+ *   </Carousel>
+ */
+export default function Carousel({ items, getKey, children, bottomInset = 96, gap = 0 }) {
+  const wrapRef = useRef(null);
+  const scrollRef = useRef(null);
+  const ratios = useRef({});
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [height, setHeight] = useState(null);
+
+  // Fill remaining viewport height below our top edge.
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = wrapRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      const vh = window.visualViewport?.height ?? window.innerHeight;
+      setHeight(Math.max(320, vh - top - bottomInset));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.visualViewport?.addEventListener("resize", measure);
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.visualViewport?.removeEventListener("resize", measure);
+    };
+  }, [bottomInset, items.length]);
+
+  // Track the most-centered slot.
+  useEffect(() => {
+    const root = scrollRef.current;
+    if (!root) return;
+    const slots = [...root.querySelectorAll("[data-slot]")];
+    ratios.current = {};
+    const io = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => {
+          ratios.current[Number(e.target.dataset.slot)] = e.intersectionRatio;
+        });
+        let best = 0;
+        let bestRatio = -1;
+        for (const [i, ratio] of Object.entries(ratios.current)) {
+          if (ratio > bestRatio) { bestRatio = ratio; best = Number(i); }
+        }
+        setActiveIndex(best);
+      },
+      { root, threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+    slots.forEach(s => io.observe(s));
+    return () => io.disconnect();
+  }, [items.length]);
+
+  return (
+    <div ref={wrapRef} style={{ position: "relative", height: height ?? "70dvh" }}>
+      <style>{`.lb-carousel::-webkit-scrollbar{display:none}`}</style>
+
+      {items.length > 1 && (
+        <div style={{
+          position: "absolute", top: 14, right: 18, zIndex: 5,
+          fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 700, letterSpacing: ".08em",
+          background: "rgba(0,0,0,.7)", border: "1px solid var(--border2)", color: "var(--text-mid)",
+          padding: "5px 11px", borderRadius: 99, backdropFilter: "blur(6px)",
+          pointerEvents: "none",
+        }}>
+          {activeIndex + 1} / {items.length}
+        </div>
+      )}
+
+      <div
+        ref={scrollRef}
+        className="lb-carousel"
+        style={{
+          height: "100%", display: "flex", gap,
+          overflowX: "auto", overflowY: "hidden",
+          scrollSnapType: "x mandatory",
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none",
+          padding: "8px 5%",
+        }}
+      >
+        {items.map((item, i) => {
+          const isActive = i === activeIndex;
+          return (
+            <div
+              key={getKey ? getKey(item) : i}
+              data-slot={i}
+              style={{
+                flex: "0 0 90%", height: "100%",
+                scrollSnapAlign: "center",
+                padding: "0 5px", display: "flex",
+              }}
+            >
+              <div style={{
+                width: "100%", height: "100%", display: "flex",
+                transition: "filter .3s ease, opacity .3s ease, transform .3s ease",
+                filter: isActive ? "blur(0)" : "blur(2px)",
+                opacity: isActive ? 1 : 0.55,
+                transform: isActive ? "scale(1)" : "scale(0.96)",
+              }}>
+                {children(item, isActive, i)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

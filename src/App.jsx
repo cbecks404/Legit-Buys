@@ -10,6 +10,7 @@ import {
 
 // Components
 import Card from "./components/Card";
+import Carousel from "./components/Carousel";
 import Sheet from "./components/Sheet";
 import SubmitFlow from "./components/SubmitFlow";
 import VerifiedUsers from "./components/VerifiedUsers";
@@ -361,13 +362,27 @@ export default function App() {
                 }}
               />
             )}
-            {filtered.map(r => <Card key={r.id} r={r} onUp={upvote} saved={saved.includes(r.id)} onSave={toggleSave} upped={userUpvotes.includes(r.id)} onSubmitterClick={(userId) => {
-              if (!user) { setShowUserAuth(true); return; }
-              const isUuid = typeof userId === "string" && /^[0-9a-f-]{36}$/.test(userId);
-              if (!isUuid) return;
-              if (userId === user.id) { setScreen("profile"); return; }
-              setViewingUserId(userId);
-            }} />)}
+            {!loading && filtered.length > 0 && (
+              <Carousel items={filtered} getKey={r => r.id} bottomInset={110}>
+                {(r, isActive) => (
+                  <Card
+                    r={r}
+                    isActive={isActive}
+                    onUp={upvote}
+                    saved={saved.includes(r.id)}
+                    onSave={toggleSave}
+                    upped={userUpvotes.includes(r.id)}
+                    onSubmitterClick={(userId) => {
+                      if (!user) { setShowUserAuth(true); return; }
+                      const isUuid = typeof userId === "string" && /^[0-9a-f-]{36}$/.test(userId);
+                      if (!isUuid) return;
+                      if (userId === user.id) { setScreen("profile"); return; }
+                      setViewingUserId(userId);
+                    }}
+                  />
+                )}
+              </Carousel>
+            )}
           </div>
         </div>
 

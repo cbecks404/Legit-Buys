@@ -34,9 +34,8 @@ function getInitials(name) {
   return parts.length === 1 ? parts[0][0].toUpperCase() : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export default function Card({ r, onUp, saved, onSave, upped: initialUpped = false, onSubmitterClick }) {
+export default function Card({ r, onUp, saved, onSave, upped: initialUpped = false, onSubmitterClick, isActive = true, extraActions }) {
   const upped = initialUpped;
-  const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const ratingColor = SCORE_COLORS[r.rating] ?? "#C8FF47";
   const rawDiet = r.diet_tags ?? r.dietTags ?? [];
@@ -70,36 +69,30 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
   return (
     <div
       id={`card-${r.id}`}
-      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}
       style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
         borderRadius: 14,
         overflow: "hidden",
         background: "var(--card-bg)",
         border: "1px solid var(--border)",
-        transition: "transform .15s",
       }}
     >
-      {/* 1. RatingBand — flush at top edge */}
-      <RatingBand score={r.rating} priceRange={priceRange} />
+      {/* 1. RatingBand — pinned at top edge */}
+      <div style={{ flex: "0 0 auto" }}>
+        <RatingBand score={r.rating} priceRange={priceRange} />
+      </div>
 
-      {/* 2. Content area */}
-      <div style={{ padding: "12px 16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
+      {/* 2. Scrollable content area */}
+      <div style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto", padding: "12px 16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
 
-        {/* 2a. Product name row — clicking toggles expanded */}
-        <div
-          onClick={() => setExpanded(e => !e)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 8,
-            cursor: "pointer",
-          }}
-        >
+        {/* 2a. Product name row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{
             fontFamily: "'LBCardHeader', serif",
-            fontSize: 15,
+            fontSize: 17,
             fontWeight: 700,
             color: "var(--text)",
             lineHeight: 1.3,
@@ -108,29 +101,20 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
             {r.product}
           </span>
           <span style={{
-            color: "#fff",
-            background: expanded ? "#ffffff14" : "transparent",
-            border: `1px solid ${expanded ? "#ffffff66" : "var(--border2)"}`,
+            color: "var(--text-mid)",
+            border: "1px solid var(--border2)",
             borderRadius: 99,
             padding: "4px 8px",
             display: "inline-flex",
             alignItems: "center",
             lineHeight: 1,
             flexShrink: 0,
-            transition: "all .25s cubic-bezier(.16,1,.3,1)",
           }}>
-            <span style={{
-              display: "inline-flex",
-              transform: expanded ? "scale(1.18) rotate(-12deg)" : "scale(1) rotate(0deg)",
-              transformOrigin: "50% 85%",
-              transition: "transform .35s cubic-bezier(.34,1.56,.64,1)",
-            }}>
-              <MapPinIcon />
-            </span>
+            <MapPinIcon />
           </span>
         </div>
 
-        {/* 2b. Review quote */}
+        {/* 2b. Review quote — shown in full */}
         <p style={{
           margin: 0,
           fontFamily: "'LBReview', serif",
@@ -138,12 +122,6 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
           fontSize: 16,
           lineHeight: 1.7,
           color: "var(--text-mid)",
-          ...(expanded ? {} : {
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }),
         }}>
           {r.review}
         </p>
@@ -161,15 +139,14 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
           </div>
         )}
 
-        {/* 2d. Expand block */}
-        {expanded && (
+        {/* 2d. Details — always visible */}
+        {(dietTags.length > 0 || r.image_url || mapQuery || r.link) && (
           <div style={{
             borderTop: "1px solid var(--border)",
             paddingTop: 12,
             display: "flex",
             flexDirection: "column",
             gap: 12,
-            animation: "fadeSlideUp .2s ease",
           }}>
             {/* Diet tags */}
             {dietTags.length > 0 && (
@@ -224,15 +201,33 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
                   textTransform: "uppercase",
                   marginBottom: 8,
                 }}>Location</div>
-                <iframe
-                  title="map"
-                  width="100%"
-                  height="160"
-                  style={{ border: "none", borderRadius: 10 }}
-                  loading="lazy"
-                  allowFullScreen
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`}
-                />
+                {isActive ? (
+                  <iframe
+                    title="map"
+                    width="100%"
+                    height="160"
+                    style={{ border: "none", borderRadius: 10 }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`}
+                  />
+                ) : (
+                  <div style={{
+                    height: 160,
+                    borderRadius: 10,
+                    border: "1px dashed var(--border2)",
+                    background: "repeating-linear-gradient(45deg,var(--card-bg),var(--card-bg) 10px,var(--surface2) 10px,var(--surface2) 20px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    color: "var(--text-dim)",
+                  }}>
+                    <span style={{ display: "inline-flex" }}><MapPinIcon /></span>
+                    <span style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", letterSpacing: ".08em" }}>swipe to load map</span>
+                  </div>
+                )}
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`}
                   target="_blank"
@@ -311,14 +306,19 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
           </div>
         )}
 
-        {/* 2e. Footer */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingTop: 8,
-          borderTop: "1px solid var(--border)",
-        }}>
+      </div>
+
+      {/* 3. Footer — pinned at bottom */}
+      <div style={{
+        flex: "0 0 auto",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 8,
+        padding: "10px 16px",
+        borderTop: "1px solid var(--border)",
+        background: "var(--card-bg)",
+      }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
             <div style={{
               width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
@@ -357,47 +357,50 @@ export default function Card({ r, onUp, saved, onSave, upped: initialUpped = fal
             >
               {copied ? <span style={{ fontSize: 11, fontWeight: 700 }}>✓</span> : <ShareIcon />}
             </button>
-            <button
-              onClick={() => onSave(r.id)}
-              onMouseDown={e => e.currentTarget.style.transform = "scale(0.88)"}
-              onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
-              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-              style={{
-                background: saved ? `${ratingColor}22` : "transparent",
-                border: `1px solid ${saved ? ratingColor : "var(--border2)"}`,
-                color: saved ? ratingColor : "var(--text-mid)",
-                borderRadius: 99, padding: "7px 11px", cursor: "pointer", transition: "all .15s",
-                animation: saved ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
-                display: "flex", alignItems: "center", lineHeight: 1,
-              }}
-            >
-              <BookmarkIcon filled={saved} />
-            </button>
-            <button
-              onClick={() => { onUp(r.id); }}
-              onMouseDown={e => { if (!upped) e.currentTarget.style.transform = "scale(0.88)"; }}
-              onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
-              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-              disabled={upped}
-              style={{
-                background: upped ? "#C8FF4722" : "transparent",
-                border: `1px solid ${upped ? "#C8FF47" : "var(--border2)"}`,
-                color: upped ? "#C8FF47" : "var(--text-mid)",
-                borderRadius: 99,
-                padding: "7px 14px",
-                fontSize: 14,
-                fontFamily: "'LBBody', sans-serif",
-                cursor: upped ? "default" : "pointer",
-                transition: "all .15s",
-                animation: upped ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
-              }}
-            >
-              ↑ {r.upvotes + (upped ? 1 : 0)}
-            </button>
+            {onSave && (
+              <button
+                onClick={() => onSave(r.id)}
+                onMouseDown={e => e.currentTarget.style.transform = "scale(0.88)"}
+                onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                style={{
+                  background: saved ? `${ratingColor}22` : "transparent",
+                  border: `1px solid ${saved ? ratingColor : "var(--border2)"}`,
+                  color: saved ? ratingColor : "var(--text-mid)",
+                  borderRadius: 99, padding: "7px 11px", cursor: "pointer", transition: "all .15s",
+                  animation: saved ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
+                  display: "flex", alignItems: "center", lineHeight: 1,
+                }}
+              >
+                <BookmarkIcon filled={saved} />
+              </button>
+            )}
+            {onUp && (
+              <button
+                onClick={() => { onUp(r.id); }}
+                onMouseDown={e => { if (!upped) e.currentTarget.style.transform = "scale(0.88)"; }}
+                onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                disabled={upped}
+                style={{
+                  background: upped ? "#C8FF4722" : "transparent",
+                  border: `1px solid ${upped ? "#C8FF47" : "var(--border2)"}`,
+                  color: upped ? "#C8FF47" : "var(--text-mid)",
+                  borderRadius: 99,
+                  padding: "7px 14px",
+                  fontSize: 14,
+                  fontFamily: "'LBBody', sans-serif",
+                  cursor: upped ? "default" : "pointer",
+                  transition: "all .15s",
+                  animation: upped ? "popIn .25s cubic-bezier(.16,1,.3,1)" : "none",
+                }}
+              >
+                ↑ {r.upvotes + (upped ? 1 : 0)}
+              </button>
+            )}
+            {extraActions}
           </div>
         </div>
-
-      </div>
     </div>
   );
 }
