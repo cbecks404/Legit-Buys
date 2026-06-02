@@ -15,21 +15,23 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
  *     {(item, isActive, index) => <Card r={item} isActive={isActive} />}
  *   </Carousel>
  */
-export default function Carousel({ items, getKey, children, bottomInset = 96, gap = 0 }) {
+export default function Carousel({ items, getKey, children, bottomInset = 96, gap = 0, height }) {
   const wrapRef = useRef(null);
   const scrollRef = useRef(null);
   const ratios = useRef({});
   const [activeIndex, setActiveIndex] = useState(0);
-  const [height, setHeight] = useState(null);
+  const [measuredHeight, setMeasuredHeight] = useState(null);
 
   // Fill remaining viewport height below our top edge.
+  // Skipped when an explicit `height` is supplied by the parent.
   useLayoutEffect(() => {
+    if (height != null) return;
     const measure = () => {
       const el = wrapRef.current;
       if (!el) return;
       const top = el.getBoundingClientRect().top;
       const vh = window.visualViewport?.height ?? window.innerHeight;
-      setHeight(Math.max(320, vh - top - bottomInset));
+      setMeasuredHeight(Math.max(320, vh - top - bottomInset));
     };
     measure();
     window.addEventListener("resize", measure);
@@ -38,7 +40,9 @@ export default function Carousel({ items, getKey, children, bottomInset = 96, ga
       window.removeEventListener("resize", measure);
       window.visualViewport?.removeEventListener("resize", measure);
     };
-  }, [bottomInset, items.length]);
+  }, [bottomInset, items.length, height]);
+
+  const finalHeight = height ?? measuredHeight ?? "70dvh";
 
   // Track the most-centered slot.
   useEffect(() => {
@@ -65,7 +69,7 @@ export default function Carousel({ items, getKey, children, bottomInset = 96, ga
   }, [items.length]);
 
   return (
-    <div ref={wrapRef} style={{ position: "relative", height: height ?? "70dvh" }}>
+    <div ref={wrapRef} style={{ position: "relative", height: finalHeight }}>
       <style>{`.lb-carousel::-webkit-scrollbar{display:none}`}</style>
 
       {items.length > 1 && (

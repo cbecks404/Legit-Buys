@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useLayoutEffect } from "react";
 import { supabase } from "../supabaseClient";
 import VerifiedBadge from "./VerifiedBadge";
 import Card from "./Card";
@@ -27,6 +27,25 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
   const [savingName, setSavingName]     = useState(false);
   const [editingName, setEditingName]   = useState(false);
 
+  // Carousel sizing: the hero scrolls away, the header + sticky tab bar stay
+  // pinned, and the carousel fills the rest of the scroll body.
+  const bodyRef = useRef(null);
+  const tabBarRef = useRef(null);
+  const [carouselH, setCarouselH] = useState(null);
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (!bodyRef.current) return;
+      const bodyH = bodyRef.current.clientHeight;
+      const tabsH = tabBarRef.current?.offsetHeight ?? 0;
+      setCarouselH(Math.max(320, bodyH - tabsH));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (bodyRef.current) ro.observe(bodyRef.current);
+    window.addEventListener("resize", measure);
+    return () => { ro.disconnect(); window.removeEventListener("resize", measure); };
+  }, [loading, tab, isOwnProfile, reviews.length]);
+
   const inp = {
     width: "100%", background: "var(--surface2)",
     border: "1px solid var(--border2)", borderRadius: 10,
@@ -37,6 +56,12 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
     fontSize: 9, fontFamily: "'DM Mono',monospace", color: "var(--text-dim)",
     letterSpacing: ".14em", textTransform: "uppercase",
     display: "block", marginBottom: 7, fontWeight: 600,
+  };
+  const centerFill = {
+    height: "100%", display: "flex", flexDirection: "column",
+    alignItems: "center", justifyContent: "center", textAlign: "center",
+    color: "var(--text-dim)", fontSize: 13, fontFamily: "'LBBody',sans-serif", lineHeight: 1.7,
+    padding: "0 18px",
   };
 
   const load = useCallback(async () => {
@@ -190,9 +215,9 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column", overflowY: "auto" }}>
-      {/* Header */}
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "var(--bg)", padding: "env(safe-area-inset-top) 18px 0" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      {/* Header — pinned */}
+      <div style={{ flex: "0 0 auto", zIndex: 10, background: "var(--bg)", padding: "env(safe-area-inset-top) 18px 0" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 0 16px", borderBottom: "1px solid var(--border)" }}>
           <div style={{ fontFamily: "'LBTitle',sans-serif", fontSize: 22, color: "var(--text)", letterSpacing: ".04em" }}>
             {isOwnProfile ? "MY REVIEWS" : (profile?.display_name?.toUpperCase() ?? "PROFILE")}
@@ -201,13 +226,14 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
         </div>
       </div>
 
-      <div style={{ flex: 1, padding: "24px 18px 60px", maxWidth: 520, width: "100%", margin: "0 auto" }}>
+      <div ref={bodyRef} style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         {loading ? (
           <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>Loading…</div>
         ) : (
           <>
-            {/* Profile section */}
-            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 16px", marginBottom: 28 }}>
+            {/* Profile hero — scrolls away */}
+            <div style={{ maxWidth: 520, width: "100%", margin: "0 auto", padding: "24px 18px 0" }}>
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 16px", marginBottom: 18 }}>
               <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "var(--text-dim)", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 12 }}>
                 {isOwnProfile ? "Your profile" : "Profile"}
               </div>
@@ -309,69 +335,68 @@ export default function ProfilePage({ user, targetUserId, onClose, onLogout, onF
                 </>
               )}
             </div>
+            </div>{/* end hero wrapper */}
 
-            {/* Tabs (own profile only) */}
-            {isOwnProfile && (
-              <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: "1px solid var(--border)", paddingBottom: 0 }}>
-                {[
-                  { key: "reviews", label: `Reviews (${reviews.length})` },
-                  { key: "saved", label: `Saved${savedReviews ? ` (${savedReviews.length})` : ""}` },
-                ].map(t => (
-                  <button
-                    key={t.key}
-                    onClick={() => setTab(t.key)}
-                    style={{
-                      background: "none", border: "none", cursor: "pointer",
-                      padding: "10px 14px",
-                      fontFamily: "'DM Mono',monospace", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase",
-                      color: tab === t.key ? "var(--text)" : "var(--text-dim)",
-                      borderBottom: tab === t.key ? "2px solid #C8FF47" : "2px solid transparent",
-                      marginBottom: -1,
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Reviews tab */}
-            {(!isOwnProfile || tab === "reviews") && (
-              <div>
-                {!isOwnProfile && (
-                  <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "var(--text-dim)", letterSpacing: ".18em", textTransform: "uppercase", marginBottom: 14 }}>
+            {/* Sticky bar — tabs (own) or reviews count (other), stays pinned */}
+            <div ref={tabBarRef} style={{ position: "sticky", top: 0, zIndex: 5, background: "var(--bg)" }}>
+              <div style={{ maxWidth: 520, width: "100%", margin: "0 auto", padding: "0 18px" }}>
+                {isOwnProfile ? (
+                  <div style={{ display: "flex", gap: 8, borderBottom: "1px solid var(--border)" }}>
+                    {[
+                      { key: "reviews", label: `Reviews (${reviews.length})` },
+                      { key: "saved", label: `Saved${savedReviews ? ` (${savedReviews.length})` : ""}` },
+                    ].map(t => (
+                      <button
+                        key={t.key}
+                        onClick={() => setTab(t.key)}
+                        style={{
+                          background: "none", border: "none", cursor: "pointer",
+                          padding: "10px 14px",
+                          fontFamily: "'DM Mono',monospace", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase",
+                          color: tab === t.key ? "var(--text)" : "var(--text-dim)",
+                          borderBottom: tab === t.key ? "2px solid #C8FF47" : "2px solid transparent",
+                          marginBottom: -1,
+                        }}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", color: "var(--text-dim)", letterSpacing: ".18em", textTransform: "uppercase", padding: "4px 0 12px" }}>
                     Reviews ({reviews.length})
                   </div>
                 )}
-                {reviews.length === 0 && (
-                  <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
+              </div>
+            </div>
+
+            {/* Carousel area — fills the rest of the scroll body */}
+            <div style={{ maxWidth: 520, width: "100%", margin: "0 auto", height: carouselH ?? "60vh" }}>
+              {(!isOwnProfile || tab === "reviews") && (
+                reviews.length === 0 ? (
+                  <div style={centerFill}>
                     {isOwnProfile ? <>No reviews yet.<br />Submit your first Legit Buy!</> : "No reviews yet."}
                   </div>
-                )}
-                {reviews.length > 0 && (
-                  <Carousel items={reviews} getKey={r => r.id} bottomInset={32}>
+                ) : (
+                  <Carousel items={reviews} getKey={r => r.id} height="100%">
                     {(r, isActive) => renderItem(r, isActive, { canEdit: isOwnProfile })}
                   </Carousel>
-                )}
-              </div>
-            )}
-
-            {/* Saved tab (own profile only) */}
-            {isOwnProfile && tab === "saved" && (
-              <div>
-                {savedLoading && savedReviews === null ? (
-                  <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'DM Mono',monospace" }}>Loading…</div>
+                )
+              )}
+              {isOwnProfile && tab === "saved" && (
+                savedLoading && savedReviews === null ? (
+                  <div style={centerFill}>Loading…</div>
                 ) : (savedReviews?.length ?? 0) === 0 ? (
-                  <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-dim)", fontSize: 13, fontFamily: "'LBBody',sans-serif", lineHeight: 1.7 }}>
+                  <div style={centerFill}>
                     Nothing saved yet.<br />Tap the bookmark on a review to save it here.
                   </div>
                 ) : (
-                  <Carousel items={savedReviews} getKey={r => r.id} bottomInset={32}>
+                  <Carousel items={savedReviews} getKey={r => r.id} height="100%">
                     {(r, isActive) => renderItem(r, isActive, { onUnsave: () => unsave(r.id) })}
                   </Carousel>
-                )}
-              </div>
-            )}
+                )
+              )}
+            </div>
           </>
         )}
       </div>
