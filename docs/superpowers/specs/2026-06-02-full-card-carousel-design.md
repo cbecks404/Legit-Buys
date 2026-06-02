@@ -54,6 +54,11 @@ A reusable horizontal swipe container.
   `scroll-snap-align: center`, `flex: 0 0 ~90%`. Container has horizontal
   side-padding (~5%) so the first and last cards can still center and neighbors
   **peek** at both edges.
+- **Peek styling:** non-active (peeking) cards are visually de-emphasized —
+  `filter: blur(2px)`, `opacity: .55`, `transform: scale(.96)`; the active/centered
+  card is crisp (`blur(0)`, `opacity: 1`, `scale(1)`). Transition ~`.3s ease` on
+  filter/opacity/transform gives a focus-pull as cards snap to center. (Validated in
+  the HTML mockup at `docs/superpowers/specs/carousel-mockup.html`.)
 - **Active index:** an `IntersectionObserver` (root = the scroll container,
   threshold ~0.6) marks the most-centered item as active. Exposes `activeIndex`.
 - **Children API:** accepts an array of items via a render prop or by cloning:
