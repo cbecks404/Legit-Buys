@@ -52,6 +52,8 @@ export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
 
   const anim = (d) => `${d > 0 ? "slideInRight" : "slideInLeft"} .25s cubic-bezier(.16,1,.3,1)`;
 
+  const step0Valid = f.product.trim() && f.placeName.trim();
+
   const steps = [
     // Step 0 – The buy
     <div key={0} style={{ display: "flex", flexDirection: "column", gap: 16, animation: anim(dir) }}>
@@ -85,7 +87,7 @@ export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
         </div>
       </div>
       <div>
-        <label style={lbl}>Place / venue name</label>
+        <label style={lbl}>Place / venue name *</label>
         <input style={inp} placeholder="e.g. Leon, Padella, The Gallery Cafe…" value={f.placeName} onChange={e => set("placeName", e.target.value)} />
         <div style={hint}>The spot itself — shows next to the dish so people can scan by place.</div>
       </div>
@@ -105,8 +107,8 @@ export default function SubmitFlow({ onSubmit, onClose, prefillName = "" }) {
           </select>
         </div>
       </div>
-      <button style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: f.product ? "pointer" : "not-allowed", opacity: f.product ? 1 : 0.35, marginTop: 6 }}
-        onClick={() => f.product && goNext(1)}>NEXT →</button>
+      <button style={{ background: "#C8FF47", color: "#0a0a0a", border: "none", borderRadius: 99, padding: "13px 0", width: "100%", fontFamily: "'LBTitle',sans-serif", fontSize: 16, letterSpacing: ".04em", cursor: step0Valid ? "pointer" : "not-allowed", opacity: step0Valid ? 1 : 0.35, marginTop: 6 }}
+        onClick={() => step0Valid && goNext(1)}>NEXT →</button>
     </div>,
 
     // Step 1 – Score & name
