@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Legit Buys — Tab Bar Mockup</title>
+<style>
+  :root{
+    --bg:#080808; --card-bg:#111; --surface:#131313; --surface2:#161616;
+    --border:#1c1c1c; --border2:#2a2a2a; --text:#f0ede8; --text-mid:#cfccc6;
+    --text-dim:#777; --lime:#C8FF47;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#000;color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;padding:24px}
+  .phone{width:390px;height:780px;background:var(--bg);border-radius:38px;
+    border:1px solid #222;position:relative;overflow:hidden;display:flex;flex-direction:column}
+  .label{text-align:center;color:var(--text-dim);font-size:12px;font-family:ui-monospace,monospace;
+    letter-spacing:.1em;margin-top:10px;text-transform:uppercase}
+
+  /* top */
+  .top{display:flex;align-items:center;justify-content:center;padding:18px 18px 8px;flex:0 0 auto}
+  .top .star{color:var(--lime);font-size:26px;line-height:1}
+
+  /* progress slider */
+  .progress{flex:0 0 auto;padding:6px 5% 10px}
+  .track{position:relative;height:4px;border-radius:99px;background:var(--border2)}
+  .thumb{position:absolute;top:0;bottom:0;width:33%;left:0;background:var(--lime);border-radius:99px}
+
+  /* carousel */
+  .carousel{flex:1 1 auto;min-height:0;display:flex;overflow:hidden;padding:4px 5%}
+  .slot{flex:0 0 90%;padding:0 5px;display:flex}
+  .slot.peek .card{filter:blur(2px);opacity:.55;transform:scale(.96)}
+  .card{width:100%;display:flex;flex-direction:column;background:var(--card-bg);
+    border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  .band{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;
+    background:linear-gradient(135deg,#1a1a1a,#0e0e0e);border-bottom:1px solid var(--border)}
+  .score{font-size:11px;font-family:ui-monospace,monospace;font-weight:700;color:var(--lime);
+    background:#C8FF4718;border:1px solid #C8FF4744;padding:3px 10px;border-radius:99px}
+  .price{font-size:11px;font-family:ui-monospace,monospace;color:var(--text-dim)}
+  .body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+  .dish{font-family:Georgia,serif;font-size:18px;font-weight:700;line-height:1.3}
+  .venue{display:flex;align-items:center;gap:5px;color:var(--lime);
+    font-family:ui-monospace,monospace;font-size:12px;font-weight:600}
+  .review{margin:0;font-family:Georgia,serif;font-style:italic;font-size:15px;
+    line-height:1.7;color:var(--text-mid)}
+  .meta{font-family:ui-monospace,monospace;font-size:12px;font-weight:600;color:var(--text-mid)}
+
+  /* TAB BAR */
+  .tabbar{flex:0 0 auto;position:relative;height:66px;
+    background:linear-gradient(to top,rgba(8,8,8,.98) 60%,rgba(8,8,8,.85));
+    border-top:1px solid var(--border);display:flex;align-items:center;
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;
+    background:none;border:none;cursor:pointer;color:var(--text-dim)}
+  .tab svg{width:23px;height:23px;fill:currentColor;transition:transform .15s ease}
+  .tab .lbl{font-size:10px;font-family:ui-monospace,monospace;letter-spacing:.06em}
+  .tab.active{color:var(--lime)}
+  .tab:active svg{transform:scale(.82)}
+  /* center FAB — sits within the bar */
+  .fab-slot{flex:1;display:flex;justify-content:center;align-items:center}
+  .fab{width:34px;height:34px;border-radius:50%;background:var(--lime);color:#0a0a0a;
+    border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:0 4px 14px #C8FF4744;font-size:21px;line-height:1;
+    transition:transform .12s ease}
+  .fab:active{transform:scale(.88)}
+
+  /* tap pop animations */
+  @keyframes iconPop{0%{transform:scale(1)}35%{transform:scale(.78)}100%{transform:scale(1)}}
+  .pop{animation:iconPop .34s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes fabPop{0%{transform:scale(1) rotate(0)}35%{transform:scale(.86) rotate(-10deg)}100%{transform:scale(1) rotate(0)}}
+  .fab.pop{animation:fabPop .4s cubic-bezier(.34,1.56,.64,1)}
+
+  .note{font-size:11px;color:var(--text-dim);font-family:ui-monospace,monospace;
+    text-align:center;padding:6px 16px;line-height:1.6}
+  .toggle{display:flex;gap:8px;justify-content:center;margin:8px 0 4px}
+  .toggle button{background:#161616;border:1px solid #2a2a2a;color:#cfccc6;border-radius:99px;
+    padding:6px 14px;font-size:11px;font-family:ui-monospace,monospace;cursor:pointer}
+  .toggle button.on{background:var(--lime);color:#0a0a0a;border-color:var(--lime)}
+</style>
+</head>
+<body>
+  <div class="note">Tap a tab to see the active state · the center + is the raised Submit FAB</div>
+
+  <div class="wrap">
+    <div class="phone">
+      <div class="top"><span class="star">✦</span></div>
+
+      <div class="progress"><div class="track"><div class="thumb"></div></div></div>
+
+      <div class="carousel">
+        <div class="slot peek" style="margin-left:-45%"><div class="card">
+          <div class="band"><span class="score">WORTH IT</span><span class="price">£3.40 · £</span></div>
+          <div class="body"><div class="dish">Oat flat white</div><div class="venue">📍 Old Spike</div></div>
+        </div></div>
+        <div class="slot"><div class="card">
+          <div class="band"><span class="score">✦ ELITE</span><span class="price">£9 · ££</span></div>
+          <div class="body">
+            <div class="dish">Smashed double cheeseburger</div>
+            <div class="venue">📍 Le Bun, Shoreditch</div>
+            <p class="review">Genuinely the best burger I’ve had this year. Crispy lacy edges, the cheese pull is unreal.</p>
+            <div class="meta">£9 · 🍔 Food</div>
+          </div>
+        </div></div>
+        <div class="slot peek"><div class="card">
+          <div class="band"><span class="score">✦ ELITE</span><span class="price">£11 · ££</span></div>
+          <div class="body"><div class="dish">Birria tacos</div><div class="venue">📍 El Pastor</div></div>
+        </div></div>
+      </div>
+
+      <!-- TAB BAR -->
+      <div class="tabbar" id="tabbar">
+        <button class="tab active" data-t="home" onclick="pick(this)">
+          <svg viewBox="0 0 24 24"><path d="M12 2.7 2.5 11l1.6 1.5L5 11.7V21h5v-6h4v6h5v-9.3l.9.8L21.5 11 12 2.7z"/></svg>
+        </button>
+        <button class="tab" data-t="search" onclick="pick(this)">
+          <svg viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M10.5 3a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15zm0 2.6a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8z"/>
+            <path d="M16.3 15l5.2 5.2-1.4 1.4-5.2-5.2z"/>
+          </svg>
+        </button>
+        <div class="fab-slot"><button class="fab" title="Submit a buy" onclick="popFab(this)">+</button></div>
+        <button class="tab" data-t="saved" onclick="pick(this)">
+          <svg viewBox="0 0 24 24"><path d="M6.5 2.5h11a1 1 0 0 1 1 1V21l-6.5-4.3L5.5 21V3.5a1 1 0 0 1 1-1z"/></svg>
+        </button>
+        <button class="tab" data-t="profile" onclick="pick(this)">
+          <svg viewBox="0 0 24 24"><path d="M12 12a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4zM4.5 20.4C4.5 16.9 7.9 14.5 12 14.5s7.5 2.4 7.5 5.9v.6h-15v-.6z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function pick(el){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    const icon = el.querySelector('svg');
+    icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop');
+  }
+  function popFab(el){
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  }
+</script>
+</body>
+</html>
